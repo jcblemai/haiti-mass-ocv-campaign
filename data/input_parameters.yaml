@@ -1,0 +1,33 @@
+# INPUTA PARAMTERS FOR CHOLERA MODEL
+
+# Note: all parameters are given in per day (/day) units except if mentioned otherwise
+
+# total population in Juba
+H: 419141
+# rate of loss of infection
+gamma: 0.2
+# natural mortality rate
+mu: 4.56E-05
+# rate of recovery from infection
+## computed as : 1/mean incubation period
+## = 1/1.4 
+phi: 0.71
+# rate of cholera-induced mortality
+alpha: 0
+# rate of loss of acquired immunity
+#rho: 3.2E-03
+# rate of loss of vaccine immunity
+rho_v: 0.0
+# vaccine efficacy
+eff_v: 0.63
+# vaccination rate during during the campaing [per day]
+## computed as : total number of dispatched vaccines / camapaign duration
+## = (140249+22128)/6 
+r_v: 27062.83
+# start and end times of epidemic
+t_start: 2015-06-04
+t_end: 2015-09-26
+# rate of vaccination during the 6 days between  2015-07-31 and 2015-08-05
+t_vacc_start: 2015-07-31
+t_vacc_end: 2015-08-06
+
