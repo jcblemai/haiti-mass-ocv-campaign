@@ -69,41 +69,40 @@ if(make_plots) {
 
 ## state variable names:
 # S:  Susceptibles
-# I:  Infected
-# E:  Exposed (infected but still asymptomatic)
-# R:  Recovered + asymptomatic infected
+# I:  Exposed Infected
+# A:  Exposed Asymptomatics (infected but still asymptomatic)
+# RI1,RI2,RI3:  Recovered from exposed infected
+# RA1,RA2,RA3:  Recovered from exposed Asymptomatics
 # B:  Bacterial concentration in the environment
-# VS: Susceptible vaccinate
-# VI: Infected vaccinated
-# VR: Recovered vaccinated
+# C: Cumulative cases
 
 ## data names:
-# cases: reported suspected cholera cases (daily)
+# cases: reported suspected cholera cases (weekly)
 
 ## covariate names:
-# rain: estimated daily precipitation standardized with the maximal observation
-# r_v:  rate of vaccination (see parameters)
+# rain: estimated weekly precipitation standardized with the maximal observation
 
-## paramter names:
+## parameter names for a departement:
 ### Pop dynamics
 # H:        total population
-# gamma:    recovery from infection
+# D:        density
+# gammaI:   recovery from infection
+# gammaA:   recovery from asymptomatcs
 # mu:       natural mortylity
 # alpha:    cholera-induced mortality
-# rho:      loss of aquired immunity
+# rhoI:      loss of aquired immunity for infected
+# rhoA:      loss of aquired immunity for asymptomatics
 ### Infection dynamics
 #### Basic SIRB
 # sigma:    sympotmatic to asymptomatic ratio
-# beta_B:   envionmental (indirect) transmission coefficient
-# beta_I:   directed (human-to-human) transmission coefficient
+# beta:   envionmental (indirect) transmission coefficient
 ### Bacterial pop dynamics
 # mu_B:     bacterial mortality
-# theta:    bacterial output per infected person
+# thetaA:    bacterial output per asymtomatic person
+# thetaI:    bacterial output per infected person
 #### Rainfall effects
-# lambda_E: multiplicative rainfall effect on exposure
-# lambda_R: multiplicative rainfall effect on contamination
-# alpha_E:  power of rainfall effect on exposure
-# alpha_R:  power of rainfall effect on contamination
+# lambda: multiplicative rainfall effect on contamination
+# r:  power of rainfall effect on contamination
 #### Extra-demographic stochasticity
 # std_W:    standard deviation of the weiner process to perturb the foi       
 ### Vaccination
@@ -116,20 +115,20 @@ if(make_plots) {
 # Set variables -----------------------------------------------------------
 
 # define stat variable names
-state_names <- c("S", "E", "I", "R", "B", "C", "W",  "VS", "VE", "VI", "VR", "Vtot")
+state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "C", "W")#,  "VS", "VE", "VI", "VR", "Vtot")
 
 # define parameter names for pomp
 ## process model parameters names to estimate
-param_proc_est_names <- c("sigma", "beta_B", "beta_I", "mu_B", "theta", "lambda_E", "lambda_R", "alpha_E", "alpha_R", "rho", "std_W", "epsilon","k")
+param_proc_est_names <- c("sigma", "beta", "r", "mu_B", "thetaA", "thetaI", "lambda", "gammaI", "gammaA", "rhoA", "rhoI", "std_W", "epsilon","k")
 
 ## initial value parameters to estimate
-param_iv_est_names <- c("R_0")
+param_iv_est_names <- c("RI1_0","RI2_0","RI3_0","RA1_0","RA2_0","RA3_0")
 
 ## fixed process model parameters 
-param_proc_fixed_names <- c("H", "mu", "phi", "gamma", "alpha", "rho_v", "eff_v", "r_v")
+param_proc_fixed_names <- c("H", "D", "mu", "phi", "gamma", "alpha")
 
 ## fixed initial value parameters
-param_iv_fixed_names <- c("E_0", "I_0", "B_0", "VS_0", "VE_0", "VI_0", "VR_0")
+param_iv_fixed_names <- c("E_0", "I_0","A_0", "B_0", "VS_0", "VE_0", "VI_0", "VR_0")
 
 # all paramter names to estimate
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
