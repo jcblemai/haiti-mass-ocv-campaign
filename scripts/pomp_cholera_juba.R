@@ -128,7 +128,7 @@ param_iv_est_names <- c("RI1_0","RI2_0","RI3_0","RA1_0","RA2_0","RA3_0")
 param_proc_fixed_names <- c("H", "D", "mu", "phi", "gamma", "alpha")
 
 ## fixed initial value parameters
-param_iv_fixed_names <- c("E_0", "I_0","A_0", "B_0", "VS_0", "VE_0", "VI_0", "VR_0")
+param_iv_fixed_names <- c("E_0", "I_0","A_0", "B_0")
 
 # all paramter names to estimate
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
@@ -139,10 +139,10 @@ param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
 param_names <- c(param_est_names, param_fixed_names)
 
 # names of parameters that are rates
-param_rates_in_days_names <- c("mu", "alpha", "phi", "gamma", "rho", "r_v")
+param_rates_in_days_names <- c("mu", "alpha", "phi", "gammaI", "gammaA", "rhoI", "rhoA")
 
 # names of rate parameters
-param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|std_W|sigma|alpha_|lambda")]
+param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|std_W|sigma|alpha_|lambda")] #???
 
 
 # declare matrix in C for the recoveries in 2014
@@ -191,11 +191,11 @@ sirb.rproc <- Csnippet("
   double dB;            // deterministic forward time difference of bacteria in the environment
   double k1, k2, k3, k4;  // coefficients of  the Runge-Kutta method
   double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
-  double rate[23];      // vector of all rates in model
-  double dN[23];        // vector of transitions between classes during integration timestep
+  double rate[19];      // vector of all rates in model
+  double dN[19];        // vector of transitions between classes during integration timestep
 
   // force of infection
-  foi = beta_B * (B / (1 + B)) * (1 + lambda_E * pow(rain, alpha_E)) + beta_I * (I + VI) / H;
+  foi = beta * (B / (1 + B));
 
   if(std_W > 0.0) {
     // white noise (extra-demographic stochasticity)
@@ -216,78 +216,77 @@ sirb.rproc <- Csnippet("
   // S compartment
   rate[0] = sigma * foi_stoc;   // infections
   rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
-  rate[2] = r_v_wdn;    // vaccinations
   // I compartment
-  rate[3] = mu;         // natural deaths
-  rate[4] = alpha;      // cholera-induced deaths
-  rate[5] = gamma;      // recovery from infection
-  // R compartment
-  rate[6] = rho;        // loss of natural immunity
-  rate[7] = mu;         // natural death
-  rate[8] = r_v_wdn;    // vaccinations
-  // VS compartment
-  rate[9] = mu;          // natural death
-  rate[10] = sigma * (1 - eff_v) * foi_stoc; // symptomatic infections
-  rate[11] = (1 - sigma) * (1 - eff_v) * foi_stoc; // asymptomatic infections
-  // VI compartment
-  rate[12] = mu;          // natural death
-  rate[13] = alpha;       // cholera-induced death
-  rate[14] = gamma;       // recovery
-  // VR compartment
-  rate[15] = mu;          // natural death
-  rate[16] = rho_v;       // loss of vaccine immunity
+  rate[2] = mu;         // natural deaths
+  rate[3] = alpha;      // cholera-induced deaths
+  rate[4] = gammaI;      // recovery from infection
+  // A compartment (not in order because was added after initial model formulation)
+  rate[5] = mu;        // natural death
+  rate[6] = gammaA;       // symptoms development
+  // RI1,2,3 compartment
+  rate[7] = 3*rhoI;        // loss of natural immunity
+  rate[8] = mu;         // natural death
+  // RI2 compartment
+  rate[9] = 3*rhoI;        // loss of natural immunity
+  rate[10] = mu;
+ // RI3 compartment
+  rate[11] = 3*rhoI;        // loss of natural immunity
+  rate[12] = mu;
+  // RA1,2,3 compartment
+  rate[13] = 3*rhoA;        // loss of natural immunity
+  rate[14] = mu;         // natural death
+  // RA2 compartment
+  rate[15] = 3*rhoA;        // loss of natural immunity
+  rate[16] = mu;
+  // RA3 compartment
+  rate[17] = 3*rhoA;        // loss of natural immunity
+  rate[18] = mu;
 
-  // E compartment (not in order because was added after initial model formulation)
-  rate[17] = mu;        // natural death
-  rate[18] = r_v_wdn;   // vaccination
-  rate[19] = phi;       // symptoms development
-  // VE compartment
-  rate[20] = mu;          // natural death
-  rate[21] = alpha;       // cholera-induced death
-  rate[22] = phi;         // symptoms development
 
   // simulate all transitions
-  reulermultinom(3, S, &rate[0], dt, &dN[0]);
-  reulermultinom(3, I, &rate[3], dt, &dN[3]);
-  reulermultinom(3, R, &rate[6], dt, &dN[6]);
-  reulermultinom(3, VS, &rate[9], dt, &dN[9]);
-  reulermultinom(3, VI, &rate[12], dt, &dN[12]);
-  reulermultinom(2, VR, &rate[15], dt, &dN[15]);
-  reulermultinom(3, E, &rate[17], dt, &dN[17]);
-  reulermultinom(3, VE, &rate[20], dt, &dN[20]);
+  reulermultinom(2, S, &rate[0], dt, &dN[0]);
+  reulermultinom(3, I, &rate[2], dt, &dN[2]);
+  reulermultinom(2, A, &rate[5], dt, &dN[5]);
+  reulermultinom(2, RI1, &rate[7], dt, &dN[7]);
+  reulermultinom(2, RI2, &rate[9], dt, &dN[9]);
+  reulermultinom(2, RI3, &rate[11], dt, &dN[11]);
+  reulermultinom(2, RA1, &rate[13], dt, &dN[13]);
+  reulermultinom(2, RA2, &rate[15], dt, &dN[15]);
+  reulermultinom(2, RA3, &rate[17], dt, &dN[17]);
+
 
   // bacteria as continous state variable
   // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
-  k1 = dt * fB(I, VI, B, mu_B, theta, lambda_R, rain, alpha_R);
-  k2 = dt * fB(I, VI, B + k1/2, mu_B, theta, lambda_R, rain, alpha_R);
-  k3 = dt * fB(I, VI, B + k2/2, mu_B, theta, lambda_R, rain, alpha_R);
-  k4 = dt * fB(I, VI, B + k3, mu_B, theta, lambda_R, rain, alpha_R);
+  k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+  k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+  k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+  k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
   // bacteria increment
   dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
   // update state variables
-  E   += dN[0] - dN[17] - dN[18] - dN[19];
-  I   += dN[19] - dN[3] - dN[4] - dN[5];
-  R   += dN[1] - dN[6] - dN[7] - dN[8] + dN[5];
-  VS  += dN[2] - dN[9] + dN[16] - dN[10] - dN[11];
-  VE  += dN[18] + dN[10] - dN[20] - dN[21] - dN[22];
-  VI  += dN[22] - dN[13] - dN[14];
-  VR  += dN[8] - dN[15] - dN[16] + dN[14] + dN[11];
-  C   +=  dN[19] + dN[22];
+  
+  I   += dN[0] - dN[2] - dN[3] - dN[4];
+  A   += dN[1] - dN[5] - dN[6];
+  RI1 += dN[4] - dN[7] - dN[8];
+  RI2 += dN[7] - dN[9] - dN[10];
+  RI3 += dN[9] - dN[11] - dN[12];
+  RA1 += dN[6] - dN[13] - dN[14];
+  RA2 += dN[13] - dN[15] - dN[16];
+  RA3 += dN[15] - dN[16] - dN[17];
+  C   +=  dN[0];
   W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
-  Vtot += dN[2] + dN[8];
   B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
-
   // susceptibles so as to match total population
-  S = nearbyint(H - I - E - R - VS - VE - VI - VR);
+  S = nearbyint(H - I - A - R1I - R2I - R3I - R1A - R2A - R3A);
 ")
 
 # C function to compute the time-derivative of bacterial concentration
-derivativeBacteria.c <- " double fB(int I, int VI, double B, 
-double mu_B, double theta, double lambda_R, double rain, double alpha_R) {
+derivativeBacteria.c <- " double fB(int I, int A, double B, 
+double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double density) {
   double dB;
-  dB = -mu_B * B + theta * (1 + lambda_R * pow(rain, alpha_R)) * ((double) I + (double) VI);
+  dB = -mu_B * B + theta * (1 + lambda * pow(rain, r)) * density * ((double) I + (double) A);
   return(dB);
 };
 "
