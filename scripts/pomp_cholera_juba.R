@@ -308,10 +308,10 @@ computeRecovered2014.c <- "int computeRecovered(double t0, double R_0_2014,  int
 sirb.skeleton <- Csnippet("
                        double foi; // force of infection and its stochastic version
                        double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
-                       double rate[23];      // vector of all rates in model
+                       double rate[19];      // vector of all rates in model
                        
                        // force of infection
-                       foi = beta_B * (B / (1 + B)) * (1 + lambda_E * pow(rain, alpha_E)) + beta_I * (I + VI) / H;
+                       foi = beta_B * (B / (1 + B));
                        
                       // vaccination window
                        if (t >= t_vacc_start && t <= (t_vacc_end + 1/365.25)) 
@@ -320,42 +320,38 @@ sirb.skeleton <- Csnippet("
                        r_v_wdn = 0;
                        
                        // define transition rates for each type of event
-                       // S compartment
-                       rate[0] = sigma * foi;   // infections
-                       rate[1] = (1 - sigma) * foi;   // asymptomatic infections
-                       rate[2] = r_v_wdn;    // vaccinations
-                       // I compartment
-                       rate[3] = mu;         // natural deaths
-                       rate[4] = alpha;      // cholera-induced deaths
-                       rate[5] = gamma;      // recovery from infection
-                       // R compartment
-                       rate[6] = rho;        // loss of natural immunity
-                       rate[7] = mu;         // natural death
-                       rate[8] = r_v_wdn;    // vaccinations
-                       // VS compartment
-                       rate[9] = mu;          // natural death
-                       rate[10] = sigma * (1 - eff_v) * foi; // symptomatic infections
-                       rate[11] = (1 - sigma) * (1 - eff_v) * foi; // asymptomatic infections
-                       // VI compartment
-                       rate[12] = mu;          // natural death
-                       rate[13] = alpha;       // cholera-induced death
-                       rate[14] = gamma;       // recovery
-                       // VR compartment
-                       rate[15] = mu;          // natural death
-                       rate[16] = rho_v;       // loss of vaccine immunity
-                       
-                       // E compartment
-                       rate[17] = mu;        // natural death
-                       rate[18] = r_v_wdn;   // vaccination
-                       rate[19] = phi;       // symptoms development
-                       // VE compartment
-                       rate[20] = mu;          // natural death
-                       rate[21] = alpha;       // cholera-induced death
-                       rate[22] = phi;         // symptoms development
-                       
+  // S compartment
+  rate[0] = sigma * foi_stoc;   // infections
+  rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
+  // I compartment
+  rate[2] = mu;         // natural deaths
+  rate[3] = alpha;      // cholera-induced deaths
+  rate[4] = gammaI;      // recovery from infection
+  // A compartment (not in order because was added after initial model formulation)
+  rate[5] = mu;        // natural death
+  rate[6] = gammaA;       // symptoms development
+  // RI1,2,3 compartment
+  rate[7] = 3*rhoI;        // loss of natural immunity
+  rate[8] = mu;         // natural death
+  // RI2 compartment
+  rate[9] = 3*rhoI;        // loss of natural immunity
+  rate[10] = mu;
+ // RI3 compartment
+  rate[11] = 3*rhoI;        // loss of natural immunity
+  rate[12] = mu;
+  // RA1,2,3 compartment
+  rate[13] = 3*rhoA;        // loss of natural immunity
+  rate[14] = mu;         // natural death
+  // RA2 compartment
+  rate[15] = 3*rhoA;        // loss of natural immunity
+  rate[16] = mu;
+  // RA3 compartment
+  rate[17] = 3*rhoA;        // loss of natural immunity
+  rate[18] = mu;
+
                        // update state variables
-                       DE  = rate[0] * S - (rate[17] + rate[18] + rate[19]) * E;
-                       DI  = rate[19] * E - (rate[3] + rate[4] + rate[5]) * I;
+                       DI  = rate[0] * S - (rate[2] + rate[3] + rate[4]) * I;
+                       DA  = rate[1] * S - (rate[5] + rate[6]) * A;
                        DR  = rate[1] * S - (rate[6] + rate[7] + rate[8]) * R + rate[5] * I;
                        DVS = rate[2] * S + rate[16] * VR - (rate[9] + rate[10] + rate[11]) * VS;
                        DVE = rate[18] * E + rate[10] * VS - (rate[20] + rate[21] + rate[22]) * VE;
@@ -373,6 +369,20 @@ sirb.skeleton <- Csnippet("
                           ")
 
 
+I   += dN[0] - dN[2] - dN[3] - dN[4];
+A   += dN[1] - dN[5] - dN[6];
+RI1 += dN[4] - dN[7] - dN[8];
+RI2 += dN[7] - dN[9] - dN[10];
+RI3 += dN[9] - dN[11] - dN[12];
+RA1 += dN[6] - dN[13] - dN[14];
+RA2 += dN[13] - dN[15] - dN[16];
+RA3 += dN[15] - dN[16] - dN[17];
+C   +=  dN[0];
+W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
+B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
+
+// susceptibles so as to match total population
+S = nearbyint(H - I - A - R1I - R2I - R3I - R1A - R2A - R3A);
 
 # Initializer -------------------------------------------------------------
 
