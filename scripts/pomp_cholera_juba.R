@@ -273,7 +273,7 @@ sirb.rproc <- Csnippet("
   RI3 += dN[9] - dN[11] - dN[12];
   RA1 += dN[6] - dN[13] - dN[14];
   RA2 += dN[13] - dN[15] - dN[16];
-  RA3 += dN[15] - dN[16] - dN[17];
+  RA3 += dN[15] - dN[17] - dN[18];
   C   +=  dN[0];
   W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
   B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
@@ -286,7 +286,7 @@ sirb.rproc <- Csnippet("
 derivativeBacteria.c <- " double fB(int I, int A, double B, 
 double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double density) {
   double dB;
-  dB = -mu_B * B + theta * (1 + lambda * pow(rain, r)) * density * ((double) I + (double) A);
+  dB = -mu_B * B +  (1 + lambda * pow(rain, r)) * density * (thetaI * (double) I + thetaA * (double) A);
   return(dB);
 };
 "
@@ -352,37 +352,26 @@ sirb.skeleton <- Csnippet("
                        // update state variables
                        DI  = rate[0] * S - (rate[2] + rate[3] + rate[4]) * I;
                        DA  = rate[1] * S - (rate[5] + rate[6]) * A;
-                       DR  = rate[1] * S - (rate[6] + rate[7] + rate[8]) * R + rate[5] * I;
-                       DVS = rate[2] * S + rate[16] * VR - (rate[9] + rate[10] + rate[11]) * VS;
-                       DVE = rate[18] * E + rate[10] * VS - (rate[20] + rate[21] + rate[22]) * VE;
-                       DVI = rate[22] * VE - (rate[13] + rate[14]) * VI;
-                       DVR = rate[8] * R - (rate[15] + rate[16]) * VR + rate[14] * VI + rate[11] * VS;
-                       DC  = rate[19] * E + rate[22] * VE;
+                       DRI1  = rate[4] * I - (rate[7] + rate[8]) * RI1;
+                       DRI2  = rate[7] * RI1 - (rate[9] + rate[10]) * RI2;
+                       DRI3  = rate[9] * RI2 - (rate[11] + rate[12]) * RI2;
+                       DRA1  = rate[6] * A - (rate[13] + rate[14]) * RA1;
+                       DRA2  = rate[13] * I - (rate[15] + rate[16]) * RI1;
+                       DRA3  = rate[15] * I - (rate[17] + rate[18]) * RI1;
+                       
+                       DC  = rate[0] * S;
                        DW  = foi;  // standardized i.i.d. white noise
                        DVtot = rate[2] * S + rate[18] * E + rate[8] * R;
                        
                        // bacteria as continous state variable
-                       DB = -mu_B * B + theta * (1 + lambda_R * pow(rain, alpha_R)) * (I + VI);
-
+                       DB = -mu_B * B + theta * (1 + lambda_R * pow(rain, r)) * (thetaA * A + thetaI * I);
                        // susceptibles so as to match total population
-                       DS = -(DE + DI + DR + DVS + DVI + DVE + DVR);
+                       DS = -(DA + DI + DRI1 + DRI2 +DRI3 +DRA1 + DRA2 + DRA3);
                           ")
 
 
-I   += dN[0] - dN[2] - dN[3] - dN[4];
-A   += dN[1] - dN[5] - dN[6];
-RI1 += dN[4] - dN[7] - dN[8];
-RI2 += dN[7] - dN[9] - dN[10];
-RI3 += dN[9] - dN[11] - dN[12];
-RA1 += dN[6] - dN[13] - dN[14];
-RA2 += dN[13] - dN[15] - dN[16];
-RA3 += dN[15] - dN[16] - dN[17];
-C   +=  dN[0];
-W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
-B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
-// susceptibles so as to match total population
-S = nearbyint(H - I - A - R1I - R2I - R3I - R1A - R2A - R3A);
+
 
 # Initializer -------------------------------------------------------------
 
