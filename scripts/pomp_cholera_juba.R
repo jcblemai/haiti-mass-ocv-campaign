@@ -33,22 +33,22 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 
 # cholera case data from the 2014-2015 epidemic in Juba (South Soudan)
 cases <- read_csv("data/case_data.csv") %>% 
-  mutate(date = as.Date(date, format = "%d-%b-%y"),
-         time = dateToYears(date))
+mutate(date = as.Date(date, format = "%d-%b-%y"),
+   time = dateToYears(date))
 
 # get the time of the first datapoint in 2015 (used for simulations)
 t_first_datapnt <- cases %>% filter(time > 2015) %>% slice(1) %>% .[["time"]]
 
 # Estimates of daily rainfall 
 rain <- read_csv("data/rainfall_data.csv") %>% 
-  mutate(date = as.Date(date, format = "%d-%b-%y"),
-         time = dateToYears(date)) 
+mutate(date = as.Date(date, format = "%d-%b-%y"),
+   time = dateToYears(date)) 
 
 # value of maximal event during the 2015 epidemic
 max_rain2015 <- rain %>%
-  filter(year(date)==2015 & month(date) < 10) %>% 
-  select(rain) %>% 
-  max()
+filter(year(date)==2015 & month(date) < 10) %>% 
+select(rain) %>% 
+max()
 
 # standardize rainfall
 rain %<>% mutate(rain_std = rain/max_rain2015)
@@ -57,9 +57,9 @@ make_plots <- F
 if(make_plots) {
   # plot the data
   p.data <- ggplot(cases, aes(x = time, y = cases)) + 
-    geom_line() + 
-    geom_bar(data = rain, aes(y = rain_std  * 100), stat = "identity", fill = "blue") +
-    scale_x_continuous(breaks = c(2014, 2015)) 
+  geom_line() + 
+  geom_bar(data = rain, aes(y = rain_std  * 100), stat = "identity", fill = "blue") +
+  scale_x_continuous(breaks = c(2014, 2015)) 
   
   p.data
 }
@@ -148,14 +148,14 @@ param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|
 # declare matrix in C for the recoveries in 2014
 cases_2014 <- cases %>% filter(year(date) == 2014)
 cases2014.string <- foreach(r = iter(cases_2014, by = "row"),
-        .combine = c) %do% {
-          sprintf(" {%f, %f} ", r$time, r$cases)
-        } %>% 
+    .combine = c) %do% {
+  sprintf(" {%f, %f} ", r$time, r$cases)
+  } %>% 
   str_c(collapse = ", \n")
 
-matrix_cases2014.string <- str_c(sprintf("double cases2014[%i][%i] = {\n", nrow(cases_2014), 2),
-                                 cases2014.string,
-                                 " \n };")
+  matrix_cases2014.string <- str_c(sprintf("double cases2014[%i][%i] = {\n", nrow(cases_2014), 2),
+   cases2014.string,
+   " \n };")
 
 
 # Measurment model  -------------------------------------------------------
@@ -168,20 +168,20 @@ dmeas <- Csnippet("
   double mean_cases = epsilon * C;
   if (ISNA(cases)) {
     lik = (give_log) ? 0 : 1;
-  } else {
-    if (S < 10000) {
-      lik = (give_log) ? -99999 : 1.0e-18;
     } else {
-      lik = dnbinom_mu(cases, k, mean_cases, give_log) ;
-    }
-  }
-")
+        if (S < 10000) {
+          lik = (give_log) ? -99999 : 1.0e-18;
+          } else {
+              lik = dnbinom_mu(cases, k, mean_cases, give_log) ;
+          }
+      }
+      ")
 
 ## NegBinomial simulator
 rmeas <- Csnippet("
   double mean_cases = epsilon * C;
   cases = rnbinom_mu(k, mean_cases);
-")
+  ")
 
 # Process model -----------------------------------------------------------------
 
@@ -202,89 +202,89 @@ sirb.rproc <- Csnippet("
     dw = rgammawn(std_W, dt);
     // apply stochasticity
     foi_stoc = foi * dw/dt;
-  } else {
-    foi_stoc = foi;
-  }
-  
-  // vaccination window
-  if (t >= t_vacc_start && t <= (t_vacc_end + dt)) 
+    } else {
+        foi_stoc = foi;
+    }
+    
+    // vaccination window
+    if (t >= t_vacc_start && t <= (t_vacc_end + dt)) 
     r_v_wdn = (r_v / (S + E + R));
-  else 
+    else 
     r_v_wdn = 0.0;
-  
-  // define transition rates for each type of event
-  // S compartment
-  rate[0] = sigma * foi_stoc;   // infections
-  rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
-  // I compartment
-  rate[2] = mu;         // natural deaths
-  rate[3] = alpha;      // cholera-induced deaths
-  rate[4] = gammaI;      // recovery from infection
-  // A compartment (not in order because was added after initial model formulation)
-  rate[5] = mu;        // natural death
-  rate[6] = gammaA;       // symptoms development
-  // RI1,2,3 compartment
-  rate[7] = 3*rhoI;        // loss of natural immunity
-  rate[8] = mu;         // natural death
-  // RI2 compartment
-  rate[9] = 3*rhoI;        // loss of natural immunity
-  rate[10] = mu;
- // RI3 compartment
-  rate[11] = 3*rhoI;        // loss of natural immunity
-  rate[12] = mu;
-  // RA1,2,3 compartment
-  rate[13] = 3*rhoA;        // loss of natural immunity
-  rate[14] = mu;         // natural death
-  // RA2 compartment
-  rate[15] = 3*rhoA;        // loss of natural immunity
-  rate[16] = mu;
-  // RA3 compartment
-  rate[17] = 3*rhoA;        // loss of natural immunity
-  rate[18] = mu;
+    
+    // define transition rates for each type of event
+    // S compartment
+    rate[0] = sigma * foi_stoc;   // infections
+    rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
+    // I compartment
+    rate[2] = mu;         // natural deaths
+    rate[3] = alpha;      // cholera-induced deaths
+    rate[4] = gammaI;      // recovery from infection
+    // A compartment (not in order because was added after initial model formulation)
+    rate[5] = mu;        // natural death
+    rate[6] = gammaA;       // symptoms development
+    // RI1,2,3 compartment
+    rate[7] = 3*rhoI;        // loss of natural immunity
+    rate[8] = mu;         // natural death
+    // RI2 compartment
+    rate[9] = 3*rhoI;        // loss of natural immunity
+    rate[10] = mu;
+    // RI3 compartment
+    rate[11] = 3*rhoI;        // loss of natural immunity
+    rate[12] = mu;
+    // RA1,2,3 compartment
+    rate[13] = 3*rhoA;        // loss of natural immunity
+    rate[14] = mu;         // natural death
+    // RA2 compartment
+    rate[15] = 3*rhoA;        // loss of natural immunity
+    rate[16] = mu;
+    // RA3 compartment
+    rate[17] = 3*rhoA;        // loss of natural immunity
+    rate[18] = mu;
 
 
-  // simulate all transitions
-  reulermultinom(2, S, &rate[0], dt, &dN[0]);
-  reulermultinom(3, I, &rate[2], dt, &dN[2]);
-  reulermultinom(2, A, &rate[5], dt, &dN[5]);
-  reulermultinom(2, RI1, &rate[7], dt, &dN[7]);
-  reulermultinom(2, RI2, &rate[9], dt, &dN[9]);
-  reulermultinom(2, RI3, &rate[11], dt, &dN[11]);
-  reulermultinom(2, RA1, &rate[13], dt, &dN[13]);
-  reulermultinom(2, RA2, &rate[15], dt, &dN[15]);
-  reulermultinom(2, RA3, &rate[17], dt, &dN[17]);
+    // simulate all transitions
+    reulermultinom(2, S, &rate[0], dt, &dN[0]);
+    reulermultinom(3, I, &rate[2], dt, &dN[2]);
+    reulermultinom(2, A, &rate[5], dt, &dN[5]);
+    reulermultinom(2, RI1, &rate[7], dt, &dN[7]);
+    reulermultinom(2, RI2, &rate[9], dt, &dN[9]);
+    reulermultinom(2, RI3, &rate[11], dt, &dN[11]);
+    reulermultinom(2, RA1, &rate[13], dt, &dN[13]);
+    reulermultinom(2, RA2, &rate[15], dt, &dN[15]);
+    reulermultinom(2, RA3, &rate[17], dt, &dN[17]);
 
 
-  // bacteria as continous state variable
-  // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
-  k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-  k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-  k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-  k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-  // bacteria increment
-  dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
+    // bacteria as continous state variable
+    // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
+    k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+    k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+    k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+    k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+    // bacteria increment
+    dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
-  // update state variables
-  
-  I   += dN[0] - dN[2] - dN[3] - dN[4];
-  A   += dN[1] - dN[5] - dN[6];
-  RI1 += dN[4] - dN[7] - dN[8];
-  RI2 += dN[7] - dN[9] - dN[10];
-  RI3 += dN[9] - dN[11] - dN[12];
-  RA1 += dN[6] - dN[13] - dN[14];
-  RA2 += dN[13] - dN[15] - dN[16];
-  RA3 += dN[15] - dN[17] - dN[18];
-  C   +=  dN[0];
-  W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
-  B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
+    // update state variables
+    
+    I   += dN[0] - dN[2] - dN[3] - dN[4];
+    A   += dN[1] - dN[5] - dN[6];
+    RI1 += dN[4] - dN[7] - dN[8];
+    RI2 += dN[7] - dN[9] - dN[10];
+    RI3 += dN[9] - dN[11] - dN[12];
+    RA1 += dN[6] - dN[13] - dN[14];
+    RA2 += dN[13] - dN[15] - dN[16];
+    RA3 += dN[15] - dN[17] - dN[18];
+    C   +=  dN[0];
+    W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
+    B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
-  // susceptibles so as to match total population
-  S = nearbyint(H - I - A - R1I - R2I - R3I - R1A - R2A - R3A);
-")
+    // susceptibles so as to match total population
+    S = nearbyint(H - I - A - R1I - R2I - R3I - R1A - R2A - R3A);
+    ")
 
 # C function to compute the time-derivative of bacterial concentration
 derivativeBacteria.c <- " double fB(int I, int A, double B, 
-double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double density) {
+    double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double density) {
   double dB;
   dB = -mu_B * B +  (1 + lambda * pow(rain, r)) * density * (thetaI * (double) I + thetaA * (double) A);
   return(dB);
@@ -297,77 +297,77 @@ computeRecovered2014.c <- "int computeRecovered(double t0, double R_0_2014,  int
   // loop over reported cases in 2014 and compute remaning in 205
   for(int i = 0; i < n_cases2014; i++){
     R_0_2015 += cases2014[i][1] * (1-sigma)/sigma/epsilon  * exp((cases2014[i][0] - t0) * rho);
-  }
-  // add the calibrated IC for R in the beginning of 2014 
-  R_0_2015 += R_0_2014 * exp((cases2014[0][0] - t0) * rho);
-  
-  return(nearbyint(R_0_2015));
+}
+// add the calibrated IC for R in the beginning of 2014 
+R_0_2015 += R_0_2014 * exp((cases2014[0][0] - t0) * rho);
+
+return(nearbyint(R_0_2015));
 };
 "
 # Deterministic skeleton --------------------------------------------------
 sirb.skeleton <- Csnippet("
-                       double foi; // force of infection and its stochastic version
-                       double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
-                       double rate[19];      // vector of all rates in model
-                       
-                       // force of infection
-                       foi = beta_B * (B / (1 + B));
-                       
-                      // vaccination window
-                       if (t >= t_vacc_start && t <= (t_vacc_end + 1/365.25)) 
-                       r_v_wdn = (r_v / (S + E + R));
-                       else 
-                       r_v_wdn = 0;
-                       
-                       // define transition rates for each type of event
-  // S compartment
-  rate[0] = sigma * foi_stoc;   // infections
-  rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
-  // I compartment
-  rate[2] = mu;         // natural deaths
-  rate[3] = alpha;      // cholera-induced deaths
-  rate[4] = gammaI;      // recovery from infection
-  // A compartment (not in order because was added after initial model formulation)
-  rate[5] = mu;        // natural death
-  rate[6] = gammaA;       // symptoms development
-  // RI1,2,3 compartment
-  rate[7] = 3*rhoI;        // loss of natural immunity
-  rate[8] = mu;         // natural death
-  // RI2 compartment
-  rate[9] = 3*rhoI;        // loss of natural immunity
-  rate[10] = mu;
+ double foi; // force of infection and its stochastic version
+ double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
+ double rate[19];      // vector of all rates in model
+ 
+ // force of infection
+ foi = beta_B * (B / (1 + B));
+ 
+ // vaccination window
+ if (t >= t_vacc_start && t <= (t_vacc_end + 1/365.25)) 
+ r_v_wdn = (r_v / (S + E + R));
+ else 
+ r_v_wdn = 0;
+ 
+ // define transition rates for each type of event
+ // S compartment
+ rate[0] = sigma * foi_stoc;   // infections
+ rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
+ // I compartment
+ rate[2] = mu;         // natural deaths
+ rate[3] = alpha;      // cholera-induced deaths
+ rate[4] = gammaI;      // recovery from infection
+ // A compartment (not in order because was added after initial model formulation)
+ rate[5] = mu;        // natural death
+ rate[6] = gammaA;       // symptoms development
+ // RI1,2,3 compartment
+ rate[7] = 3*rhoI;        // loss of natural immunity
+ rate[8] = mu;         // natural death
+ // RI2 compartment
+ rate[9] = 3*rhoI;        // loss of natural immunity
+ rate[10] = mu;
  // RI3 compartment
-  rate[11] = 3*rhoI;        // loss of natural immunity
-  rate[12] = mu;
-  // RA1,2,3 compartment
-  rate[13] = 3*rhoA;        // loss of natural immunity
-  rate[14] = mu;         // natural death
-  // RA2 compartment
-  rate[15] = 3*rhoA;        // loss of natural immunity
-  rate[16] = mu;
-  // RA3 compartment
-  rate[17] = 3*rhoA;        // loss of natural immunity
-  rate[18] = mu;
+ rate[11] = 3*rhoI;        // loss of natural immunity
+ rate[12] = mu;
+ // RA1,2,3 compartment
+ rate[13] = 3*rhoA;        // loss of natural immunity
+ rate[14] = mu;         // natural death
+ // RA2 compartment
+ rate[15] = 3*rhoA;        // loss of natural immunity
+ rate[16] = mu;
+ // RA3 compartment
+ rate[17] = 3*rhoA;        // loss of natural immunity
+ rate[18] = mu;
 
-                       // update state variables
-                       DI  = rate[0] * S - (rate[2] + rate[3] + rate[4]) * I;
-                       DA  = rate[1] * S - (rate[5] + rate[6]) * A;
-                       DRI1  = rate[4] * I - (rate[7] + rate[8]) * RI1;
-                       DRI2  = rate[7] * RI1 - (rate[9] + rate[10]) * RI2;
-                       DRI3  = rate[9] * RI2 - (rate[11] + rate[12]) * RI2;
-                       DRA1  = rate[6] * A - (rate[13] + rate[14]) * RA1;
-                       DRA2  = rate[13] * I - (rate[15] + rate[16]) * RI1;
-                       DRA3  = rate[15] * I - (rate[17] + rate[18]) * RI1;
-                       
-                       DC  = rate[0] * S;
-                       DW  = foi;  // standardized i.i.d. white noise
-                       DVtot = rate[2] * S + rate[18] * E + rate[8] * R;
-                       
-                       // bacteria as continous state variable
-                       DB = -mu_B * B + theta * (1 + lambda_R * pow(rain, r)) * (thetaA * A + thetaI * I);
-                       // susceptibles so as to match total population
-                       DS = -(DA + DI + DRI1 + DRI2 +DRI3 +DRA1 + DRA2 + DRA3);
-                          ")
+ // update state variables
+ DI  = rate[0] * S - (rate[2] + rate[3] + rate[4]) * I;
+ DA  = rate[1] * S - (rate[5] + rate[6]) * A;
+ DRI1  = rate[4] * I - (rate[7] + rate[8]) * RI1;
+ DRI2  = rate[7] * RI1 - (rate[9] + rate[10]) * RI2;
+ DRI3  = rate[9] * RI2 - (rate[11] + rate[12]) * RI2;
+ DRA1  = rate[6] * A - (rate[13] + rate[14]) * RA1;
+ DRA2  = rate[13] * I - (rate[15] + rate[16]) * RI1;
+ DRA3  = rate[15] * I - (rate[17] + rate[18]) * RI1;
+ 
+ DC  = rate[0] * S;
+ DW  = foi;  // standardized i.i.d. white noise
+ DVtot = rate[2] * S + rate[18] * E + rate[8] * R;
+ 
+ // bacteria as continous state variable
+ DB = -mu_B * B + theta * (1 + lambda_R * pow(rain, r)) * (thetaA * A + thetaI * I);
+ // susceptibles so as to match total population
+ DS = -(DA + DI + DRI1 + DRI2 +DRI3 +DRA1 + DRA2 + DRA3);
+ ")
 
 
 
@@ -390,7 +390,7 @@ initalizeStates <- Csnippet("
   C   = 0;
   W   = 0;
   Vtot  = 0;
-")
+  ")
 
 
 # Parameter transformations -----------------------------------------------
@@ -412,7 +412,7 @@ toEstimationScale <- Csnippet("
   Tk = log(k);
   TR_0 = logit(R_0);
   TB_0 = log(B_0);
-")
+  ")
 
 fromEstimationScale <- Csnippet("
   Tsigma = expit(sigma);
@@ -430,7 +430,7 @@ fromEstimationScale <- Csnippet("
   Tk = exp(k);
   TR_0 = expit(R_0);
   TB_0 = exp(B_0);
-")
+  ")
 
 # Build pomp object -------------------------------------------------------
 
@@ -488,8 +488,8 @@ params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 sirb_cholera <- pomp(
   # set data
   data = cases %>% 
-    filter(time > t_start & time < (t_end + 0.01)) %>% 
-    select(time, cases) , 
+  filter(time > t_start & time < (t_end + 0.01)) %>% 
+  select(time, cases) , 
   # time column
   times = "time",
   # initialization time
@@ -506,9 +506,9 @@ sirb_cholera <- pomp(
   dmeasure = dmeas,
   # covariates
   covar = rain  %>% 
-    filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
-    select(time, rain_std) %>% 
-    rename(rain = rain_std),
+  filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
+  select(time, rain_std) %>% 
+  rename(rain = rain_std),
   tcovar = "time",
   # names of state variables
   statenames = state_names,
@@ -531,8 +531,8 @@ sirb_cholera <- pomp(
     sprintf("int n_cases2014 = %i;",  nrow(cases_2014)),
     computeRecovered2014.c,
     sep = " ")
-)
+  )
 
 # save pomp object for further use
 save(sirb_cholera, file = "data/sirb_cholera_pomped.rda")
- 
+
