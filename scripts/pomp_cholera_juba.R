@@ -234,9 +234,6 @@ sirb.rproc <- Csnippet("
     }
 
     // vaccination window
-    if (t >= t_vacc_start && t <= (t_vacc_end + dt)) 
-    r_v_wdn = (r_v / (S + E + R));
-    else 
     r_v_wdn = 0.0;
 
     // define transition rates for each type of event
@@ -284,10 +281,10 @@ sirb.rproc <- Csnippet("
 
     // bacteria as continous state variable
     // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
-    k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-    k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-    k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
-    k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, density);
+    k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
+    k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
+    k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
+    k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
     // bacteria increment
     dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
@@ -306,14 +303,14 @@ sirb.rproc <- Csnippet("
     B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
     // susceptibles so as to match total population
-    S = nearbyint(H - I - A - R1I - R2I - R3I - R1A - R2A - R3A);
+    S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
     ")
 
 # C function to compute the time-derivative of bacterial concentration OK
 derivativeBacteria.c <- " double fB(int I, int A, double B, 
-    double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double density) {
+    double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double D) {
   double dB;
-  dB = -mu_B * B +  (1 + lambda * pow(rain, r)) * density * (thetaI * (double) I + thetaA * (double) A);
+  dB = -mu_B * B +  (1 + lambda * pow(rain, r)) * D * (thetaI * (double) I + thetaA * (double) A);
   return(dB);
 };
 "
@@ -341,15 +338,12 @@ sirb.skeleton <- Csnippet("
  foi = betaB * (B / (1 + B));
 
  // vaccination window
- if (t >= t_vacc_start && t <= (t_vacc_end + 1/365.25)) 
- r_v_wdn = (r_v / (S + E + R));
- else 
  r_v_wdn = 0;
 
  // define transition rates for each type of event
  // S compartment
- rate[0] = sigma * foi_stoc;   // infections
- rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
+ rate[0] = sigma * foi;   // infections
+ rate[1] = (1 - sigma) * foi;   // asymptomatic infections
  // I compartment
  rate[2] = mu;         // natural deaths
  rate[3] = alpha;      // cholera-induced deaths
@@ -388,10 +382,9 @@ sirb.skeleton <- Csnippet("
 
  DC  = rate[0] * S;
  DW  = foi;  // standardized i.i.d. white noise
- DVtot = rate[2] * S + rate[18] * E + rate[8] * R;
 
  // bacteria as continous state variable
- DB = -mu_B * B + theta * (1 + lambda_R * pow(rain, r)) * (thetaA * A + thetaI * I);
+ DB = -mu_B * B +  (1 + lambda * pow(rain, r)) * (thetaA * A + thetaI * I);
  // susceptibles so as to match total population
  DS = -(DA + DI + DRI1 + DRI2 +DRI3 +DRA1 + DRA2 + DRA3);
  ")
@@ -430,7 +423,6 @@ initalizeStates <- Csnippet("
   B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
   C   = 0;
   W   = 0;
-  Vtot  = 0;
   ")
 
 
@@ -450,7 +442,7 @@ toEstimationScale <- Csnippet("
   Tstd_W = log(std_W);
   Tepsilon = log(epsilon);
   Tk = log(k);
-  TR_0 = logit(R_0);
+  TRI1_0 = logit(RI1_0);
   TB_0 = log(B_0);
   ")
 
@@ -467,7 +459,7 @@ fromEstimationScale <- Csnippet("
   Tstd_W = exp(std_W);
   Tepsilon = exp(epsilon);
   Tk = exp(k);
-  TR_0 = expit(R_0);
+  TRI1_0 = expit(RI1_0);
   TB_0 = exp(B_0);
   ")
 
