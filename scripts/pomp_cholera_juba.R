@@ -42,7 +42,9 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 cases <- read_csv("haiti-data/fromAzman/cases.csv")  %>% 
 gather(dep, cases, -date) %>% 
 group_by(dep) %>% 
-filter(dep == "Artibonite")
+filter(dep == "Artibonite") %>% 
+     mutate(date = as.Date(date, format = "%Y-%m-%d"),
+            time = dateToYears(date))
 
 # get the time of the first datapoint (use %>% filter(time > 2015) to constraint)
 t_first_datapnt <- cases %>% slice(1) %>% .[["time"]]
@@ -68,7 +70,9 @@ rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
 gather(dep, rain, -date) %>% 
 group_by(dep) %>% 
 mutate(max_rain = max(rain), rain_std = rain/max_rain) %>%
-filter(dep == "Artibonite")
+filter(dep == "Artibonite") %>% 
+     mutate(date = as.Date(date, format = "%Y-%m-%d"),
+            time = dateToYears(date))
 
 
 make_plots <- F

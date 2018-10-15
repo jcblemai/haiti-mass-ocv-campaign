@@ -12,3 +12,6 @@
 2. `run_mif_cholera.R`: fit the models using [multiple iterated filtering](http://www.pnas.org/content/112/3/719)
 3. `analysis_mif_runs.R`: code to produce all the figures of the paper, maybe the most usefull is the one to simulate the stochastic model in the "Compare outputs" section
 install.packages(c("pomp","tidyverse","magrittr","ggthemes","GGally","foreach","itertools","lubridate","dplyr","purrr","readr","stringr","tibble","doMC","doSNOW" ) , dependencies=TRUE)
+options(show.error.locations=TRUE)
+options(error=recover)
+
