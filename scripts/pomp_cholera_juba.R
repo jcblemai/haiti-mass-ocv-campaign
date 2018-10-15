@@ -154,7 +154,7 @@ param_iv_est_names <- c("RI1_0")
 param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
 
 ## fixed initial value parameters OK
-param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", 
+param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI2_0", "RI3_0", 
     "RA1_0", "RA2_0", "RA3_0")
 
 # all paramter names to estimate OK
