@@ -3,7 +3,7 @@
 # Date: Thu Jul  5 09:12:52 2018
 # Author: javier.perezsaeez@epfl.ch
 
-
+# Warning: dt is fraction of a year ! -> so put rates accordily
 
 # Preamble ---------------------------------------------------------------
 library(tidyverse)
@@ -100,7 +100,8 @@ if(make_plots) {
 # RA2: Recovered from exposed asymptomatics
 # RA3: Recovered from exposed asymptomatics
 # B:   Bacterial concentration in the environment
-# C:   Cumulative cases
+# C:   New cases since last observation. Sometime peaks -> data missing and accumulate for two weeks 
+#[should add NA to data]. Les cases sont une observation de C par le rmeas.
 
 ## data names:
 # cases: reported suspected cholera cases (weekly)
@@ -185,9 +186,8 @@ param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|
 #   " \n };")
 
 
-# Measurment model  -------------------------------------------------------
+# easurement model  -------------------------------------------------------
 
-# measurement model
 ## density
 
 ## NegBinomial density (if k -> inf then becomes Poisson) OK TODO S
@@ -329,69 +329,6 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 # return(nearbyint(R_0_2015));
 # };
 # "
-# Deterministic skeleton -------------------------------------------------- OK
-sirb.skeleton <- Csnippet("
- double foi; // force of infection and its stochastic version
- double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
- double rate[19];      // vector of all rates in model
-
- // force of infection
- foi = betaB * (B / (1 + B));
-
- // vaccination window
- r_v_wdn = 0;
-
- // define transition rates for each type of event
- // S compartment
- rate[0] = sigma * foi;   // infections
- rate[1] = (1 - sigma) * foi;   // asymptomatic infections
- // I compartment
- rate[2] = mu;         // natural deaths
- rate[3] = alpha;      // cholera-induced deaths
- rate[4] = gammaI;      // recovery from infection
- // A compartment (not in order because was added after initial model formulation)
- rate[5] = mu;        // natural death
- rate[6] = gammaA;       // symptoms development
- // RI1,2,3 compartment
- rate[7] = 3*rhoI;        // loss of natural immunity
- rate[8] = mu;         // natural death
- // RI2 compartment
- rate[9] = 3*rhoI;        // loss of natural immunity
- rate[10] = mu;
- // RI3 compartment
- rate[11] = 3*rhoI;        // loss of natural immunity
- rate[12] = mu;
- // RA1,2,3 compartment
- rate[13] = 3*rhoA;        // loss of natural immunity
- rate[14] = mu;         // natural death
- // RA2 compartment
- rate[15] = 3*rhoA;        // loss of natural immunity
- rate[16] = mu;
- // RA3 compartment
- rate[17] = 3*rhoA;        // loss of natural immunity
- rate[18] = mu;
-
- // update state variables
- DI  = rate[0] * S - (rate[2] + rate[3] + rate[4]) * I;
- DA  = rate[1] * S - (rate[5] + rate[6]) * A;
- DRI1  = rate[4] * I - (rate[7] + rate[8]) * RI1;
- DRI2  = rate[7] * RI1 - (rate[9] + rate[10]) * RI2;
- DRI3  = rate[9] * RI2 - (rate[11] + rate[12]) * RI2;
- DRA1  = rate[6] * A - (rate[13] + rate[14]) * RA1;
- DRA2  = rate[13] * I - (rate[15] + rate[16]) * RI1;
- DRA3  = rate[15] * I - (rate[17] + rate[18]) * RI1;
-
- DC  = rate[0] * S;
- DW  = foi;  // standardized i.i.d. white noise
-
- // bacteria as continous state variable
- DB = -mu_B * B +  (1 + lambda * pow(rain, r)) * (thetaA * A + thetaI * I);
- // susceptibles so as to match total population
- DS = -(DA + DI + DRI1 + DRI2 +DRI3 +DRA1 + DRA2 + DRA3);
- ")
-
-
-
 
 
 # Initializer -------------------------------------------------------------
@@ -523,8 +460,7 @@ sirb_cholera <- pomp(
   t0 = t_start - dt_yrs,
   # paramter vector
   params = params,
-  # deterministic skeleton
-  skeleton = vectorfield(sirb.skeleton),
+  
   # process simulator
   rprocess = euler.sim(step.fun = sirb.rproc, delta.t = dt_yrs),
   # measurement model simulator
@@ -569,5 +505,6 @@ p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>%
   ggplot(aes(x = time, y = value, color = sim)) + 
   geom_line() + 
   facet_wrap(~variable, scales = "free_y")
+# use coef(sirb_cholera)["mu_B"] <- 365/5 to change a parameter
 
 print(p)

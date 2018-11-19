@@ -31,11 +31,6 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
 
-# simple function to easily set values of paramters to retain
-setRandomWalkSD <- function(job_param_specs, param, param.type = "regular", rw.sd = rw.sd_param) {
-  ifelse(job_param_specs[param], rw.sd_param[param.type], 0)
-}
-
 # Load pomp object ---------------------------------------------------------------
 cholera_pomp_file <- "data/sirb_cholera_pomped.rda"
 
@@ -46,56 +41,28 @@ if(!file.exists(cholera_pomp_file)) {
   load(cholera_pomp_file)
 }
 
-
-
 # Parallel setup ----------------------------------------------------------
 
 # run on a single multi-core machine or on a cluster (using SLURM)
-oneMACHINE  = T
 
-if (!oneMACHINE) {
-  jobname <- Sys.getenv("SLURM_JOB_NAME")
-  job_id <- Sys.getenv("SLURM_ARRAY_JOB_ID")
-  runid <- Sys.getenv("SLURM_JOB_ID")
-  ntasks <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_COUNT"))
-  ncpus <- as.integer(Sys.getenv("SLURM_NTASKS_PER_NODE"))
-  rscript.options = commandArgs()
-  script = sub(".R","",sub(".* = ", "",rscript.options[grep("--file",rscript.options)]))
-  
-  # seed for simulations to assure reproducibility
-  master.seed <- as.integer(runid) 
-  
-  # the array id is used to specify the model type to run
-  array_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-  array_id_vec <- array_id
-  # spawn workers
-  registerDoMC(ncpus)
-  
-  n_runs_pertask <- ncpus * 3
-  
-} else {
-  ncpus <- detectCores()
-  jobname <- "HaitiOCV"
-  script <- "run_mif_cholera"
-  projname <- jobname
-  job_id <- 1
-  # seed for simulations to assure reproducibility
-  master.seed <- as.integer(runif(1) * 10000) 
-  
-  # number of runs to do for each task (n * number of cores)
-  n_runs_pertask <- ncpus * 1
-  
-  # simple setup to run only one initial condition per model per node
-  ntasks <-  n_runs_pertask * nrow(model_specs) 
-  
-  # array of ids to run
-  array_id_vec <- seq(1,1) * 100 + 1
-  # spawn workers
-  registerDoMC(ncpus)
-  
-}
+ncpus <- detectCores()
+jobname <- "HaitiOCV"
+script <- "run_mif_cholera"
+projname <- jobname
+job_id <- 1
+# seed for simulations to assure reproducibility
+master.seed <- as.integer(runif(1) * 10000) 
 
-# Set paramter bounds -----------------------------------------------------
+# number of runs to do for each task (n * number of cores)
+n_runs <- ncpus * 1
+
+# array of ids to run
+array_id_vec <- seq(1,1) * 100 + 1
+# spawn workers
+registerDoMC(ncpus)
+
+
+# Set parameter bounds -----------------------------------------------------
 
 # lower bound for positive parameter values
 min_param_val <- 1e-5 
@@ -104,21 +71,20 @@ parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   # Regular paramters
   "sigma", min_param_val, 1 - min_param_val,
-  "beta_B", min_param_val, 50,
-  "beta_I", min_param_val, 1e3,
+  "betaB", min_param_val, 50,
   "mu_B", min_param_val, 1e2,
-  "theta", min_param_val, 1e2,
-  "lambda_E", min_param_val, 5,
-  "lambda_R", min_param_val, 5,
-  "alpha_E", min_param_val, 40,
-  "alpha_R", min_param_val, 40,
-  "rho", 0.02, 20,
+  "thetaA", min_param_val, 1e2,
+  "thetaI", min_param_val, 1e2,
+  "lambda", min_param_val, 5,
+  "r", min_param_val, 40,
+  "rhoA", 0.02, 20,
+  "rhoI", 0.02, 20,
   # Process noise
   "std_W", min_param_val, 1e-1,
   # Measurement model
   "epsilon", min_param_val, 2,
   #"k", min_param_val, 10,
-  "R_0", min_param_val, 0.2
+  "RI1_0", min_param_val, 0.2
 )
 
 # convert to matrix for ease
@@ -126,16 +92,16 @@ parameter_bounds <- set_rownames(as.matrix(parameter_bounds[, -1]), parameter_bo
 
 # Setup MIF paramters -----------------------------------------------------
 
-# values of the random walks standard deviations
+# values of the random walks standard deviations [From somewhere, don't touch]
 rw.sd_rp <- 0.02  # for the regular (process and measurement model) paramters
 rw.sd_ivp <- 0.2  # for the initial value paramters
 rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
-# Level of detail on which to run the computations
+# Level of detail on which to run the computations [Allow to chose easly set of params]
 run_level <- 1
 cholera_Np <- c(1000, 3e3, 1e4)
 cholera_Nmif <- c(1, 300, 400)
-cholera_Ninit_param <- c(n_runs_pertask, n_runs_pertask, 10)
+cholera_Ninit_param <- c(n_runs, n_runs, 10)
 cholera_NpLL <- c(2000, 1e4, 5e4)
 cholera_Nreps_global <- c(1, 20, 100)
 
@@ -145,26 +111,16 @@ cholera_Nreps_global <- c(1, 20, 100)
 for(array_id in array_id_vec) {
   
   # get model for current job array ID: 
-  model_id <- floor(array_id/100)
-  task_id <- array_id - model_id * 100 
-  
-  # number of taskes per model
-  ntasks_permodel <- floor(ntasks/nrow(model_specs))
-  
+
   # select model for this job in array
-  job_model_specs <- model_specs[model_id, ]
-  job_param_specs <- unlist(job_model_specs[, -(1:2)])
-  
+
   # names of results files
-  mifruns.filename = str_c("results/", str_c(projname, job_model_specs$model, job_id, array_id, str_c(run_level, sep = "-")), "-mif_runs.rda", sep = "")
-  
-  # set to 0 the paramters that should not be fit
-  parameter_bounds[names(job_param_specs)[!job_param_specs], ] <- 0
+  mifruns.filename = str_c("results/", str_c(projname, str_c(run_level, sep = "-")), "-mif_runs.rda", sep = "")
   
   # create random vectors of initial paramters given the bounds
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
                              upper = parameter_bounds[, "upper"], 
-                             nseq = ntasks_permodel * cholera_Ninit_param[run_level])
+                             nseq = n_runs * cholera_Ninit_param[run_level])
   
   # get the names of the paramters that are fixed
   param_fixed_names <- setdiff(names(coef(sirb_cholera)), colnames(init_params))
@@ -182,35 +138,24 @@ for(array_id in array_id_vec) {
   job_rw.sd <- eval(
     parse(
       text = str_c("rw.sd(sigma  = ",  rw.sd_param["regular"],
-                   ", beta_B  = ",  setRandomWalkSD(job_param_specs, "beta_B"),
-                   ", beta_I  = ",  setRandomWalkSD(job_param_specs, "beta_I"),
-                   ", mu_B  = ",  setRandomWalkSD(job_param_specs, "mu_B"),
-                   ", theta  = ",  setRandomWalkSD(job_param_specs, "theta"),
-                   ", rho  = ",  rw.sd_param["regular"],
-                   ", lambda_E  = ",  setRandomWalkSD(job_param_specs, "lambda_E"),
-                   ", lambda_R  = ",  setRandomWalkSD(job_param_specs, "lambda_R"),
-                   ", alpha_E  = ",  setRandomWalkSD(job_param_specs, "alpha_E"),
-                   ", alpha_R  = ",  setRandomWalkSD(job_param_specs, "alpha_R"),
+                   ", betaB  = ",  rw.sd_param["regular"],
+                   ", mu_B   = ",  rw.sd_param["regular"],
+                   ", thetaA = ",  rw.sd_param["regular"],
+                   ", thetaI = ",  rw.sd_param["regular"],
+                   ", lambda = ",  rw.sd_param["regular"],
+                   ", r      = ",  rw.sd_param["regular"],
+                   ", rhoI   = ",  rw.sd_param["regular"],
+                   ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
-                   ", epsilon  = ",  rw.sd_param["regular"],
-                   ", R_0  = ivp(",  rw.sd_param["ivp"], ")",
+                   ", epsilon= ",  rw.sd_param["regular"],
+                   ", RI1_0  = ivp(",  rw.sd_param["ivp"], ")",
                    ")")
     )
   )
   
-  if(!oneMACHINE){
-    # cut up the initial parameter matrices for computations
-    init_params_ichunk <- ichunk(iter(init_params, "row"), cholera_Ninit_param[run_level])
-    
-    # get the task to run in this instance of the array
-    init_param_tocompute <- foreach(chnk = init_params_ichunk) %do% {
-      bind_rows(chnk)
-    }
-    
-    init_param_tocompute <- init_param_tocompute[[task_id]]
-  } else {
-    init_param_tocompute <- init_params
-  }
+  
+  init_param_tocompute <- init_params
+  
   
   # Run MIF
   # file to store all explorations of the likelihood surface
