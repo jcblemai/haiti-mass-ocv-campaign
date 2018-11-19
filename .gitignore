@@ -1,3 +1,6 @@
-        .Rhistory
-        .ipynb_checkpoints/
-
+.Rhistory
+.directory
+.ipynb_checkpoints/
+*.rda
+*.png
+*.csv

@@ -186,7 +186,7 @@ param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|
 #   " \n };")
 
 
-# easurement model  -------------------------------------------------------
+# Measurement model  -------------------------------------------------------
 
 ## density
 

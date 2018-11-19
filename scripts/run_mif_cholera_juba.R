@@ -159,7 +159,7 @@ for(array_id in array_id_vec) {
   
   # Run MIF
   # file to store all explorations of the likelihood surface
-  all_loglik.filename <- sprintf("results/choleraJuba_param_logliks-10-l%i.csv", run_level)
+  all_loglik.filename <- sprintf("results/Haiti_OCVparam_logliks-10-l%i.csv", run_level)
   # run computations (stew ensures not to duplicate calculations and sets RNG)
   stew(mifruns.filename, {
     w1 <- getDoParWorkers()
@@ -185,7 +185,7 @@ for(array_id in array_id_vec) {
       }
     })
     
-    # Compute more precise likelihood
+    # Compute more precise likelihood (because mif uses a fast like)
     lik_mf <- foreach(mifit = mf,
                       i = icount(length(mf)),
                       .packages = c("pomp", "tibble", "dplyr"),
@@ -206,8 +206,7 @@ for(array_id in array_id_vec) {
       
       tibble(loglik = ll_mean[1], loglik.se = ll_mean[2]) %>%
         cbind(data.frame(t(coef(mifit))))
-    } %>%
-      mutate(model = job_model_specs$model)
+    } 
     
     # write the results to a global file with all preceeding runs for each run level
     write_csv(lik_mf, all_loglik.filename, append = file.exists(all_loglik.filename))

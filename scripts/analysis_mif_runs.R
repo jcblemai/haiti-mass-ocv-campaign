@@ -19,48 +19,11 @@ Sys.setenv(TZ='GMT')
 # load fits ---------------------------------------------------------------
 
 # Stochastic model (POMP)
-dict_model_stoch <- c("SIR_B" = "MN"
-                      , "SIR_HB" = "MNH"
-                      , "SIR_B_E" = "ME"
-                      , "SIR_B_R" = "MC"
-                      , "SIR_B_ER" = "MEC"
-                      , "SIR_HB_E" = "MEH"
-                      , "SIR_HB_R" = "MCH"
-                      , "SIR_HB_ER" = "MECH"
-)
+liks_stoch <- read_csv("results/Haiti_OCVparam_logliks-10-l1.csv")
 
+#colnames(liks_stoch) <- str_replace_all(colnames(liks_stoch), "_", "")
 
-liks_stoch <- read_csv("results/choleraJuba_param_logliks-20-l2.csv") %>%
-  rbind(read_csv("results/choleraJuba_param_logliks-l2.csv")) %>%
-  rbind(read_csv("results/choleraJuba_param_logliks-l2_new.csv")) %>%
-  filter(model != "SIR_H", k > 1000) %>%
-  mutate(model = factor(dict_model_stoch[model], c("MN", "MNH", "ME", "MC", "MEC", "MEH", "MCH", "MECH")),
-         type = "stochastic") %>%
-rename(lambda_C = lambda_R,
-alpha_C = alpha_R)
-
-colnames(liks_stoch) <- str_replace_all(colnames(liks_stoch), "_", "")
-
-# Deterministic model (MCMC)
-dict_model_deter<- c("SIRB" = "MN"
-                     , "SIRB-H2H" = "MNH"
-                     , "SIRB-JE" = "ME"
-                     , "SIRB-JC" = "MC"
-                     , "SIRB-JCE" = "MEC"
-                     , "SIRB-JE-H2H" = "MEH"
-                     , "SIRB-JR-H2H" = "MCH"
-                     , "SIRB-JRE-H2H" = "MECH"
-) 
-
-liks_deter <- read_csv("results/posteriors_deterministic_models_final.csv") %>%
-  rename(model = Model, loglik = logL) %>%
-  mutate(model = factor(model, c("MN", "MNH", "ME", "MC", "MEC", "MEH", "MCH", "MECH")),
-         type = "deterministic")
-
-common_param_names <- colnames(liks_deter)[-c(1, 14:17)] %>% keep(~!(. %in% c("eff_v"))) %>% sort
-# liks <- read_csv("results/csv_pars_theta.csv")
-
-doplots <- F
+doplots <- T
 
 if(doplots) {
   
@@ -68,10 +31,9 @@ if(doplots) {
     p <- ggpairs(data %>% 
                    select(loglik, one_of(variables)) %>% 
                    keep(~sd(.) > 1e-4) %>% 
-                   map_df(~ map_dbl(., ~ifelse(. == 0, NA, .))) %>%
-                   bind_cols(data[,"model"]),
+                   map_df(~ map_dbl(., ~ifelse(. == 0, NA, .))), #%>% bind_cols(data[,"model"]),
                  # filter(loglik > -400),
-                 aes(color = model, alpha = I(0.4)),
+                 aes(alpha = I(0.4)),
                  upper = list(continuous = "points", combo = "box_no_facet", discrete = "facetbar", na = "na"),
                  lower = list(continuous = "points", combo = "facethist", discrete = "facetbar", na = "na") ,
                  legend = NULL
@@ -79,10 +41,10 @@ if(doplots) {
       theme_few() +
       # scale_fill_few()+
       theme(
-            # panel.grid.major = element_line(color = "grey"),
-            # axis.line = element_line(color = "black"),
-            panel.spacing = unit(.5, "lines"),
-            panel.border = element_rect(color = "black", fill = NA, size = .3)
+        # panel.grid.major = element_line(color = "grey"),
+        # axis.line = element_line(color = "black"),
+        panel.spacing = unit(.5, "lines"),
+        panel.border = element_rect(color = "black", fill = NA, size = .3)
       ) 
     
     p
@@ -90,50 +52,30 @@ if(doplots) {
   }
   
   # create pairplots by model
-  liks %>% 
-    mutate(model = as.character(model)) %>% 
-    nest(-model) %>% 
-    # slice(1) %>% 
-    pwalk(~ ggsave(
-      ggpairs(.y %>% select(-loglik.se, -contains("_0")) %>% keep(~sd(.) > 1e-4),
+  ggsave(ggpairs(liks_stoch %>% select(-loglik.se, -contains("0")) %>% keep(~sd(.) > 1e-4),
               upper = list(continuous = "points", combo = "box_no_facet", discrete = "facetbar", na = "na"),
               lower = list(continuous = "cor", combo = "facethist", discrete = "facetbar", na = "na"),
-              title = sprintf("model %s with best loglik: %f", .x, max(.y$loglik))
+              title = sprintf("Haiti OCV model with best loglik: %f",  max(liks_stoch$loglik))
       ),
-      filename = str_c("results/figures/", .x, "-logliks.png"),
-      width = 10, height = 8
-    ))
+      filename = str_c("results/figures/all-logliks.png"),
+      width = 10, height = 8)
   
   # plot all
-  # plotPairs(liks, c("epsilon", "k"), "results/figures/liks_measurement_model.png", width = 8, height = 6.5)
-  plotPairs(liks_deter %>% 
-              filter(model %in% c("MN", "ME", "MEC")) %>% 
-              mutate(model = factor(model, levels = c("MEC", "ME", "MN"))),
-            c("sigma", "betaB", "muB" , "theta", "rho", "alphaC", "lambdaC", "alphaE", "lambdaE"),
-            "results/figures/deter_posteriors.png",
-            width = 12,
-            height = 12)
-  
-  
   plotPairs(liks_stoch %>% 
-              filter(model %in% c("MN", "ME", "MEC")) %>% 
-              mutate(model = factor(model, levels = c("MEC", "ME", "MN"))) %>% 
-              group_by(model) %>% 
               arrange(desc(loglik)) %>% 
               slice(1:20) %>%
               ungroup,
-            c("sigma", "betaB", "muB" , "theta", "rho", "alphaC", "lambdaC", "alphaE", "lambdaE"),
+            c("sigma", "betaB", "muB" , "thetaA", "thetaI", "rhoA", "rhoI", "r", "lambda"),
             "results/figures/stoch_posteriors.png",
             width = 12,
             height = 12)
   
   # plot pairs by type of parameteres
-  plotPairs(liks, c("epsilon", "k"), "results/figures/liks_measurement_model.png", width = 10, height = 6.5)
-  plotPairs(liks, str_c(c("S", "E", "I", "R", "B"), "_0"), "results/figures/liks_initial_conditions.png", width = 10, height = 5)
-  plotPairs(liks, c("sigma", "beta_I", "beta_B", "mu_B", "theta", "rho", "std_W"), "results/figures/liks_sirb_processes.png")
-  plotPairs(liks, c("sigma", "beta_I", "beta_B", "mu_B", "theta", "lambda_E", "lambda_R", "alpha_E", "alpha_R"), "results/figures/liks_rainfall_effect.png")
-  plotPairs(liks, c( "lambda_E", "lambda_R", "alpha_E", "alpha_R"), "results/figures/liks_rainfall_effect_only.png", width = 8, height = 6.5)
-  
+  plotPairs(liks_stoch, c("epsilon", "k"), "results/figures/liks_measurement_model.png", width = 10, height = 6.5)
+  plotPairs(liks_stoch, str_c(c("S", "A", "I", "R", "B"), "_0"), "results/figures/liks_initial_conditions.png", width = 10, height = 5)
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "rhoA", "rhoI",  "std_W"), "results/figures/liks_sirb_processes.png")
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "lambda", "r"), "results/figures/liks_rainfall_effect.png")
+
 }
 # Likelihood comparison ---------------------------------------------------
 load("data/sirb_cholera_pomped.rda")
