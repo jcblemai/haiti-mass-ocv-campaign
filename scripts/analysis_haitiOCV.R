@@ -65,7 +65,7 @@ if(doplots) {
               arrange(desc(loglik)) %>% 
               slice(1:20) %>%
               ungroup,
-            c("sigma", "betaB", "muB" , "thetaA", "thetaI", "rhoA", "rhoI", "r", "lambda"),
+            c("sigma", "betaB", "mu_B" , "thetaA", "thetaI", "rhoA", "rhoI", "r", "lambda"),
             "results/figures/stoch_posteriors.png",
             width = 12,
             height = 12)
