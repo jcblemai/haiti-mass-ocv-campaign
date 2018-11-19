@@ -15,7 +15,7 @@ mu: 0.00004343944    # population natality and mortality rate (life exp is 63.07
 alpha: 0.004            # mortality rate due to cholera (day^-1) (2% case fatality rate)
 
 # start and end times of epidemic
-t_start: 2015-06-04
-t_end: 2015-09-26
+t_start: 2015-01-01
+t_end: 2018-03-01
 
 

@@ -47,44 +47,6 @@ if(!file.exists(cholera_pomp_file)) {
 }
 
 
-# Define model structures -------------------------------------------------
-# abbreviations of process names
-h2h <- "human-to-human" 
-bacteria <- "environmental bacteria reservoir"
-rain_expo <- "rainfall effect on exposure"
-rain_cont <- "rainfall effect on contamination"
-
-# Specify model types and paramters to estimate
-model_specs <- tribble(
-  ~model, ~processes, 
-  "SIR_B", bacteria,
-  "SIR_HB", str_c(h2h, bacteria, sep = " + "),
-  "SIR_B_E", str_c(bacteria, rain_expo, sep = " + "),
-  "SIR_B_R", str_c(bacteria, rain_cont, sep = " + "),
-  "SIR_B_ER", str_c(bacteria, rain_expo, rain_cont, sep = " + "),
-  "SIR_HB_E", str_c(h2h, bacteria, rain_expo, sep = " + "),
-  "SIR_HB_R", str_c(h2h, bacteria, rain_cont, sep = " + "),
-  "SIR_HB_ER", str_c(h2h, bacteria, rain_expo, rain_cont, sep = " + ")
-)
-
-# Speficy the paramter names corresponding to the model paramters
-param_specs <- tribble(
-  ~process, ~param_name,
-  h2h, "beta_I",
-  bacteria, "beta_B",
-  bacteria, "mu_B",
-  bacteria, "theta",
-  rain_expo, "lambda_E",
-  rain_expo, "alpha_E",
-  rain_cont, "lambda_R",
-  rain_cont, "alpha_R"
-)
-
-# Specify which parameters to estimate for each model
-for(r in seq(nrow(param_specs))) {
-  model_specs[[param_specs$param_name[r]]] <- map_lgl(model_specs$processes, 
-                                                      ~param_specs$process[r] %in% str_split(., " \\+ ")[[1]])
-}
 
 # Parallel setup ----------------------------------------------------------
 
@@ -113,7 +75,7 @@ if (!oneMACHINE) {
   
 } else {
   ncpus <- detectCores()
-  jobname <- "choleraJuba"
+  jobname <- "HaitiOCV"
   script <- "run_mif_cholera"
   projname <- jobname
   job_id <- 1
@@ -278,7 +240,7 @@ for(array_id in array_id_vec) {
       }
     })
     
-    # Compute likelihood
+    # Compute more precise likelihood
     lik_mf <- foreach(mifit = mf,
                       i = icount(length(mf)),
                       .packages = c("pomp", "tibble", "dplyr"),

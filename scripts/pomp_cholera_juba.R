@@ -40,11 +40,10 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 #            time = dateToYears(date))
 # Javier says the second is better
 cases <- read_csv("haiti-data/fromAzman/cases.csv")  %>% 
-gather(dep, cases, -date) %>% 
-group_by(dep) %>% 
-filter(dep == "Artibonite") %>% 
-     mutate(date = as.Date(date, format = "%Y-%m-%d"),
-            time = dateToYears(date))
+  gather(dep, cases, -date) %>% 
+  filter(dep == "Artibonite") %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date))
 
 # get the time of the first datapoint (use %>% filter(time > 2015) to constraint)
 t_first_datapnt <- cases %>% slice(1) %>% .[["time"]]
@@ -67,21 +66,22 @@ t_first_datapnt <- cases %>% slice(1) %>% .[["time"]]
 
 
 rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
-gather(dep, rain, -date) %>% 
-group_by(dep) %>% 
-mutate(max_rain = max(rain), rain_std = rain/max_rain) %>%
-filter(dep == "Artibonite") %>% 
-     mutate(date = as.Date(date, format = "%Y-%m-%d"),
-            time = dateToYears(date))
+  gather(dep, rain, -date) %>% 
+  group_by(dep) %>% 
+  mutate(max_rain = max(rain), rain_std = rain/max_rain) %>%
+  ungroup() %>% 
+  filter(dep == "Artibonite") %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date))
 
 
 make_plots <- F
 if(make_plots) {
   # plot the data
   p.data <- ggplot(cases, aes(x = time, y = cases)) + 
-  geom_line() + 
-  geom_bar(data = rain, aes(y = rain_std  * 100), stat = "identity", fill = "blue") +
-  scale_x_continuous(breaks = c(2014, 2015)) 
+    geom_line() + 
+    geom_bar(data = rain, aes(y = rain_std  * 100), stat = "identity", fill = "blue") +
+    scale_x_continuous(breaks = c(2014, 2015)) 
   
   p.data
 }
@@ -155,7 +155,7 @@ param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
 
 ## fixed initial value parameters OK
 param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI2_0", "RI3_0", 
-    "RA1_0", "RA2_0", "RA3_0")
+                          "RA1_0", "RA2_0", "RA3_0")
 
 # all paramter names to estimate OK
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
@@ -189,8 +189,8 @@ param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|
 
 # measurement model
 ## density
- 
-## NegBinomial density (if k -> inf then becomes Poisson) OK
+
+## NegBinomial density (if k -> inf then becomes Poisson) OK TODO S
 dmeas <- Csnippet("
   double mean_cases = epsilon * C;
   if (ISNA(cases)) {
@@ -207,6 +207,7 @@ dmeas <- Csnippet("
 ## NegBinomial simulator OK
 rmeas <- Csnippet("
   double mean_cases = epsilon * C;
+  // cases = mean_cases;
   cases = rnbinom_mu(k, mean_cases);
   ")
 
@@ -493,29 +494,29 @@ param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
 param_est["sigma"] <- .2
 param_est["rhoA"] <- 1/(365*3)
 param_est["rhoI"] <- 1/(365*3)
-param_est["betaB"] <- 0.001
-param_est["mu_B"] <-  4000
-param_est["thetaA"] <- 1
-param_est["thetaI"] <- 1
-param_est["lambda"] <- 0
-param_est["r"] <- 1
+param_est["betaB"] <- .1
+param_est["mu_B"] <-  365/5
+param_est["thetaA"] <- .01
+param_est["thetaI"] <- .01
+param_est["lambda"] <- 100
+param_est["r"] <- 3
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
-param_est["k"] <- 1
+param_est["k"] <- 10001
 param_est["RI1_0"] <- 0.1
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .1
 
-# adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days)
+# adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days) TODO CHECK
 params <- c(param_est, param_fixed)
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 
 sirb_cholera <- pomp(
   # set data
   data = cases %>% 
-  filter(time > t_start & time < (t_end + 0.01)) %>% 
-  select(time, cases) , 
+    filter(time > t_start & time < (t_end + 0.01)) %>% 
+    select(time, cases) , 
   # time column
   times = "time",
   # initialization time
@@ -532,9 +533,9 @@ sirb_cholera <- pomp(
   dmeasure = dmeas,
   # covariates
   covar = rain  %>% 
-  filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
-  select(time, rain_std) %>% 
-  rename(rain = rain_std),
+    filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
+    select(time, rain_std) %>% 
+    rename(rain = rain_std),
   tcovar = "time",
   # names of state variables
   statenames = state_names,
@@ -550,15 +551,23 @@ sirb_cholera <- pomp(
   fromEstimationScale = fromEstimationScale,
   # global C definitions
   globals = str_c(
-#    sprintf("double t_vacc_start = %f; double t_vacc_end = %f;", t_vacc_start, t_vacc_end),
-#    sprintf("double t0 = %f;",  t_first_datapnt - dt_yrs),
+    #    sprintf("double t_vacc_start = %f; double t_vacc_end = %f;", t_vacc_start, t_vacc_end),
+    #    sprintf("double t0 = %f;",  t_first_datapnt - dt_yrs),
     derivativeBacteria.c,
     #matrix_cases2014.string, 
     #sprintf("int n_cases2014 = %i;",  nrow(cases_2014)),
     #computeRecovered2014.c,
     sep = " ")
-  )
+)
 
 # save pomp object for further use
 save(sirb_cholera, file = "data/sirb_cholera_pomped.rda")
 
+
+p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>% 
+  gather(variable, value, -time, -rain, -sim)  %>% 
+  ggplot(aes(x = time, y = value, color = sim)) + 
+  geom_line() + 
+  facet_wrap(~variable, scales = "free_y")
+
+print(p)
