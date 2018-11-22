@@ -16,7 +16,7 @@ library(pomp)
 library(lubridate)
 Sys.setlocale("LC_ALL","C")
 Sys.setenv(TZ='GMT')
-# load fits ---------------------------------------------------------------
+# Pair plots ---------------------------------------------------------------
 
 # Stochastic model (POMP)
 liks_stoch <- read_csv("results/Haiti_OCVparam_logliks-10-l1.csv")
@@ -153,14 +153,7 @@ best_param <- best_liks %>%
 sim_stochastic <- foreach(r = iter(best_param, by = "row"), 
                           .combine = rbind) %dopar% {
                             
-                            if(r$model == "ME") {
-                              simulatePOMP(sirb_cholera, unlist(r[names(coef(sirb_cholera))]), 10000) %>% 
-                                mutate(model = r$model)
-                            } else {
-                              simulatePOMP(sirb_cholera_maxrain, unlist(r[names(coef(sirb_cholera))]), 10000) %>% 
-                                mutate(model = r$model)
-                            }
-                            
+                          simulatePOMP(sirb_cholera, unlist(r[names(coef(sirb_cholera))]), nsim = 10)
                           }
 
 # tidy tibble for merger
@@ -177,28 +170,16 @@ sim_stochastic_quantiles <- sim_stochastic %>%
 simcol <- "#175CD6"
 datacol <- "#ED0000"
 
-psim_labels <- tribble(
-  ~model, ~type, ~label,
-  "MN", "deterministic", "A",
-  "MN", "stochastic", "B",
-  "ME", "deterministic", "C",
-  "ME", "stochastic", "D",
-  "MEC", "deterministic", "E",
-  "MEC", "stochastic", "F"
-) %>% 
-  mutate(date = as.Date("2015-06-09"), y = 115,
-         model = factor(model, levels = c("MN", "ME", "MEC")))
-
-p.sim <- ggplot(data = rbind(sim_stochastic_quantiles, sim_deter_quantiles),
+p.sim <- ggplot(data = sim_stochastic_quantiles,
                 aes(x = date))+
   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
   geom_line(aes(y = q50), color = simcol) +
   geom_line(aes(y = mean), linetype = 2, color = simcol) +
   geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
   geom_point(aes(y = cases), color = datacol, size = 0.8) +
-  geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
-  facet_grid(model~type) +
-  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2015-06-01", "2015-09-28"))) +
+  #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
+  #facet_grid(model~type) +
+  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2015-06-01", "2018-01-01"))) +
   scale_y_continuous(expand = c(0,0))+ 
   labs(y = "daily cholera cases", x = "date") +
   theme(panel.grid.major = element_line(color = "lightgray"),
@@ -209,16 +190,6 @@ p.sim <- ggplot(data = rbind(sim_stochastic_quantiles, sim_deter_quantiles),
 
 p.sim
 ggsave(p.sim, filename = "results/figures/simulations_comparison.png", width = 9, height = 10, dpi = 300)
-
-
-# Write BICs to file
-summary_stoch <- nodes %>% 
-  mutate(BIC = -2 * loglik + log(length(sirb_cholera_maxrain@data)) * nparam,
-         BF = 1/exp(0.5 * (BIC - min(BIC)))) %>% 
-  filter(type == "stochastic") %>% 
-  select(model, loglik, loglik.se, nparam, BIC, BF) 
-
-write_csv(summary_stoch, path = "results/stochastic_models_summary.csv")
 
 
 # Parameter profiles ------------------------------------------------------
@@ -344,18 +315,3 @@ p.profile <- profile_liks %>%
   facet_wrap(~variable, scales = "free_x")
 
 ggsave(p.profile, filename = "results/figures/profiles_alpha_lambda_E.png", width = 10, height = 5, dpi = 300)
-
-
-# Sumary statistics models ------------------------------------------------
-
-library(xtable)
-model_summary <- summary_stoch %>% 
-  inner_join(read_csv(file = "results/deter_models_summary.csv") %>% 
-               mutate(loglik.se = 0) %>% 
-               select(one_of(colnames(summary_stoch)))
-             , by = "model", ., suffix = c(".deter", ".stoch"))
-
-print(xtable(model_summary, 
-             align = c("c","l", rep("c", 10)),
-             digits = c(1,1, rep(c(2,3,2,2,-1), times = 2))),
-      file = "results/model_summary_latex.txt")
