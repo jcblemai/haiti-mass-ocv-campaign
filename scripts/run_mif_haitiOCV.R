@@ -71,7 +71,7 @@ parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   # Regular paramters
   "sigma", min_param_val, 1 - min_param_val,
-  "betaB", min_param_val, 50,
+  "betaB", min_param_val, 1,
   "mu_B", min_param_val, 1e2,
   "thetaA", min_param_val, 1e2,
   "thetaI", min_param_val, 1e2,

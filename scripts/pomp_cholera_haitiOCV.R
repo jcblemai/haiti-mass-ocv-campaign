@@ -41,7 +41,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 # Javier says the second is better
 cases <- read_csv("haiti-data/fromAzman/cases.csv")  %>% 
   gather(dep, cases, -date) %>% 
-  filter(dep == "Artibonite") %>% 
+  filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date))
 
@@ -498,13 +498,3 @@ sirb_cholera <- pomp(
 
 # save pomp object for further use
 save(sirb_cholera, file = "data/sirb_cholera_pomped.rda")
-
-
-p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>% 
-  gather(variable, value, -time, -rain, -sim)  %>% 
-  ggplot(aes(x = time, y = value, color = sim)) + 
-  geom_line() + 
-  facet_wrap(~variable, scales = "free_y")
-# use coef(sirb_cholera)["mu_B"] <- 365/5 to change a parameter
-
-print(p)
