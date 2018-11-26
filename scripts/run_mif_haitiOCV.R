@@ -84,7 +84,7 @@ parameter_bounds <- tribble(
   # Measurement model
   "epsilon", min_param_val, 2,
   #"k", min_param_val, 10,
-  "RI1_0", min_param_val, 0.2
+  "RI1_0", min_param_val, 0.7
 )
 
 # convert to matrix for ease

@@ -312,9 +312,9 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 initalizeStates <- Csnippet("
   A   = 0;
   I   = 0;
-  RI1   = nearbyint(sigma * Rtot_0/3.0);
-  RI2   = nearbyint(sigma * Rtot_0/3.0);
-  RI3   = nearbyint(sigma * Rtot_0/3.0);
+  RI1   = nearbyint(sigma * Rtot_0*H/3.0);
+  RI2   = nearbyint(sigma * Rtot_0*H/3.0);
+  RI3   = nearbyint(sigma * Rtot_0*H/3.0);
   RA1   = nearbyint((1-sigma) * Rtot_0/3.0);
   RA2   = nearbyint((1-sigma) * Rtot_0/3.0);
   RA3   = nearbyint((1-sigma) * Rtot_0/3.0);
@@ -329,7 +329,7 @@ initalizeStates <- Csnippet("
     RA3   = nearbyint((1-sigma) * R_tot/3.0);
 
   }
-  S   = nearbyint(H - A - I - RI1 - RI2 - RI3 - RA1 -RA2 - RA3);
+  S   = nearbyint(H - A - I - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
   B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
   C   = 0;
   W   = 0;
@@ -419,7 +419,7 @@ param_est["r"] <- 3
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
 param_est["k"] <- 10001
-param_est["Rtot_0"] <- 1000
+param_est["Rtot_0"] <- 0.35
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .1
