@@ -310,8 +310,8 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 
 # Initializer -------------------------------------------------------------
 initalizeStates <- Csnippet("
-  A   = 0;
-  I   = 0;
+  A   = 1/sigma * 1/epsilon * cases0;
+  I   = 1/epsilon * cases0;
   RI1   = nearbyint(sigma * Rtot_0*H/3.0);
   RI2   = nearbyint(sigma * Rtot_0*H/3.0);
   RI3   = nearbyint(sigma * Rtot_0*H/3.0);
@@ -327,7 +327,6 @@ initalizeStates <- Csnippet("
     RA1   = nearbyint((1-sigma) * R_tot/3.0);
     RA2   = nearbyint((1-sigma) * R_tot/3.0);
     RA3   = nearbyint((1-sigma) * R_tot/3.0);
-
   }
   S   = nearbyint(H - A - I - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
   B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
@@ -405,6 +404,12 @@ param_fixed["A_0"] <- 3 / param_fixed["H"]
 param_fixed["I_0"] <- 2 / param_fixed["H"]
 param_fixed["B_0"] <- 0 # B0 depends on epsilon and sigma
 
+# Cases in the last report:
+# declare matrix in C for the infected before the strat date in 2014
+cases_at_t_start <- cases %>% filter(dateToYears(date) <= t_start) %>% tail(n=1)%>% select('cases') %>% unlist()
+cases_at_t_start.string <- sprintf("double cases0 = %i;", cases_at_t_start)
+
+
 # Initialize the parameters to estimate (just initial guesses)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
 param_est["sigma"] <- .2
@@ -467,6 +472,7 @@ sirb_cholera <- pomp(
   # global C definitions
   globals = str_c(
     derivativeBacteria.c,
+    cases_at_t_start.string,
     sep = " ")
 )
 
