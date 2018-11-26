@@ -39,7 +39,8 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Load pomp object ---------------------------------------------------------------
-cholera_pomp_file <- paste0("sirb_cholera_pomped_", departement, ".rda")
+load(paste0("sirb_cholera_pomped_", departement, ".rda"))
+
 
 # Parallel setup ----------------------------------------------------------
 
@@ -84,7 +85,7 @@ parameter_bounds <- tribble(
   # Measurement model
   "epsilon", min_param_val, 2,
   #"k", min_param_val, 10,
-  "RI1_0", min_param_val, 0.7
+  "Rtot_0", min_param_val, 0.7
 )
 
 # convert to matrix for ease
@@ -148,7 +149,7 @@ for(array_id in array_id_vec) {
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
-                   ", RI1_0  = ivp(",  rw.sd_param["ivp"], ")",
+                   ", Rtot_0  = ivp(",  rw.sd_param["ivp"], ")",
                    ")")
     )
   )

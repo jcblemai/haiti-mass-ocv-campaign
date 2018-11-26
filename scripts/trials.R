@@ -11,7 +11,7 @@ load(paste0("sirb_cholera_pomped_", departement, ".rda")
 
 coef(sirb_cholera)["mu_B"] <- 365/5
 coef(sirb_cholera)["betaB"] <- 0.1
-#coef(sirb_cholera)["Rtot_0"] <-100000000
+coef(sirb_cholera)["Rtot_0"] <-50
 
 p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>% 
   gather(variable, value, -time, -rain, -sim)  %>% 

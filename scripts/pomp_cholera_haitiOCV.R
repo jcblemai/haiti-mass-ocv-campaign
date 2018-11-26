@@ -171,11 +171,8 @@ param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
 # all param names OK
 param_names <- c(param_est_names, param_fixed_names)
 
-# names of parameters that are rates MAYBE
+# names of parameters that are rates (MAYBE) (because time 365 since timestep is year) r_v shoudl be here
 param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoI", "rhoA")
-
-# names of rate parameters WUT
-param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|std_W|sigma|alpha_|lambda")] #???
 
 # Measurement model  -------------------------------------------------------
 
@@ -310,8 +307,8 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 
 # Initializer -------------------------------------------------------------
 initalizeStates <- Csnippet("
-  A   = 1/sigma * 1/epsilon * cases0;
-  I   = 1/epsilon * cases0;
+  A     = nearbyint(1/sigma * 1/epsilon * cases0);
+  I     = nearbyint(1/epsilon * cases0);
   RI1   = nearbyint(sigma * Rtot_0*H/3.0);
   RI2   = nearbyint(sigma * Rtot_0*H/3.0);
   RI3   = nearbyint(sigma * Rtot_0*H/3.0);
@@ -321,6 +318,12 @@ initalizeStates <- Csnippet("
   if (A + I + RI1 + RI2 + RI3 + RA1 + RA2 + RA3 >= H)
   {
     double R_tot = H - A - I - 100.0;
+    if (R_tot <= 0)
+    {
+      I     = nearbyint(H - 100);
+      A     = nearbyint(0);
+      R_tot = nearbyint(0);
+    }
     RI1   = nearbyint(sigma * R_tot/3.0);
     RI2   = nearbyint(sigma * R_tot/3.0);
     RI3   = nearbyint(sigma * R_tot/3.0);
