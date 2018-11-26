@@ -16,7 +16,7 @@ library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
 
-departement <- 'Artibonite'
+departement <- 'Grande Anse'
 
 # function to convert dates to fractions of years for model
 dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
@@ -70,7 +70,7 @@ rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
   group_by(dep) %>% 
   mutate(max_rain = max(rain), rain_std = rain/max_rain) %>%
   ungroup() %>% 
-  filter(dep == "Artibonite") %>% 
+  filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date))
 
@@ -404,18 +404,26 @@ fromEstimationScale <- Csnippet("
 # Build pomp object -------------------------------------------------------
 
 # input parameters to the model
-input_parameters <- yaml::read_yaml("data/input_parameters.yaml")
+input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
 
 # Start and end dates of epidemic
 t_start <- dateToYears(as.Date(input_parameters$t_start))
 t_end <- dateToYears(as.Date(input_parameters$t_end))
 
 # get fixed process paramteres to input
+populations  <- unlist(flatten(input_parameters["population"]))
+densities <- unlist(flatten(input_parameters["density"]))
+
 fixed_input_parameters <- as_vector(input_parameters[map_lgl(names(input_parameters), ~ . %in% param_fixed_names)])
+
 
 # set fixed process parameters
 param_proc_fixed <- set_names(seq_along(param_proc_fixed_names) * 0, param_proc_fixed_names)
 param_proc_fixed[names(fixed_input_parameters)] <- fixed_input_parameters
+
+param_proc_fixed['H'] <- populations[departement]
+param_proc_fixed['D'] <- densities[departement]
+
 
 # Initialize the fixed parameters
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)

@@ -2,9 +2,32 @@
 
 # Note: all parameters are given in per day (/day) units except if mentioned otherwise
 
-# total population in Juba
-H: 1727524
-D: 353
+# total population
+
+population:
+  - Artibonite: 1727524
+  - Centre: 746236
+  - Grande Anse: 468301
+  - Nippes: 342525
+  - Nord: 1067177
+  - Nord-Est: 393967
+  - Nord-Ouest: 728807
+  - Ouest: 4029705
+  - Sud: 774976
+  - Sud-Est: 632601
+
+density:
+  - Artibonite: 353
+  - Centre: 214
+  - Grande Anse: 245
+  - Nippes: 270
+  - Nord: 505
+  - Nord-Est: 243
+  - Nord-Ouest: 347
+  - Ouest: 809
+  - Sud: 292
+  - Sud-Est: 311
+
 # rate of loss of infection
 gammaA: 0.2
 gammaI: 0.2
@@ -15,7 +38,7 @@ mu: 0.00004343944    # population natality and mortality rate (life exp is 63.07
 alpha: 0.004            # mortality rate due to cholera (day^-1) (2% case fatality rate)
 
 # start and end times of epidemic
-t_start: 2015-01-01
-t_end: 2018-03-01
+t_start: 2017-07-8
+t_end: 2018-07-14
 
 
