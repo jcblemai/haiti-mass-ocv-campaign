@@ -22,8 +22,14 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
   args[1] = "Artibonite"
+  args[2] = 1
+} else if (length(args)==1) {
+  args[2] = 1
 }
+
 departement <- args[1]
+run_level <- as.integer(args[2])
+
 
 # Helper functions 
 dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
@@ -99,12 +105,11 @@ rw.sd_ivp <- 0.2  # for the initial value paramters
 rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
 # Level of detail on which to run the computations [Allow to chose easly set of params]
-run_level <- 1
-cholera_Np <- c(1000, 3e3, 1e4)
-cholera_Nmif <- c(1, 300, 400)
-cholera_Ninit_param <- c(n_runs, n_runs, 10)
-cholera_NpLL <- c(2000, 1e4, 5e4)
-cholera_Nreps_global <- c(1, 20, 100)
+cholera_Np <- c(1e3, 2e3, 3e3, 1e4)
+cholera_Nmif <- c(1, 100, 300, 400)
+cholera_Ninit_param <- c(n_runs, n_runs*2, n_runs*3, 10)
+cholera_NpLL <- c(2000, 5e3, 1e4, 5e4)
+cholera_Nreps_global <- c(1, 10, 20, 100)
 
 # Run the computations -----------------------------------------------
 # if on one machine run all models in sequence if only one task per model 
