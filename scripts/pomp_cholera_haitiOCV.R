@@ -155,14 +155,13 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 param_proc_est_names <- c("sigma", "betaB", "r", "mu_B", "thetaA", "thetaI", "lambda", "rhoA", "rhoI", "std_W", "epsilon","k")
 
 ## initial value parameters to estimate OK
-param_iv_est_names <- c("RI1_0")
+param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
 param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
 
 ## fixed initial value parameters OK
-param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI2_0", "RI3_0", 
-                          "RA1_0", "RA2_0", "RA3_0")
+param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
 
 # all paramter names to estimate OK
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
@@ -177,20 +176,6 @@ param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoI", "rhoA"
 
 # names of rate parameters WUT
 param_rate_names <- param_names[!str_detect(param_names, "_0|H|k|epsilon|eff|t_|std_W|sigma|alpha_|lambda")] #???
-
-
-# declare matrix in C for the recoveries in 2014
-#cases_2014 <- cases %>% filter(year(date) == 2014)
-#cases2014.string <- foreach(r = iter(cases_2014, by = "row"),
-#    .combine = c) %do% {
-#  sprintf(" {%f, %f} ", r$time, r$cases)
-#  } %>% 
-#  str_c(collapse = ", \n")
-
-#  matrix_cases2014.string <- str_c(sprintf("double cases2014[%i][%i] = {\n", nrow(cases_2014), 2),
-#   cases2014.string,
-#   " \n };")
-
 
 # Measurement model  -------------------------------------------------------
 
@@ -322,48 +307,29 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 };
 "
 
-# C function to compute the initial number of recovered at the start of the simulations given sigma and epsilon.
-# computeRecovered2014.c <- "int computeRecovered(double t0, double R_0_2014,  int n_cases2014, double cases2014[][2], double sigma, double rho, double epsilon){
-#   double R_0_2015 = 0;
-#   // loop over reported cases in 2014 and compute remaning in 205
-#   for(int i = 0; i < n_cases2014; i++){
-#     R_0_2015 += cases2014[i][1] * (1-sigma)/sigma/epsilon  * exp((cases2014[i][0] - t0) * rho);
-# }
-# // add the calibrated IC for R in the beginning of 2014 
-# R_0_2015 += R_0_2014 * exp((cases2014[0][0] - t0) * rho);
-
-# return(nearbyint(R_0_2015));
-# };
-# "
-
 
 # Initializer -------------------------------------------------------------
-
-# initalizeStates <- Csnippet("
-#   double m = H ;// /(S_0+E_0+I_0+R_0);
-#   A   = nearbyint(A_0 * m/epsilon);
-#   I   = nearbyint(I_0 * m/epsilon);
-#   R   = computeRecovered(t0, R_0 * H, n_cases2014, cases2014, sigma, rho, epsilon);
-#   R   = ((R >= H) ? (m - E - I - 100.0) : (R)); // remove 100 so that S > 0 if the predicted R > H
-#   S   = nearbyint(m - E - I - R);
-#   B   = 2.0/epsilon * theta/mu_B; // custom initial conditions equivalent to the 'forcing' in the continous model
-#   C   = 0;
-#   W   = 0;
-#   Vtot  = 0;
-#   ")
-
-# TODO
 initalizeStates <- Csnippet("
-  double m = H ;// /(S_0+E_0+I_0+R_0);
   A   = 0;
   I   = 0;
-  RI1   = 100;
-  RI2   = 100;
-  RI3   = 100;
-  RA1   = 100;
-  RA2   = 100;
-  RA3   = 100;
-  S   = nearbyint(m - A - I - RI1 - RI2 - RI3 - RA1 -RA2 -RA3);
+  RI1   = nearbyint(sigma * Rtot_0/3.0);
+  RI2   = nearbyint(sigma * Rtot_0/3.0);
+  RI3   = nearbyint(sigma * Rtot_0/3.0);
+  RA1   = nearbyint((1-sigma) * Rtot_0/3.0);
+  RA2   = nearbyint((1-sigma) * Rtot_0/3.0);
+  RA3   = nearbyint((1-sigma) * Rtot_0/3.0);
+  if (A + I + RI1 + RI2 + RI3 + RA1 + RA2 + RA3 >= H)
+  {
+    double R_tot = H - A - I - 100.0;
+    RI1   = nearbyint(sigma * R_tot/3.0);
+    RI2   = nearbyint(sigma * R_tot/3.0);
+    RI3   = nearbyint(sigma * R_tot/3.0);
+    RA1   = nearbyint((1-sigma) * R_tot/3.0);
+    RA2   = nearbyint((1-sigma) * R_tot/3.0);
+    RA3   = nearbyint((1-sigma) * R_tot/3.0);
+
+  }
+  S   = nearbyint(H - A - I - RI1 - RI2 - RI3 - RA1 -RA2 - RA3);
   B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
   C   = 0;
   W   = 0;
@@ -386,7 +352,7 @@ toEstimationScale <- Csnippet("
   Tstd_W = log(std_W);
   Tepsilon = log(epsilon);
   Tk = log(k);
-  TRI1_0 = logit(RI1_0);
+  TRtot_0 = logit(Rtot_0);
   TB_0 = log(B_0);
   ")
 
@@ -403,7 +369,7 @@ fromEstimationScale <- Csnippet("
   Tstd_W = exp(std_W);
   Tepsilon = exp(epsilon);
   Tk = exp(k);
-  TRI1_0 = expit(RI1_0);
+  TRtot_0 = expit(Rtot_0);
   TB_0 = exp(B_0);
   ")
 
@@ -417,9 +383,6 @@ t_start <- dateToYears(as.Date(input_parameters$t_start))
 t_end <- dateToYears(as.Date(input_parameters$t_end))
 
 # get fixed process paramteres to input
-populations  <- unlist(flatten(input_parameters["population"]))
-densities <- unlist(flatten(input_parameters["density"]))
-
 fixed_input_parameters <- as_vector(input_parameters[map_lgl(names(input_parameters), ~ . %in% param_fixed_names)])
 
 
@@ -427,6 +390,8 @@ fixed_input_parameters <- as_vector(input_parameters[map_lgl(names(input_paramet
 param_proc_fixed <- set_names(seq_along(param_proc_fixed_names) * 0, param_proc_fixed_names)
 param_proc_fixed[names(fixed_input_parameters)] <- fixed_input_parameters
 
+populations  <- unlist(flatten(input_parameters["population"]))
+densities <- unlist(flatten(input_parameters["density"]))
 param_proc_fixed['H'] <- populations[departement]
 param_proc_fixed['D'] <- densities[departement]
 
@@ -435,7 +400,7 @@ param_proc_fixed['D'] <- densities[departement]
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
 param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)
 
-# Initial Conditions based on forcing WUT
+# Initial Conditions based on forcing (These overwritten by the initilizer function)
 param_fixed["A_0"] <- 3 / param_fixed["H"]
 param_fixed["I_0"] <- 2 / param_fixed["H"]
 param_fixed["B_0"] <- 0 # B0 depends on epsilon and sigma
@@ -454,7 +419,7 @@ param_est["r"] <- 3
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
 param_est["k"] <- 10001
-param_est["RI1_0"] <- 0.1
+param_est["Rtot_0"] <- 1000
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .1
@@ -501,12 +466,7 @@ sirb_cholera <- pomp(
   fromEstimationScale = fromEstimationScale,
   # global C definitions
   globals = str_c(
-    #    sprintf("double t_vacc_start = %f; double t_vacc_end = %f;", t_vacc_start, t_vacc_end),
-    #    sprintf("double t0 = %f;",  t_first_datapnt - dt_yrs),
     derivativeBacteria.c,
-    #matrix_cases2014.string, 
-    #sprintf("int n_cases2014 = %i;",  nrow(cases_2014)),
-    #computeRecovered2014.c,
     sep = " ")
 )
 
