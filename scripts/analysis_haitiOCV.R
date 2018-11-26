@@ -16,6 +16,15 @@ library(pomp)
 library(lubridate)
 Sys.setlocale("LC_ALL","C")
 Sys.setenv(TZ='GMT')
+
+args = commandArgs(trailingOnly=TRUE)
+if (length(args)==0) {
+  # default departement
+  args[1] = "Artibonite"
+}
+departement <- args[1]
+
+
 # Pair plots ---------------------------------------------------------------
 
 # Stochastic model (POMP)
@@ -79,7 +88,7 @@ if(doplots) {
 
 }
 # Likelihood comparison ---------------------------------------------------
-load("data/sirb_cholera_pomped.rda")
+load(paste0("sirb_cholera_pomped_", departement, ".rda"))
 
 
 # get best likelihood

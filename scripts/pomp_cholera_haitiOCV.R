@@ -16,7 +16,13 @@ library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
 
-departement <- 'Grande Anse'
+
+args = commandArgs(trailingOnly=TRUE)
+if (length(args)==0) {
+  # default departement
+  args[1] = "Artibonite"
+}
+departement <- args[1]
 
 # function to convert dates to fractions of years for model
 dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
@@ -505,4 +511,4 @@ sirb_cholera <- pomp(
 )
 
 # save pomp object for further use
-save(sirb_cholera, file = "data/sirb_cholera_pomped.rda")
+save(sirb_cholera, file = paste0("sirb_cholera_pomped_", departement, ".rda"))

@@ -18,6 +18,13 @@ library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
 
+args = commandArgs(trailingOnly=TRUE)
+if (length(args)==0) {
+  # default departement
+  args[1] = "Artibonite"
+}
+departement <- args[1]
+
 # Helper functions 
 dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
   julian(date, origin = origin)/365.25 + yr_offset
@@ -32,14 +39,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Load pomp object ---------------------------------------------------------------
-cholera_pomp_file <- "data/sirb_cholera_pomped.rda"
-
-if(!file.exists(cholera_pomp_file)) {
-  # if not done yet create the pomp object
-  source("scripts/pomp_cholera_juba.R")
-} else {
-  load(cholera_pomp_file)
-}
+cholera_pomp_file <- paste0("sirb_cholera_pomped_", departement, ".rda")
 
 # Parallel setup ----------------------------------------------------------
 
