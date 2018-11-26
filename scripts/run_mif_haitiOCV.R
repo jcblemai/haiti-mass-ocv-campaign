@@ -116,7 +116,7 @@ for(array_id in array_id_vec) {
   # select model for this job in array
 
   # names of results files
-  mifruns.filename = str_c("results/", str_c(projname, str_c(run_level, sep = "-")), "-mif_runs.rda", sep = "")
+  mifruns.filename = str_c("results/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
   
   # create random vectors of initial paramters given the bounds
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
@@ -160,7 +160,7 @@ for(array_id in array_id_vec) {
   
   # Run MIF
   # file to store all explorations of the likelihood surface
-  all_loglik.filename <- sprintf("results/Haiti_OCVparam_logliks-10-l%i.csv", run_level)
+  all_loglik.filename <- sprintf("results/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, run_level)
   # run computations (stew ensures not to duplicate calculations and sets RNG)
   stew(mifruns.filename, {
     w1 <- getDoParWorkers()
