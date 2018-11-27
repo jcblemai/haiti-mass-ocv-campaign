@@ -223,3 +223,12 @@ for(array_id in array_id_vec) {
 
 closeAllConnections()
 
+
+# Send a telegram message
+hostname <- system('hostname', intern = T) 
+if (hostname != 'echopc27') {
+    system('bash ~/science_bot.sh')
+}
+
+
+
