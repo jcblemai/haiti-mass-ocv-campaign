@@ -15,6 +15,7 @@ library(foreach)
 library(itertools)
 library(doMC)
 library(lubridate)
+library(tictoc)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
 
@@ -46,7 +47,6 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 
 # Load pomp object ---------------------------------------------------------------
 load(paste0("sirb_cholera_pomped_", departement, ".rda"))
-
 
 # Parallel setup ----------------------------------------------------------
 
@@ -106,18 +106,20 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
 # Level of detail on which to run the computations [Allow to chose easly set of params]
 cholera_Np <- c(1e3, 2e3, 3e3, 1e4)
-cholera_Nmif <- c(1, 100, 300, 400)
-cholera_Ninit_param <- c(n_runs, n_runs*2, n_runs*3, 10)
-cholera_NpLL <- c(2000, 5e3, 1e4, 5e4)
-cholera_Nreps_global <- c(1, 10, 20, 100)
+cholera_Nmif <- c(1, 100, 300, 400)   # Entre 200 et 300  
+cholera_Ninit_param <- c(n_runs, n_runs, n_runs, 10)  # How many rounds a cpu does
+cholera_NpLL <- c(1000, 1e4, 1e4, 5e4)  # Au moins 10 000 pour un truc ok
+cholera_Nreps_global <- c(1, 10, 10, 100)
+
 
 # Run the computations -----------------------------------------------
 # if on one machine run all models in sequence if only one task per model 
 # seq(1, nrow(model_specs))
 for(array_id in array_id_vec) {
+  print("one")
   
   # get model for current job array ID: 
-
+  
   # select model for this job in array
 
   # names of results files
@@ -164,9 +166,11 @@ for(array_id in array_id_vec) {
   
   
   # Run MIF
+  tic("MIF")
   # file to store all explorations of the likelihood surface
   all_loglik.filename <- sprintf("results/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, run_level)
   # run computations (stew ensures not to duplicate calculations and sets RNG)
+  
   stew(mifruns.filename, {
     w1 <- getDoParWorkers()
     run.seed <- master.seed
@@ -190,8 +194,10 @@ for(array_id in array_id_vec) {
         )
       }
     })
-    
+    toc()
+
     # Compute more precise likelihood (because mif uses a fast like)
+    tic("LL")
     lik_mf <- foreach(mifit = mf,
                       i = icount(length(mf)),
                       .packages = c("pomp", "tibble", "dplyr"),
@@ -212,7 +218,9 @@ for(array_id in array_id_vec) {
       
       tibble(loglik = ll_mean[1], loglik.se = ll_mean[2]) %>%
         cbind(data.frame(t(coef(mifit))))
-    } 
+    }
+    toc()
+    
     
     # write the results to a global file with all preceeding runs for each run level
     write_csv(lik_mf, all_loglik.filename, append = file.exists(all_loglik.filename))
@@ -222,7 +230,6 @@ for(array_id in array_id_vec) {
 }
 
 closeAllConnections()
-
 
 # Send a telegram message
 hostname <- system('hostname', intern = T) 

@@ -430,7 +430,7 @@ param_est["k"] <- 10001
 param_est["Rtot_0"] <- 0.35
 
 # rate of simulation in fractions of years
-dt_yrs <- 1/365.25 * .1
+dt_yrs <- 1/365.25 * .2
 
 # adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days) TODO CHECK
 params <- c(param_est, param_fixed)

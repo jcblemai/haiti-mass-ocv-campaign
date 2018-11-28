@@ -23,3 +23,34 @@
   options(show.error.locations=TRUE)
   options(error=recover)
 
+Time:
+
+cholera_Np <- 1000
+cholera_Nmif <- 1
+cholera_Ninit_param <- n_runs
+cholera_NpLL <- 2000
+cholera_Nreps_global <- 1
+
+MIF: 109.193 sec elapsed
+LL: 220.92 sec elapsed
+
+
+cholera_NpLL <- 1000
+
+MIF: 108.204 sec elapsed
+LL: 104.924 sec elapsed
+
+cholera_Np <- 2000
+MIF: 224.731 sec elapsed
+LL: 104.081 sec elapsed
+
+cholera_Nmif <- 1
+cholera_Nreps_global <- 1
+MIF: 221.893 sec elapsed
+LL: 202.593 sec elapsed
+
+dt_yrs <- 1/365.25 * .1 -> dt_yrs <- 1/365.25 * .2
+ -> 54 sec 
+ 
+ So everything is linear
+
