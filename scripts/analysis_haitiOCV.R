@@ -87,9 +87,9 @@ if(doplots) {
   
   # plot pairs by type of parameteres
   plotPairs(liks_stoch, c("epsilon", "k"), "results/figures/liks_measurement_model.png", width = 10, height = 6.5)
-  plotPairs(liks_stoch, str_c(c("S", "A", "I", "R", "B"), "_0"), "results/figures/liks_initial_conditions.png", width = 10, height = 5)
+  plotPairs(liks_stoch, c("Rtot_0"), "results/figures/liks_initial_conditions.png", width = 10, height = 5)
   plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "rhoA", "rhoI",  "std_W"), "results/figures/liks_sirb_processes.png")
-  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "lambda", "r"), "results/figures/liks_rainfall_effect.png")
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "lambda", "r", "Rtot_0"), "results/figures/liks_rainfall_effect.png")
 
 }
 # Likelihood comparison ---------------------------------------------------
