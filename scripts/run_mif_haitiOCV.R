@@ -105,18 +105,21 @@ rw.sd_ivp <- 0.2  # for the initial value paramters
 rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
 # Level of detail on which to run the computations [Allow to chose easly set of params]
-cholera_Np <- c(1e3, 2e3, 3e3, 1e4)
-cholera_Nmif <- c(1, 100, 300, 400)   # Entre 200 et 300  
+cholera_Np <- c(1e3, 3e3, 3e3, 1e4)
+cholera_Nmif <- c(1, 1, 300, 400)   # Entre 200 et 300  
 cholera_Ninit_param <- c(n_runs, n_runs, n_runs, 10)  # How many rounds a cpu does
 cholera_NpLL <- c(1000, 1e4, 1e4, 5e4)  # Au moins 10 000 pour un truc ok
-cholera_Nreps_global <- c(1, 10, 10, 100)
+cholera_Nreps_global <- c(1, 1, 10, 100)
 
 
 # Run the computations -----------------------------------------------
 # if on one machine run all models in sequence if only one task per model 
 # seq(1, nrow(model_specs))
 for(array_id in array_id_vec) {
-  print("one")
+  print(sprintf(">>>> Running on departement %s with run level %d", departement, run_level))
+  print(sprintf(">>>> Np : %d | Nmif: %d | Ninit: %d | NpLL: %d | Nrep: %d ", 
+                cholera_Np[run_level], cholera_Nmif[run_level], cholera_Ninit_param[run_level], 
+                cholera_NpLL[run_level], cholera_Nreps_global[run_level]))
   
   # get model for current job array ID: 
   
