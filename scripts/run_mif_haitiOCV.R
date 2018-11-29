@@ -18,6 +18,7 @@ library(lubridate)
 library(tictoc)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
+hostname <- system('hostname', intern = T) 
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
@@ -62,6 +63,7 @@ master.seed <- as.integer(runif(1) * 10000)
 
 # number of runs to do for each task (n * number of cores)
 n_runs <- ncpus * 1
+n_runs <- 8
 
 # array of ids to run
 array_id_vec <- seq(1,1) * 100 + 1
@@ -105,11 +107,14 @@ rw.sd_ivp <- 0.2  # for the initial value paramters
 rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
 # Level of detail on which to run the computations [Allow to chose easly set of params]
-cholera_Np <- c(1e3, 3e3, 3e3, 1e4)
-cholera_Nmif <- c(1, 1, 300, 400)   # Entre 200 et 300  
-cholera_Ninit_param <- c(n_runs, n_runs, n_runs, 10)  # How many rounds a cpu does
-cholera_NpLL <- c(1000, 1e4, 1e4, 5e4)  # Au moins 10 000 pour un truc ok
-cholera_Nreps_global <- c(1, 1, 10, 100)
+# level 1 is short
+# level 2 on echopc: 65s and 206s (if Nmif=2 and NrepGlobal=2: 130s and 404 sec)
+# level 3 on echopc: 2h10 should be
+cholera_Np <-           c(1e3,    3e3,    3e3,    3e3)
+cholera_Nmif <-         c(1,      1,      100,    300)      # Entre 200 et 300  
+cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs)   # How many rounds a cpu does
+cholera_NpLL <-         c(1e3,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
+cholera_Nreps_global <- c(1,      1,      5,      10)
 
 
 # Run the computations -----------------------------------------------
@@ -197,7 +202,11 @@ for(array_id in array_id_vec) {
         )
       }
     })
-    toc()
+    tt <- toc()
+    if (hostname != 'echopc27') {
+      system(sprintf('bash ~/science_bot.sh "Successfully done MIF on %s, elapsed time %.2f min :)"', hostname, (tt$toc -tt$tic)/60))
+    }
+    
 
     # Compute more precise likelihood (because mif uses a fast like)
     tic("LL")
@@ -222,7 +231,10 @@ for(array_id in array_id_vec) {
       tibble(loglik = ll_mean[1], loglik.se = ll_mean[2]) %>%
         cbind(data.frame(t(coef(mifit))))
     }
-    toc()
+    tt <- toc()
+    if (hostname != 'echopc27') {
+      system(sprintf('bash ~/science_bot.sh "Successfully done LL on %s, elapsed time %.2f min :)"', hostname, (tt$toc -tt$tic)/60))
+    }
     
     
     # write the results to a global file with all preceeding runs for each run level
@@ -235,9 +247,9 @@ for(array_id in array_id_vec) {
 closeAllConnections()
 
 # Send a telegram message
-hostname <- system('hostname', intern = T) 
+
 if (hostname != 'echopc27') {
-    system('bash ~/science_bot.sh')
+    system(sprintf('bash ~/science_bot.sh "Successful completion on %s :) \n (Departement: %s | Run level: %d)"', hostname, departement, run_level))
 }
 
 

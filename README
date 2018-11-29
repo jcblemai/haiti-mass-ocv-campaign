@@ -52,5 +52,6 @@ LL: 202.593 sec elapsed
 dt_yrs <- 1/365.25 * .1 -> dt_yrs <- 1/365.25 * .2
  -> 54 sec 
  
- So everything is linear
+ So everything is linear. Even the Ninitparameters. We were thinking that we would kep the performance if run like this  but 24 instead of 8
+ because 24 core on echopc. But it is longer
 
