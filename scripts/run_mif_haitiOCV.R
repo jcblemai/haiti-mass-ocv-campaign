@@ -137,7 +137,7 @@ for(array_id in array_id_vec) {
   # create random vectors of initial paramters given the bounds
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
                              upper = parameter_bounds[, "upper"], 
-                             nseq = n_runs * cholera_Ninit_param[run_level])
+                             nseq = cholera_Ninit_param[run_level])
   
   # get the names of the paramters that are fixed
   param_fixed_names <- setdiff(names(coef(sirb_cholera)), colnames(init_params))
@@ -165,6 +165,7 @@ for(array_id in array_id_vec) {
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
+                   ", k = ",  rw.sd_param["regular"],        # to get binomial, comment for poisson.
                    ", Rtot_0  = ivp(",  rw.sd_param["ivp"], ")",
                    ")")
     )
