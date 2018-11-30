@@ -46,8 +46,8 @@ if(doplots) {
     p <- ggpairs(data %>% 
                    select(loglik, one_of(variables)) %>% 
                    keep(~sd(.) > 1e-4) %>% 
-                   map_df(~ map_dbl(., ~ifelse(. == 0, NA, .))), #%>% bind_cols(data[,"model"]),
-                 # filter(loglik > -400),
+                   map_df(~ map_dbl(., ~ifelse(. == 0, NA, .))) %>% 
+                  filter(loglik > -250),
                  aes(alpha = I(0.4)),
                  upper = list(continuous = "points", combo = "box_no_facet", discrete = "facetbar", na = "na"),
                  lower = list(continuous = "points", combo = "facethist", discrete = "facetbar", na = "na") ,
@@ -164,10 +164,11 @@ best_param <- best_liks %>%
 #                              tcovar = "time")
 
 # run simulations for each model
-sim_stochastic <- foreach(r = iter(best_param, by = "row"), 
-                          .combine = rbind) %dopar% {
+nsim = 1000
+sim_stochastic <- foreach(r = iter(best_param, by = "row"), #over models, useless
+                          .combine = rbind) %do% {
                             
-                          simulatePOMP(sirb_cholera, unlist(r[names(coef(sirb_cholera))]), nsim = 10)
+                          simulatePOMP(sirb_cholera, unlist(r[names(coef(sirb_cholera))]), nsim = nsim)
                           }
 
 # tidy tibble for merger
