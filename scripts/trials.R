@@ -29,9 +29,19 @@ print(p)
 # Data plots --------------------------------------------------------------
 
 
+dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
+  julian(date, origin = origin)/365.25 + yr_offset
+}
 
+yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
+  as.Date((year_frac - yr_offset) * 365.25, origin = origin)
+}
 
-cases <- read_csv("haiti-data/fromAzman/cases.csv")  %>% 
+yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
+  as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
+}
+
+cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date))
@@ -52,7 +62,7 @@ yr_thresh <- 2015
 cases %>% 
   mutate(yr = lubridate::year(date)) %>%
   filter(yr>=yr_thresh) %>% 
-  mutate(incal = case_when(date > as.Date("2017-07-08") ~ T,
+  mutate(incal = case_when(date > as.Date("2016-07-08") ~ T,
                            T ~ F)) %>% 
   ggplot(aes(x = date, y = cases)) +
   geom_bar(data = filter(rain, lubridate::year(date)>=yr_thresh), aes(y = rain * 10), fill = "blue", stat = "identity", alpha = 0.4) +

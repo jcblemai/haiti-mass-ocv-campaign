@@ -45,7 +45,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 #     mutate(date = as.Date(date, format = "%Y-%m-%d"),
 #            time = dateToYears(date))
 # Javier says the second is better
-cases <- read_csv("haiti-data/fromAzman/cases.csv")  %>% 
+cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 
   filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),

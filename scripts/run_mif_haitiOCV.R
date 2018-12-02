@@ -165,7 +165,7 @@ for(array_id in array_id_vec) {
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
-                   ", k = ",  rw.sd_param["regular"],        # to get binomial, comment for poisson.
+                   ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
                    ", Rtot_0  = ivp(",  rw.sd_param["ivp"], ")",
                    ")")
     )
