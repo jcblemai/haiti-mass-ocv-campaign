@@ -63,7 +63,6 @@ master.seed <- as.integer(runif(1) * 10000)
 
 # number of runs to do for each task (n * number of cores)
 n_runs <- ncpus * 1
-n_runs <- 8
 
 # array of ids to run
 array_id_vec <- seq(1,1) * 100 + 1
@@ -92,7 +91,7 @@ parameter_bounds <- tribble(
   "std_W", min_param_val, 1e-1,
   # Measurement model
   "epsilon", min_param_val, 2,
-  "k", min_param_val, 10,
+  "k", min_param_val, 10000,
   "Rtot_0", min_param_val, 0.7
 )
 
