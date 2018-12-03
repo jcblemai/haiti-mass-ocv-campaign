@@ -47,7 +47,7 @@ if(doplots) {
                    select(loglik, one_of(variables)) %>% 
                    keep(~sd(.) > 1e-4) %>% 
                    map_df(~ map_dbl(., ~ifelse(. == 0, NA, .))) %>% 
-                  filter(loglik > -250),
+                  filter(loglik > -750),
                  aes(alpha = I(0.4)),
                  upper = list(continuous = "points", combo = "box_no_facet", discrete = "facetbar", na = "na"),
                  lower = list(continuous = "points", combo = "facethist", discrete = "facetbar", na = "na") ,
@@ -194,7 +194,7 @@ p.sim <- ggplot(data = sim_stochastic_quantiles,
   geom_point(aes(y = cases), color = datacol, size = 0.8) +
   #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
   #facet_grid(model~type) +
-  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2017-07-8", "2018-07-14"))) +
+  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2016-07-02", "2018-07-14"))) +
   scale_y_continuous(expand = c(0,0))+ 
   labs(y = "daily cholera cases", x = "date") +
   theme(panel.grid.major = element_line(color = "lightgray"),

@@ -92,7 +92,7 @@ parameter_bounds <- tribble(
   "std_W", min_param_val, 1e-1,
   # Measurement model
   "epsilon", min_param_val, 2,
-  #"k", min_param_val, 10,
+  "k", min_param_val, 10,
   "Rtot_0", min_param_val, 0.7
 )
 
