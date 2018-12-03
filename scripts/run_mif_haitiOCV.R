@@ -82,12 +82,12 @@ parameter_bounds <- tribble(
   "sigma", min_param_val, 1 - min_param_val,
   "betaB", min_param_val, 10,
   "mu_B", min_param_val, 1e2,
-  "thetaA", min_param_val, 1e2,
+  "XthetaA", min_param_val, 1,
   "thetaI", min_param_val, 1e2,
   "lambda", min_param_val, 5,
   "r", min_param_val, 40,
   "rhoA", 0.02, 20,
-  "rhoI", 0.02, 20,
+  "XrhoI", min_param_val, 1,
   # Process noise
   "std_W", min_param_val, 1e-1,
   # Measurement model
@@ -132,7 +132,7 @@ for(array_id in array_id_vec) {
   # select model for this job in array
 
   # names of results files
-  mifruns.filename = str_c("results/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
+  mifruns.filename = str_c("results/", departement, "/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
   
   # create random vectors of initial paramters given the bounds
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
@@ -157,11 +157,11 @@ for(array_id in array_id_vec) {
       text = str_c("rw.sd(sigma  = ",  rw.sd_param["regular"],
                    ", betaB  = ",  rw.sd_param["regular"],
                    ", mu_B   = ",  rw.sd_param["regular"],
-                   ", thetaA = ",  rw.sd_param["regular"],
+                   ", XthetaA= ",  rw.sd_param["regular"],
                    ", thetaI = ",  rw.sd_param["regular"],
                    ", lambda = ",  rw.sd_param["regular"],
                    ", r      = ",  rw.sd_param["regular"],
-                   ", rhoI   = ",  rw.sd_param["regular"],
+                   ", XrhoI  = ",  rw.sd_param["regular"],
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
@@ -178,7 +178,7 @@ for(array_id in array_id_vec) {
   # Run MIF
   tic("MIF")
   # file to store all explorations of the likelihood surface
-  all_loglik.filename <- sprintf("results/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, run_level)
+  all_loglik.filename <- sprintf("results/%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)
   # run computations (stew ensures not to duplicate calculations and sets RNG)
   
   stew(mifruns.filename, {

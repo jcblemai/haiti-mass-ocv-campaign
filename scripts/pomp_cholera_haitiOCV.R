@@ -152,7 +152,7 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "r", "mu_B", "thetaA", "thetaI", "lambda", "rhoA", "rhoI", "std_W", "epsilon","k")
+param_proc_est_names <- c("sigma", "betaB", "r", "mu_B", "XthetaA", "thetaI", "lambda", "rhoA", "XrhoI", "std_W", "epsilon","k")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
@@ -172,7 +172,7 @@ param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
 param_names <- c(param_est_names, param_fixed_names)
 
 # names of parameters that are rates (MAYBE) (because time 365 since timestep is year) r_v shoudl be here
-param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoI", "rhoA")
+param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA")
 
 # Measurement model  -------------------------------------------------------
 
@@ -209,6 +209,9 @@ sirb.rproc <- Csnippet("
   double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
   double rate[19];      // vector of all rates in model
   double dN[19];        // vector of transitions between classes during integration timestep
+
+  double thetaA = thetaI * XthetaA;
+  double rhoI = rhoA * XrhoI;
 
   // force of infection
   foi = betaB * (B / (1 + B));
@@ -297,7 +300,8 @@ sirb.rproc <- Csnippet("
 
 # C function to compute the time-derivative of bacterial concentration OK
 derivativeBacteria.c <- " double fB(int I, int A, double B, 
-    double mu_B, double thetaI, double thetaA, double lambda, double rain, double r, double D) {
+    double mu_B, double thetaI, double XthetaA, double lambda, double rain, double r, double D) {
+  double thetaA = thetaI * XthetaA;
   double dB;
   dB = -mu_B * B +  (1 + lambda * pow(rain, r)) * D * (thetaI * (double) I + thetaA * (double) A);
   return(dB);
@@ -345,9 +349,9 @@ toEstimationScale <- Csnippet("
   Tsigma = logit(sigma);
   TbetaB = log(betaB);
   Tmu_B = log(mu_B);
-  TthetaA = log(thetaA);
+  TXthetaA = logit(XthetaA);
   TthetaI = log(thetaI);
-  TrhoI = log(rhoI);
+  TXrhoI = logit(XrhoI);
   TrhoA = log(rhoA);
   Tlambda = log(lambda);
   Tr = log(r);
@@ -363,9 +367,9 @@ fromEstimationScale <- Csnippet("
   TbetaB = exp(betaB);
   Tmu_B = exp(mu_B);
   TthetaI = exp(thetaI);
-  TthetaA = exp(thetaA);
+  TXthetaA = expit(XthetaA);
   TrhoA = exp(rhoA);
-  TrhoI = exp(rhoI);
+  TXrhoI = expit(XrhoI);
   Tlambda = exp(lambda);
   Tr = exp(r);
   Tstd_W = exp(std_W);
@@ -417,10 +421,10 @@ cases_at_t_start.string <- sprintf("double cases0 = %i;", cases_at_t_start)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
 param_est["sigma"] <- .2
 param_est["rhoA"] <- 1/(365*3)
-param_est["rhoI"] <- 1/(365*3)
+param_est["XrhoI"] <- 0.5
 param_est["betaB"] <- .1
 param_est["mu_B"] <-  365/5
-param_est["thetaA"] <- .01
+param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
 param_est["lambda"] <- 100
 param_est["r"] <- 3

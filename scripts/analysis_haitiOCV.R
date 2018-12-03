@@ -33,7 +33,7 @@ run_level <- as.integer(args[2])
 
 # Pair plots ---------------------------------------------------------------
 
-liks_stoch <- read_csv(sprintf("results/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, run_level))
+liks_stoch <- read_csv(sprintf("results/%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level))
 liks <- liks_stoch
 
 #colnames(liks_stoch) <- str_replace_all(colnames(liks_stoch), "_", "")
@@ -72,7 +72,7 @@ if(doplots) {
               lower = list(continuous = "cor", combo = "facethist", discrete = "facetbar", na = "na"),
               title = sprintf("Haiti OCV model with best loglik: %f",  max(liks_stoch$loglik))
       ),
-      filename = str_c("results/figures/all-logliks.png"),
+      filename = str_c("results/", departement, "/all-logliks.png"),
       width = 10, height = 8)
   
   # plot all
@@ -80,16 +80,16 @@ if(doplots) {
               arrange(desc(loglik)) %>% 
               slice(1:20) %>%
               ungroup,
-            c("sigma", "betaB", "mu_B" , "thetaA", "thetaI", "rhoA", "rhoI", "r", "lambda"),
-            "results/figures/stoch_posteriors.png",
+            c("sigma", "betaB", "mu_B" , "XthetaA", "thetaI", "rhoA", "XrhoI", "r", "lambda"),
+            str_c("results/", departement, "/stoch_posteriors.png"),
             width = 12,
             height = 12)
   
   # plot pairs by type of parameteres
-  plotPairs(liks_stoch, c("epsilon", "k"), "results/figures/liks_measurement_model.png", width = 10, height = 6.5)
-  plotPairs(liks_stoch, c("Rtot_0"), "results/figures/liks_initial_conditions.png", width = 10, height = 5)
-  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "rhoA", "rhoI",  "std_W"), "results/figures/liks_sirb_processes.png")
-  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "thetaA", "thetaI", "lambda", "r", "Rtot_0"), "results/figures/liks_rainfall_effect.png")
+  plotPairs(liks_stoch, c("epsilon", "k"),  str_c("results/", departement, "/liks_measurement_model.png"), width = 10, height = 6.5)
+  plotPairs(liks_stoch, c("Rtot_0"),  str_c("results/", departement, "/liks_initial_conditions.png"), width = 10, height = 5)
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "rhoA", "XrhoI",  "std_W"),  str_c("results/", departement, "/liks_sirb_processes.png"))
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "r", "Rtot_0"),  str_c("results/", departement, "/liks_rainfall_effect.png"))
 
 }
 # Likelihood comparison ---------------------------------------------------
@@ -204,7 +204,7 @@ p.sim <- ggplot(data = sim_stochastic_quantiles,
         axis.title = element_text())
 
 p.sim
-ggsave(p.sim, filename = "results/figures/simulations_comparison.png", width = 9, height = 10, dpi = 300)
+ggsave(p.sim, filename = str_c("results/", departement, "/simulations_comparison.png"), width = 9, height = 10, dpi = 300)
 
 
 # Parameter profiles ------------------------------------------------------
