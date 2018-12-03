@@ -62,7 +62,7 @@ yr_thresh <- 2015
 cases %>% 
   mutate(yr = lubridate::year(date)) %>%
   filter(yr>=yr_thresh) %>% 
-  mutate(incal = case_when(date > as.Date("2016-07-08") ~ T,
+  mutate(incal = case_when(date > as.Date("2016-07-09") ~ T,
                            T ~ F)) %>% 
   ggplot(aes(x = date, y = cases)) +
   geom_bar(data = filter(rain, lubridate::year(date)>=yr_thresh), aes(y = rain * 10), fill = "blue", stat = "identity", alpha = 0.4) +
