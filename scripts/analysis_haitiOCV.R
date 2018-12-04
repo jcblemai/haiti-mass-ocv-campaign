@@ -32,8 +32,8 @@ run_level <- as.integer(args[2])
 
 
 # Pair plots ---------------------------------------------------------------
-
-liks_stoch <- read_csv(sprintf("results/%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level))
+# One line per initial condition
+liks_stoch <- read_csv(sprintf("results/%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)) 
 liks <- liks_stoch
 
 #colnames(liks_stoch) <- str_replace_all(colnames(liks_stoch), "_", "")
@@ -95,18 +95,6 @@ if(doplots) {
 # Likelihood comparison ---------------------------------------------------
 load(paste0("sirb_cholera_pomped_", departement, ".rda"))
 
-
-# get best likelihood
-best_liks <- liks %>% 
-arrange(desc(loglik)) %>% 
-slice(1)
-  
-
-# Get estimated parameter names
-param_est_names_stoch <- colnames(liks_stoch)  %>% 
-  keep(~ !(. %in% c("loglik", "loglik.se", "type", "k")) & sd(liks_stoch[[.]]) > 1e-3)
-
-
 # Compare outputs ---------------------------------------------------------
 
 doMC::registerDoMC(8)
@@ -146,10 +134,10 @@ simulatePOMP <- function(pmp, params, nsim, seed = 199919L) {
 }
 
 
-
-
 # get MLE paramter sets 
-best_param <- best_liks %>% 
+best_param <- liks %>% 
+arrange(desc(loglik)) %>% 
+slice(1)  %>% 
   arrange(desc(loglik)) %>% 
   ungroup %>% 
   left_join(liks_stoch)
@@ -165,18 +153,14 @@ best_param <- best_liks %>%
 
 # run simulations for each model
 nsim = 1000
-sim_stochastic <- foreach(r = iter(best_param, by = "row"), #over models, useless
-                          .combine = rbind) %do% {
-                            
-                          simulatePOMP(sirb_cholera, unlist(r[names(coef(sirb_cholera))]), nsim = nsim)
-                          }
+sim_stochastic <- simulatePOMP(sirb_cholera, unlist(best_param[names(coef(sirb_cholera))]), nsim = nsim)
 
 # tidy tibble for merger
 sim_stochastic_quantiles <- sim_stochastic %>% 
-  mutate(date = as.Date(round_date(date)), type = "stochastic") %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
   filter(variable == "cases", isdata == "simulation") %>% 
   select(-isdata, -time, -variable) %>% 
-  bind_cols(sim_stochastic %>% 
+  bind_cols(sim_stochastic %>%                                         #Add a column with the data
               filter(variable == "cases", isdata == "data") %>% 
               select(mean) %>% 
               rename(cases = mean))
@@ -205,6 +189,23 @@ p.sim <- ggplot(data = sim_stochastic_quantiles,
 
 p.sim
 ggsave(p.sim, filename = str_c("results/", departement, "/simulations_comparison.png"), width = 9, height = 10, dpi = 300)
+
+sim_stochastic_quantiles_all <- sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "cases" |  isdata == "simulation") %>% 
+  select(-isdata) 
+
+p.all <- ggplot(data = sim_stochastic_quantiles_all,
+                aes(x = date))+
+  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+  geom_line(aes(y = q50), color = simcol) +
+  geom_line(aes(y = mean), linetype = 2, color = simcol) +
+    facet_wrap(~variable, scales = "free_y") 
+  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14"))) +
+  scale_y_continuous(expand = c(0,0))
+
+
+p.all
 
 
 # Parameter profiles ------------------------------------------------------

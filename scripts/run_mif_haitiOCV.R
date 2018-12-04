@@ -74,7 +74,7 @@ registerDoMC(ncpus)
 
 # lower bound for positive parameter values
 min_param_val <- 1e-5 
-# define the bounds for the paramters to estimate
+# define the bounds for the paramters to estimate, juste to give initial parameters.
 parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   # Regular paramters

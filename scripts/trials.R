@@ -26,7 +26,7 @@ load(paste0("sirb_cholera_pomped_", departement, ".rda")
 
 coef(sirb_cholera)["mu_B"] <- 365/5
 coef(sirb_cholera)["betaB"] <- 0.1
-coef(sirb_cholera)["Rtot_0"] <-50
+coef(sirb_cholera)["Rtot_0"] <-25
 
 p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>% 
   gather(variable, value, -time, -rain, -sim)  %>% 
@@ -40,71 +40,6 @@ datacol <- "#ED0000"
 print(p)
 
 # several simulation --------------------------------------------------------------
-
-
-doMC::registerDoMC(8)
-
-# function to simulate from a given set of paramters
-simulatePOMP <- function(pmp, params, nsim, seed = 199919L) {
-  pmpsim <- pmp
-  pomp::coef(pmpsim) <- params
-  
-  pomp::simulate(pmpsim, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed) %>% 
-    as_tibble() %>% 
-    mutate(isdata = sim == "data") %>%
-    gather(variable, value, -time, -rain, -sim, -isdata) %>% 
-    group_by(time, isdata, variable) %>% 
-    summarise( q05 = quantile(value, 0.025, na.rm = T),
-               mean = mean(value, na.rm = T),
-               q50 = quantile(value, 0.5, na.rm = T),
-               q95 = quantile(value, 0.975, na.rm = T)) %>% 
-    ungroup %>% 
-    mutate(isdata = ifelse(isdata, "data", "simulation"),
-           date = yearsToDateTime(time)) %>% 
-    filter(date >= yearsToDate(pmpsim@t0))
-}
-
-# run simulations for each model
-nsim = 10
-sim_stochastic <- foreach(r = iter(best_param, by = "row"), #over models, useless
-                          .combine = rbind) %do% {
-                            
-                            simulatePOMP(sirb_cholera, unlist(r[names(coef(sirb_cholera))]), nsim = nsim)
-                          }
-
-# tidy tibble for merger
-sim_stochastic_quantiles <- sim_stochastic %>% 
-  mutate(date = as.Date(round_date(date)), type = "stochastic") %>% 
-  filter(variable == "cases", isdata == "simulation") %>% 
-  select(-isdata, -time, -variable) %>% 
-  bind_cols(sim_stochastic %>% 
-              filter(variable == "cases", isdata == "data") %>% 
-              select(mean) %>% 
-              rename(cases = mean))
-
-# PLOT BOTH
-simcol <- "#175CD6"
-datacol <- "#ED0000"
-
-p.sim <- ggplot(data = sim_stochastic_quantiles,
-                aes(x = date))+
-  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
-  geom_line(aes(y = q50), color = simcol) +
-  geom_line(aes(y = mean), linetype = 2, color = simcol) +
-  geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
-  geom_point(aes(y = cases), color = datacol, size = 0.8) +
-  #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
-  #facet_grid(model~type) +
-  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14"))) +
-  scale_y_continuous(expand = c(0,0))+ 
-  labs(y = "daily cholera cases", x = "date") +
-  theme(panel.grid.major = element_line(color = "lightgray"),
-        panel.background = element_rect(fill = "white"),
-        axis.line = element_line(color = "black"),
-        strip.text = element_blank(),
-        axis.title = element_text())
-
-p.sim
 
 
 # Data plots --------------------------------------------------------------
