@@ -206,6 +206,7 @@ p.all <- ggplot(data = sim_stochastic_quantiles_all,
 
 
 p.all
+ggsave(p.all, filename = str_c("results/", departement, "/simulations_all.png"), width = 9, height = 10, dpi = 300)
 
 
 # Parameter profiles ------------------------------------------------------
