@@ -53,6 +53,23 @@ cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date))
 
+case_dates <- with(cases %>% 
+                       filter(time > t_start - 0.01 & time < (t_end + 0.01)),
+                   seq.Date(min(date), max(date), by = "1 week")
+                   )
+# check if weekly reports are missing
+missing_dates <- setdiff(case_dates, cases$date) %>% as.Date(origin = as.Date("1970-01-01"))
+
+if (length(missing_dates) > 0) {
+# fill in the data
+  cases %<>% 
+    bind_rows(slice(cases, 1:2) %>% 
+                mutate(date = missing_dates,
+                      cases = NA,
+                      time = dateToYears(date))) %>%
+    arrange(time)
+}
+
 rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
   gather(dep, rain, -date) %>% 
   group_by(dep) %>% 

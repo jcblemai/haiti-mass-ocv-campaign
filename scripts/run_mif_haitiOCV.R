@@ -79,20 +79,20 @@ parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   # Regular paramters
   "sigma", min_param_val, 1 - min_param_val,
-  "betaB", min_param_val, 10,
+  "betaB", min_param_val, 1,
   "mu_B", min_param_val, 1e2,
   "XthetaA", min_param_val, 1,
   "thetaI", min_param_val, 10,
   "lambda", min_param_val, 5,
 #  "r", min_param_val, 40,
-  "rhoA", 0.02, 20,
+  "rhoA", 0.02, 10,
   "XrhoI", min_param_val, 1,
   # Process noise
   "std_W", min_param_val, 1e-1,
   # Measurement model
   "epsilon", min_param_val, 2,
   "k", min_param_val, 10000,
-  "Rtot_0", min_param_val, 0.7
+  "Rtot_0", min_param_val, 0.4
 )
 
 # convert to matrix for ease
