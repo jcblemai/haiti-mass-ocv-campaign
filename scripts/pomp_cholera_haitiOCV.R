@@ -135,15 +135,15 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "r", "mu_B", "XthetaA", "thetaI", "lambda", "rhoA", "XrhoI", "std_W", "epsilon","k")
+param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "rhoA", "XrhoI", "std_W", "epsilon","k")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
-param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
+param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA", "r")
 
-## fixed initial value parameters OK
+## fixed initial value parameters OK 
 param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
 
 # all paramter names to estimate OK
@@ -410,7 +410,7 @@ param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
 param_est["lambda"] <- 100
-param_est["r"] <- 3
+param_est["r"] <- 1
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
 param_est["k"] <- 10001

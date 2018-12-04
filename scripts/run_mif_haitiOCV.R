@@ -82,9 +82,9 @@ parameter_bounds <- tribble(
   "betaB", min_param_val, 10,
   "mu_B", min_param_val, 1e2,
   "XthetaA", min_param_val, 1,
-  "thetaI", min_param_val, 1e2,
+  "thetaI", min_param_val, 10,
   "lambda", min_param_val, 5,
-  "r", min_param_val, 40,
+#  "r", min_param_val, 40,
   "rhoA", 0.02, 20,
   "XrhoI", min_param_val, 1,
   # Process noise
@@ -159,7 +159,7 @@ for(array_id in array_id_vec) {
                    ", XthetaA= ",  rw.sd_param["regular"],
                    ", thetaI = ",  rw.sd_param["regular"],
                    ", lambda = ",  rw.sd_param["regular"],
-                   ", r      = ",  rw.sd_param["regular"],
+                  # ", r      = ",  rw.sd_param["regular"],
                    ", XrhoI  = ",  rw.sd_param["regular"],
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
@@ -169,7 +169,6 @@ for(array_id in array_id_vec) {
                    ")")
     )
   )
-  
   
   init_param_tocompute <- init_params
   

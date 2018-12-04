@@ -201,8 +201,7 @@ p.all <- ggplot(data = sim_stochastic_quantiles_all,
   geom_line(aes(y = q50), color = simcol) +
   geom_line(aes(y = mean), linetype = 2, color = simcol) +
     facet_wrap(~variable, scales = "free_y") 
-  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14"))) +
-  scale_y_continuous(expand = c(0,0))
+  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14")))
 
 
 p.all
