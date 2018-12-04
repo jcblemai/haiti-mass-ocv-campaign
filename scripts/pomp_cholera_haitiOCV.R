@@ -39,46 +39,29 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 
 # Load data ---------------------------------------------------------------
 
-# cholera case data from the 2014-2015 epidemic in Juba (South Soudan)
-#cases <- read_csv("haiti-data/fromAzman/cases.csv") %>%  
-#select('date', departement) %>% 
-#     mutate(date = as.Date(date, format = "%Y-%m-%d"),
-#            time = dateToYears(date))
-# Javier says the second is better
+# input parameters to the model
+input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
+
+# Start and end dates of epidemic
+t_start <- dateToYears(as.Date(input_parameters$t_start))
+t_end <- dateToYears(as.Date(input_parameters$t_end))
+
+
 cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 
   filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date))
 
-# get the time of the first datapoint (use %>% filter(time > 2015) to constraint)
-t_first_datapnt <- cases %>% slice(1) %>% .[["time"]]
-
-# Estimates of daily rainfall 
-#rain <- read_csv("haiti-data/fromAzman/rainfall.csv") %>%  
-#select('date', departement) %>%
-#mutate(date = as.Date(date, format = "%Y-%m-%d"),
-#   time = dateToYears(date)) 
-
-# value of maximal event OK ^
-#max_rain <- rain %>%
-#filter(year(date)==2015 & month(date) < 10) %>% 
-#select(departement) %>% 
-#max()
-
-
-# standardize rainfall  TODO 
-#rain %<>% mutate(rain_std = rain/max_rain)
-
-
 rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
   gather(dep, rain, -date) %>% 
   group_by(dep) %>% 
-  mutate(max_rain = max(rain), rain_std = rain/max_rain) %>%
   ungroup() %>% 
   filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
-         time = dateToYears(date))
+         time = dateToYears(date)) %>%
+  filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
+  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
 
 
 make_plots <- F
