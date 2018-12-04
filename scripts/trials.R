@@ -1,3 +1,18 @@
+# Auxillary functions
+dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
+  julian(date, origin = origin)/365.25 + yr_offset
+}
+
+yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
+  as.Date((year_frac - yr_offset) * 365.25, origin = origin)
+}
+
+yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
+  as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
+}
+
+# One simulation  --------------------------------------------------------------
+
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
@@ -11,7 +26,7 @@ load(paste0("sirb_cholera_pomped_", departement, ".rda")
 
 coef(sirb_cholera)["mu_B"] <- 365/5
 coef(sirb_cholera)["betaB"] <- 0.1
-coef(sirb_cholera)["Rtot_0"] <-50
+coef(sirb_cholera)["Rtot_0"] <-25
 
 p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>% 
   gather(variable, value, -time, -rain, -sim)  %>% 
@@ -24,22 +39,10 @@ p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>%
 datacol <- "#ED0000"
 print(p)
 
+# several simulation --------------------------------------------------------------
 
 
 # Data plots --------------------------------------------------------------
-
-
-dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
-  julian(date, origin = origin)/365.25 + yr_offset
-}
-
-yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
-  as.Date((year_frac - yr_offset) * 365.25, origin = origin)
-}
-
-yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
-  as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
-}
 
 cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 
@@ -74,20 +77,7 @@ cases %>%
   facet_wrap(~dep)
 
 
-# all together
-
-
-dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
-  julian(date, origin = origin)/365.25 + yr_offset
-}
-
-yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
-  as.Date((year_frac - yr_offset) * 365.25, origin = origin)
-}
-
-yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
-  as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
-}
+# Data plots togetehr  --------------------------------------------------------------
 
 cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 

@@ -39,46 +39,29 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 
 # Load data ---------------------------------------------------------------
 
-# cholera case data from the 2014-2015 epidemic in Juba (South Soudan)
-#cases <- read_csv("haiti-data/fromAzman/cases.csv") %>%  
-#select('date', departement) %>% 
-#     mutate(date = as.Date(date, format = "%Y-%m-%d"),
-#            time = dateToYears(date))
-# Javier says the second is better
+# input parameters to the model
+input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
+
+# Start and end dates of epidemic
+t_start <- dateToYears(as.Date(input_parameters$t_start))
+t_end <- dateToYears(as.Date(input_parameters$t_end))
+
+
 cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 
   filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date))
 
-# get the time of the first datapoint (use %>% filter(time > 2015) to constraint)
-t_first_datapnt <- cases %>% slice(1) %>% .[["time"]]
-
-# Estimates of daily rainfall 
-#rain <- read_csv("haiti-data/fromAzman/rainfall.csv") %>%  
-#select('date', departement) %>%
-#mutate(date = as.Date(date, format = "%Y-%m-%d"),
-#   time = dateToYears(date)) 
-
-# value of maximal event OK ^
-#max_rain <- rain %>%
-#filter(year(date)==2015 & month(date) < 10) %>% 
-#select(departement) %>% 
-#max()
-
-
-# standardize rainfall  TODO 
-#rain %<>% mutate(rain_std = rain/max_rain)
-
-
 rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
   gather(dep, rain, -date) %>% 
   group_by(dep) %>% 
-  mutate(max_rain = max(rain), rain_std = rain/max_rain) %>%
   ungroup() %>% 
   filter(dep == departement) %>% 
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
-         time = dateToYears(date))
+         time = dateToYears(date)) %>%
+  filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
+  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
 
 
 make_plots <- F
@@ -152,15 +135,15 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "r", "mu_B", "XthetaA", "thetaI", "lambda", "rhoA", "XrhoI", "std_W", "epsilon","k")
+param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "rhoA", "XrhoI", "std_W", "epsilon","k")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
-param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
+param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA", "r")
 
-## fixed initial value parameters OK
+## fixed initial value parameters OK 
 param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
 
 # all paramter names to estimate OK
@@ -427,7 +410,7 @@ param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
 param_est["lambda"] <- 100
-param_est["r"] <- 3
+param_est["r"] <- 1
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
 param_est["k"] <- 10001
