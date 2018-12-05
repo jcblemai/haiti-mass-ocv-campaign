@@ -316,9 +316,9 @@ initalizeStates <- Csnippet("
   RI1   = nearbyint(sigma * Rtot_0*H/3.0);
   RI2   = nearbyint(sigma * Rtot_0*H/3.0);
   RI3   = nearbyint(sigma * Rtot_0*H/3.0);
-  RA1   = nearbyint((1-sigma) * Rtot_0/3.0);
-  RA2   = nearbyint((1-sigma) * Rtot_0/3.0);
-  RA3   = nearbyint((1-sigma) * Rtot_0/3.0);
+  RA1   = nearbyint((1-sigma) * Rtot_0*H/3.0);
+  RA2   = nearbyint((1-sigma) * Rtot_0*H/3.0);
+  RA3   = nearbyint((1-sigma) * Rtot_0*H/3.0);
   if (A + I + RI1 + RI2 + RI3 + RA1 + RA2 + RA3 >= H)
   {
     double R_tot = H - A - I - 100.0;
