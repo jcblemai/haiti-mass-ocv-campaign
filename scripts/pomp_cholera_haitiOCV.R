@@ -152,13 +152,13 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "rhoA", "XrhoI", "std_W", "epsilon","k")
+param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
-param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA", "r")
+param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
 
 ## fixed initial value parameters OK 
 param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
@@ -273,10 +273,10 @@ sirb.rproc <- Csnippet("
 
     // bacteria as continous state variable
     // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
-    k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
-    k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
-    k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
-    k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, rain, r, D);
+    k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
+    k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
+    k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
+    k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
     // bacteria increment
     dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
@@ -300,10 +300,10 @@ sirb.rproc <- Csnippet("
 
 # C function to compute the time-derivative of bacterial concentration OK
 derivativeBacteria.c <- " double fB(int I, int A, double B, 
-    double mu_B, double thetaI, double XthetaA, double lambda, double rain, double r, double D) {
+    double mu_B, double thetaI, double XthetaA, double lambda, double lambdaR, double rain, double r, double D) {
   double thetaA = thetaI * XthetaA;
   double dB;
-  dB = -mu_B * B +  (1 + lambda * pow(rain, r)) * D * (thetaI * (double) I + thetaA * (double) A);
+  dB = -mu_B * B +  (1 + lambda * rain + lambdaR * pow(rain, r)) * D * (thetaI * (double) I + thetaA * (double) A);
   return(dB);
 };
 "
@@ -354,6 +354,7 @@ toEstimationScale <- Csnippet("
   TXrhoI = logit(XrhoI);
   TrhoA = log(rhoA);
   Tlambda = log(lambda);
+  TlambdaR = log(lambdaR);
   Tr = log(r);
   Tstd_W = log(std_W);
   Tepsilon = logit(epsilon);
@@ -371,6 +372,7 @@ fromEstimationScale <- Csnippet("
   TrhoA = exp(rhoA);
   TXrhoI = expit(XrhoI);
   Tlambda = exp(lambda);
+  TlambdaR = exp(lambdaR);
   Tr = exp(r);
   Tstd_W = exp(std_W);
   Tepsilon = expit(epsilon);
@@ -427,6 +429,7 @@ param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
 param_est["lambda"] <- 100
+param_est["lambdaR"] <- 10
 param_est["r"] <- 1
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
