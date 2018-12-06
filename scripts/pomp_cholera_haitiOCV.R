@@ -356,7 +356,7 @@ toEstimationScale <- Csnippet("
   Tlambda = log(lambda);
   Tr = log(r);
   Tstd_W = log(std_W);
-  Tepsilon = log(epsilon);
+  Tepsilon = logit(epsilon);
   Tk = log(k);
   TRtot_0 = logit(Rtot_0);
   TB_0 = log(B_0);
@@ -373,7 +373,7 @@ fromEstimationScale <- Csnippet("
   Tlambda = exp(lambda);
   Tr = exp(r);
   Tstd_W = exp(std_W);
-  Tepsilon = exp(epsilon);
+  Tepsilon = expit(epsilon);
   Tk = exp(k);
   TRtot_0 = expit(Rtot_0);
   TB_0 = exp(B_0);

@@ -78,8 +78,8 @@ min_param_val <- 1e-5
 parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   # Regular paramters
-  "sigma", min_param_val, 1 - min_param_val,
-  "betaB", min_param_val, 1,
+  "sigma", 0.3, 1 - min_param_val,
+  "betaB", min_param_val, 3,
   "mu_B", min_param_val, 1e2,
   "XthetaA", min_param_val, .5,
   "thetaI", min_param_val, 2,
@@ -90,8 +90,8 @@ parameter_bounds <- tribble(
   # Process noise
   "std_W", min_param_val, 1e-1,
   # Measurement model
-  "epsilon", min_param_val, 2,
-  "k", min_param_val, 10000,
+  "epsilon", min_param_val, 1,
+  "k", -3, 4 ,   # hard to get negbin like this, sobol in log scale -5 et 4
   "Rtot_0", min_param_val, 0.1
 )
 
@@ -137,6 +137,9 @@ for(array_id in array_id_vec) {
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
                              upper = parameter_bounds[, "upper"], 
                              nseq = cholera_Ninit_param[run_level])
+  
+  # Allow large variation of k to chose neg in and poisson
+  init_params %<>% mutate(k=10^k) 
   
   # get the names of the paramters that are fixed
   param_fixed_names <- setdiff(names(coef(sirb_cholera)), colnames(init_params))
