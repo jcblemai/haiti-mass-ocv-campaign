@@ -47,7 +47,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Load pomp object ---------------------------------------------------------------
-load(paste0("sirb_cholera_pomped_", departement, ".rda"))
+load(paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
 # Parallel setup ----------------------------------------------------------
 
@@ -83,7 +83,7 @@ parameter_bounds <- tribble(
   "mu_B", min_param_val, 1e2,
   "XthetaA", min_param_val, .5,
   "thetaI", min_param_val, 2,
-  "lambda", min_param_val, 5,
+#  "lambda", min_param_val, 5,
    "lambdaR", min_param_val, 5,
   "r", min_param_val, 2,
   "rhoA", 0.02, 10,
@@ -92,6 +92,7 @@ parameter_bounds <- tribble(
   "std_W", min_param_val, 1e-1,
   # Measurement model
   "epsilon", min_param_val, 1,
+  "foi_add", min_param_val, 0.01,
   "k", -3, 4 ,   # hard to get negbin like this, sobol in log scale -5 et 4
   "Rtot_0", min_param_val, 0.1
 )
@@ -108,14 +109,12 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
 # Level of detail on which to run the computations [Allow to chose easly set of params]
 # level 1 is short
-# level 2 on echopc: 65s and 206s (if Nmif=2 and NrepGlobal=2: 130s and 404 sec)
-# level 3 on echopc: 100 min + 16 min
 # level 4
 cholera_Np <-           c(1e3,    3e3,    3e3,    3e3)
-cholera_Nmif <-         c(1,      1,      100,    400)      # Entre 200 et 300  
+cholera_Nmif <-         c(1,      100,    400,    600)      # Entre 200 et 300  
 cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs)   # How many rounds a cpu does
 cholera_NpLL <-         c(1e3,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
-cholera_Nreps_global <- c(1,      1,      5,      15)
+cholera_Nreps_global <- c(1,      5,      15,     20)
 
 
 # Run the computations -----------------------------------------------
@@ -132,7 +131,7 @@ for(array_id in array_id_vec) {
   # select model for this job in array
 
   # names of results files
-  mifruns.filename = str_c("results/", departement, "/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
+  mifruns.filename = str_c("", departement, "/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
   
   # create random vectors of initial paramters given the bounds
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
@@ -162,13 +161,14 @@ for(array_id in array_id_vec) {
                    ", mu_B   = ",  rw.sd_param["regular"],
                    ", XthetaA= ",  rw.sd_param["regular"],
                    ", thetaI = ",  rw.sd_param["regular"],
-                   ", lambda = ",  rw.sd_param["regular"],
+                   #", lambda = ",  rw.sd_param["regular"],
                    ", lambdaR = ",  rw.sd_param["regular"],
                    ", r      = ",  rw.sd_param["regular"],
                    ", XrhoI  = ",  rw.sd_param["regular"],
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
+                   ", foi_add= ",  rw.sd_param["regular"],
                    ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
                    ", Rtot_0  = ivp(",  rw.sd_param["ivp"], ")",
                    ")")
@@ -181,7 +181,7 @@ for(array_id in array_id_vec) {
   # Run MIF
   tic("MIF")
   # file to store all explorations of the likelihood surface
-  all_loglik.filename <- sprintf("results/%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)
+  all_loglik.filename <- sprintf("%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)
   # run computations (stew ensures not to duplicate calculations and sets RNG)
   
   stew(mifruns.filename, {

@@ -152,7 +152,7 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k")
+param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k", "foi_add")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
@@ -214,7 +214,7 @@ sirb.rproc <- Csnippet("
   double rhoI = rhoA * XrhoI;
 
   // force of infection
-  foi = betaB * (B / (1 + B));
+  foi = betaB * (B / (1 + B)) + foi_add;
 
   if(std_W > 0.0) {
     // white noise (extra-demographic stochasticity)
@@ -361,6 +361,7 @@ toEstimationScale <- Csnippet("
   Tk = log(k);
   TRtot_0 = logit(Rtot_0);
   TB_0 = log(B_0);
+  Tfoi_add = log(foi_add);
   ")
 
 fromEstimationScale <- Csnippet("
@@ -379,6 +380,7 @@ fromEstimationScale <- Csnippet("
   Tk = exp(k);
   TRtot_0 = expit(Rtot_0);
   TB_0 = exp(B_0);
+  Tfoi_add = exp(foi_add);
   ")
 
 # Build pomp object -------------------------------------------------------
@@ -428,13 +430,14 @@ param_est["betaB"] <- .1
 param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
-param_est["lambda"] <- 100
+param_est["lambda"] <- 0
 param_est["lambdaR"] <- 10
 param_est["r"] <- 1
 param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
 param_est["k"] <- 10001
 param_est["Rtot_0"] <- 0.35
+param_est["foi_add"] <- 0.001
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
@@ -487,4 +490,4 @@ sirb_cholera <- pomp(
 )
 
 # save pomp object for further use
-save(sirb_cholera, file = paste0("sirb_cholera_pomped_", departement, ".rda"))
+save(sirb_cholera, file = paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
