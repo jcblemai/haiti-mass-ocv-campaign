@@ -85,6 +85,7 @@ parameter_bounds <- tribble(
   "thetaI", min_param_val, 2,
 #  "lambda", min_param_val, 5,
    "lambdaR", min_param_val, 5,
+   "gammaA", 73, 365,
   "r", min_param_val, 2,
   "rhoA", 0.02, 10,
   "XrhoI", min_param_val, 1,
@@ -111,10 +112,10 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 # level 1 is short
 # level 4
 cholera_Np <-           c(1e3,    3e3,    3e3,    3e3)
-cholera_Nmif <-         c(1,      100,    400,    600)      # Entre 200 et 300  
-cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs)   # How many rounds a cpu does
+cholera_Nmif <-         c(1,      100,    400,    300)      # Entre 200 et 300  
+cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs*2)   # How many rounds a cpu does
 cholera_NpLL <-         c(1e3,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
-cholera_Nreps_global <- c(1,      5,      15,     20)
+cholera_Nreps_global <- c(1,      5,      15,     15)
 
 
 # Run the computations -----------------------------------------------
@@ -167,6 +168,7 @@ for(array_id in array_id_vec) {
                    ", XrhoI  = ",  rw.sd_param["regular"],
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
+                   ", gammaA  = ",  rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
                    ", foi_add= ",  rw.sd_param["regular"],
                    ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.

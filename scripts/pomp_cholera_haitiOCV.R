@@ -152,13 +152,13 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k", "foi_add")
+param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "gammaI", "lambda", "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k", "foi_add")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
-param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaI", "gammaA")
+param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaA")
 
 ## fixed initial value parameters OK 
 param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
@@ -362,6 +362,7 @@ toEstimationScale <- Csnippet("
   TRtot_0 = logit(Rtot_0);
   TB_0 = log(B_0);
   Tfoi_add = log(foi_add);
+  TgammaA = log(gammaA);
   ")
 
 fromEstimationScale <- Csnippet("
@@ -381,6 +382,7 @@ fromEstimationScale <- Csnippet("
   TRtot_0 = expit(Rtot_0);
   TB_0 = exp(B_0);
   Tfoi_add = exp(foi_add);
+  TgammaA = exp(gammaA);
   ")
 
 # Build pomp object -------------------------------------------------------
@@ -408,7 +410,7 @@ param_proc_fixed['D'] <- densities[departement]
 
 # Initialize the fixed parameters
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
-param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)
+param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)  # Does not work for gammaI TODO
 
 # Initial Conditions based on forcing (These overwritten by the initilizer function)
 param_fixed["A_0"] <- 3 / param_fixed["H"]
@@ -438,12 +440,14 @@ param_est["epsilon"] <- .5
 param_est["k"] <- 10001
 param_est["Rtot_0"] <- 0.35
 param_est["foi_add"] <- 0.001
+param_est["gammaA"] <- 1/5
+param_est["gammaI"] <- 1/5
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
 
 # adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days) TODO CHECK
-params <- c(param_est, param_fixed)
+params <- c(param_est, param_fixed)  
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 
 sirb_cholera <- pomp(
