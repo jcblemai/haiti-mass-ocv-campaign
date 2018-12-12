@@ -93,7 +93,7 @@ if(doplots) {
 
 }
 # Likelihood comparison ---------------------------------------------------
-load(paste0("sirb_cholera_pomped_", departement, ".rda"))
+load(paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
 # Compare outputs ---------------------------------------------------------
 

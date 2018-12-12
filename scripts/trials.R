@@ -61,7 +61,7 @@ rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
 
 library(tidyverse)
 
-yr_thresh <- 2012
+yr_thresh <- 2015
 cases %>% 
   mutate(yr = lubridate::year(date)) %>%
   filter(yr>=yr_thresh) %>% 
