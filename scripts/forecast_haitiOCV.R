@@ -37,8 +37,6 @@ run_level <- as.integer(args[2])
 nsim = 10
 
 
-
-
 load(paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
 # input parameters to the model
@@ -81,12 +79,13 @@ doMC::registerDoMC(8)
 # function to simulate from a given set of paramters
 simulatePOMP <- function(params, nsim, seed = 199919L) {
   pomp::coef(sirb_cholera) <- params
-  pomp::coef(sirb_cholera_forecast) <- params
+  #pomp::coef(sirb_cholera_forecast) <- params
   
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
-  pomp::simulate(sirb_cholera_forecast, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> proj
+  #pomp::simulate(sirb_cholera_forecast, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> proj
   
-  rbind(calib, proj)%>% 
+  #rbind(calib, proj)%>% 
+  calib %>%
     as_tibble() %>% 
     mutate(isdata = sim == "data") %>%
     gather(variable, value, -time, -rain, -sim, -isdata) %>% 
@@ -123,23 +122,26 @@ params <-unlist(best_param[names(coef(sirb_cholera))])
 
 
 # New ofject with new horizon:
-sirb_cholera_forecast <- sirb_cholera
-time(sirb_cholera_forecast) <- time_forecast
-timezero(sirb_cholera_forecast) <- max(time(sirb_cholera))
+#sirb_cholera_forecast <- sirb_cholera
+#time(sirb_cholera_forecast) <- time_forecast
+#timezero(sirb_cholera_forecast) <- max(time(sirb_cholera))
 #covar(sirb_cholera_forecast) <- rain_forecast
-sirb_cholera_forecast <- pomp(sirb_cholera_forecast,
+#sirb_cholera_forecast <- pomp(sirb_cholera_forecast,
+#                              covar = rain_forecast,
+#                              tcovar = "time")
+
+sirb_cholera <- pomp(sirb_cholera,
                               covar = rain_forecast,
                               tcovar = "time")
-
 
 # run simulations for each model
 sim_stochastic <- simulatePOMP(params, nsim = nsim)
 
 # tidy tibble for merger
 sim_stochastic_quantiles <- sim_stochastic %>% 
-  mutate(date = as.Date(round_date(date))) %>% 
-  filter(variable == "cases", isdata == "simulation") %>% 
-  select(-isdata, -time, -variable)# %>% 
+mutate(date = as.Date(round_date(date))) %>% 
+filter(variable == "cases", isdata == "simulation") %>% 
+select(-isdata, -time, -variable)# %>% 
   #bind_cols(sim_stochastic %>%                                         #Add a column with the data
   #            filter(variable == "cases", isdata == "data") %>% 
   #            select(mean) %>% 
@@ -154,8 +156,8 @@ p.sim <- ggplot(data = sim_stochastic_quantiles,
   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
   geom_line(aes(y = q50), color = simcol) +
   geom_line(aes(y = mean), linetype = 2, color = simcol) +
-  geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
-  geom_point(aes(y = cases), color = datacol, size = 0.8) +
+  #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
+  #geom_point(aes(y = cases), color = datacol, size = 0.8) +
   #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
   #facet_grid(model~type) +
   scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +

@@ -233,15 +233,15 @@ sirb.rproc <- Csnippet("
     rate[0] = sigma * foi_stoc;   // infections
     rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
     // I compartment
-    rate[2] = mu;         // natural deaths
-    rate[3] = alpha;      // cholera-induced deaths
-    rate[4] = gammaI;      // recovery from infection
+    rate[2] = mu;           // natural deaths
+    rate[3] = alpha;        // cholera-induced deaths
+    rate[4] = gammaI;       // recovery from infection
     // A compartment (not in order because was added after initial model formulation)
-    rate[5] = mu;        // natural death
+    rate[5] = mu;           // natural death
     rate[6] = gammaA;       // symptoms development
     // RI1,2,3 compartment
     rate[7] = 3*rhoI;        // loss of natural immunity
-    rate[8] = mu;         // natural death
+    rate[8] = mu;            // natural death
     // RI2 compartment
     rate[9] = 3*rhoI;        // loss of natural immunity
     rate[10] = mu;
@@ -250,7 +250,7 @@ sirb.rproc <- Csnippet("
     rate[12] = mu;
     // RA1,2,3 compartment
     rate[13] = 3*rhoA;        // loss of natural immunity
-    rate[14] = mu;         // natural death
+    rate[14] = mu;            // natural death
     // RA2 compartment
     rate[15] = 3*rhoA;        // loss of natural immunity
     rate[16] = mu;
