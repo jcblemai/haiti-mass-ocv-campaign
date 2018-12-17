@@ -22,12 +22,13 @@ yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2
 yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
+output_dir <- "output/"
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
   args[1] = "Artibonite"
-  args[2] = 1
+  args[2] = 3
 } else if (length(args)==1) {
   args[2] = 1
 }
@@ -37,7 +38,28 @@ run_level <- as.integer(args[2])
 nsim = 10
 
 
-load(paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
+liks_stoch <- read_csv(sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv",output_dir, departement, departement, run_level)) 
+liks <- liks_stoch
+
+# get MLE paramter sets 
+best_param <- liks %>% 
+  arrange(desc(loglik)) %>% 
+  slice(1)  %>% 
+  arrange(desc(loglik)) %>% 
+  ungroup %>% 
+  left_join(liks_stoch)
+
+load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
+
+params <-unlist(best_param[names(coef(sirb_cholera))])
+
+
+
+
+
+
+
+
 
 # input parameters to the model
 input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
@@ -48,13 +70,22 @@ t_end <- dateToYears(as.Date(input_parameters$t_end))
 t_sf <- dateToYears(as.Date(input_parameters$t_end))
 
 
-t_forecast <- dateToYears(as.Date("2030-10-20"))
+t_forecast <- dateToYears(as.Date("2029-12-20"))
 
-time_forecast <- dateToYears(seq.Date(yearsToDate(t_sf), yearsToDate(t_forecast), by = "1 week"))
 
-# fill in the data
-rain_forecast <- tibble(time = time_forecast, rain = 0)
-cases_forecast <- tibble(time = time_forecast, cases = NA)
+rain_forecast <- read_csv("haiti-data/proj/rainfall.csv")  %>% 
+  gather(dep, rain, -date) %>% 
+  group_by(dep) %>% 
+  ungroup() %>% 
+  filter(dep == departement) %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date)) %>%
+  filter(time > t_start - 0.01 & time < (t_forecast + 0.01)) %>%
+  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
+
+
+time_forecast <- dateToYears(seq.Date(yearsToDate(t_start), yearsToDate(t_forecast), by = "1 week"))
+
 
 #case_dates <- cases %>%  filter(time > t_start - 0.01)
 
@@ -100,18 +131,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
     filter(date >= yearsToDate(sirb_cholera@t0))
 }
 
-liks_stoch <- read_csv(sprintf("%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)) 
-liks <- liks_stoch
 
-# get MLE paramter sets 
-best_param <- liks %>% 
-  arrange(desc(loglik)) %>% 
-  slice(1)  %>% 
-  arrange(desc(loglik)) %>% 
-  ungroup %>% 
-  left_join(liks_stoch)
-
-params <-unlist(best_param[names(coef(sirb_cholera))])
 
 # sirb_cholera_maxrain <- pomp(sirb_cholera,
 #                              covar = rain %>%
@@ -147,43 +167,46 @@ select(-isdata, -time, -variable)# %>%
   #            select(mean) %>% 
   #              rename(cases = mean))
 
+
+# create ojects for python
+
 # PLOT BOTH
-simcol <- "#175CD6"
-datacol <- "#ED0000"
+# simcol <- "#175CD6"
+# datacol <- "#ED0000"
+# 
+# p.sim <- ggplot(data = sim_stochastic_quantiles,
+#                 aes(x = date))+
+#   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+#   geom_line(aes(y = q50), color = simcol) +
+#   geom_line(aes(y = mean), linetype = 2, color = simcol) +
+#   #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
+#   #geom_point(aes(y = cases), color = datacol, size = 0.8) +
+#   #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
+#   #facet_grid(model~type) +
+#   scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +
+#   scale_y_continuous(expand = c(0,0))+ 
+#   labs(y = "daily cholera cases", x = "date") +
+#   theme(panel.grid.major = element_line(color = "lightgray"),
+#         panel.background = element_rect(fill = "white"),
+#         axis.line = element_line(color = "black"),
+#         strip.text = element_blank(),
+#         axis.title = element_text())
+# 
+# #print(p.sim)
+# 
+# sim_stochastic_quantiles_all <- sim_stochastic %>% 
+#   mutate(date = as.Date(round_date(date))) %>% 
+#   filter(variable == "cases" |  isdata == "simulation") %>% 
+#   select(-isdata) 
+# 
+# p.all <- ggplot(data = sim_stochastic_quantiles_all,
+#                 aes(x = date))+
+#   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+#   geom_line(aes(y = q50), color = simcol) +
+#   geom_line(aes(y = mean), linetype = 2, color = simcol) +
+#   facet_wrap(~variable, scales = "free_y") 
+# scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14")))
 
-p.sim <- ggplot(data = sim_stochastic_quantiles,
-                aes(x = date))+
-  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
-  geom_line(aes(y = q50), color = simcol) +
-  geom_line(aes(y = mean), linetype = 2, color = simcol) +
-  #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
-  #geom_point(aes(y = cases), color = datacol, size = 0.8) +
-  #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
-  #facet_grid(model~type) +
-  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +
-  scale_y_continuous(expand = c(0,0))+ 
-  labs(y = "daily cholera cases", x = "date") +
-  theme(panel.grid.major = element_line(color = "lightgray"),
-        panel.background = element_rect(fill = "white"),
-        axis.line = element_line(color = "black"),
-        strip.text = element_blank(),
-        axis.title = element_text())
-
-print(p.sim)
-
-sim_stochastic_quantiles_all <- sim_stochastic %>% 
-  mutate(date = as.Date(round_date(date))) %>% 
-  filter(variable == "cases" |  isdata == "simulation") %>% 
-  select(-isdata) 
-
-p.all <- ggplot(data = sim_stochastic_quantiles_all,
-                aes(x = date))+
-  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
-  geom_line(aes(y = q50), color = simcol) +
-  geom_line(aes(y = mean), linetype = 2, color = simcol) +
-  facet_wrap(~variable, scales = "free_y") 
-scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14")))
-
-
+#print(p.all)
 
 
