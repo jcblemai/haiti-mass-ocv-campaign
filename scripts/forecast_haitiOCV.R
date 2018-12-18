@@ -135,8 +135,11 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
 }
 
 sirb_cholera <- pomp(sirb_cholera,
-                              covar = rain_forecast,
-                              tcovar = "time")
+                     covar = rain_forecast  %>% 
+                     filter(time > (t_start - 0.01) & time < (t_forecast + 0.01)) %>% 
+                     select(time, rain_std) %>% 
+                     rename(rain = rain_std),
+                     tcovar = "time")
 
 # run simulations for each model
 sim_stochastic <- simulatePOMP(params, nsim = nsim)
