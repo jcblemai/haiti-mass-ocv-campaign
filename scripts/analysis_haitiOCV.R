@@ -21,7 +21,7 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
   args[1] = "Artibonite"
-  args[2] = 1
+  args[2] = 3
 } else if (length(args)==1) {
   args[2] = 1
 }
@@ -29,11 +29,13 @@ if (length(args)==0) {
 departement <- args[1]
 run_level <- as.integer(args[2])
 
+output_dir <- "output/"
+#output_dir <- ""
 
 
 # Pair plots ---------------------------------------------------------------
 # One line per initial condition
-liks_stoch <- read_csv(sprintf("%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)) 
+liks_stoch <- read_csv(sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", output_dir, departement, departement, run_level)) 
 liks <- liks_stoch
 
 #colnames(liks_stoch) <- str_replace_all(colnames(liks_stoch), "_", "")
@@ -72,7 +74,7 @@ if(doplots) {
               lower = list(continuous = "cor", combo = "facethist", discrete = "facetbar", na = "na"),
               title = sprintf("Haiti OCV model with best loglik: %f",  max(liks_stoch$loglik))
       ),
-      filename = str_c("", departement, "/all-logliks.png"),
+      filename = str_c(output_dir, departement, "/all-logliks.png"),
       width = 10, height = 8)
   
   # plot all
@@ -81,19 +83,19 @@ if(doplots) {
               slice(1:20) %>%
               ungroup,
             c("sigma", "betaB", "mu_B" , "XthetaA", "thetaI", "rhoA", "XrhoI", "r", "lambda"),
-            str_c("", departement, "/stoch_posteriors.png"),
+            str_c(output_dir, departement, "/stoch_posteriors.png"),
             width = 12,
             height = 12)
   
   # plot pairs by type of parameteres
-  plotPairs(liks_stoch, c("epsilon", "k"),  str_c("", departement, "/liks_measurement_model.png"), width = 10, height = 6.5)
-  plotPairs(liks_stoch, c("Rtot_0"),  str_c("", departement, "/liks_initial_conditions.png"), width = 10, height = 5)
-  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "rhoA", "XrhoI",  "std_W"),  str_c("", departement, "/liks_sirb_processes.png"))
-  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "r", "Rtot_0"),  str_c("", departement, "/liks_rainfall_effect.png"))
+  plotPairs(liks_stoch, c("epsilon", "k"),  str_c(output_dir, departement, "/liks_measurement_model.png"), width = 10, height = 6.5)
+  plotPairs(liks_stoch, c("Rtot_0"),  str_c(output_dir, departement, "/liks_initial_conditions.png"), width = 10, height = 5)
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "rhoA", "XrhoI",  "std_W"),  str_c(output_dir, departement, "/liks_sirb_processes.png"))
+  plotPairs(liks_stoch, c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "lambda", "r", "Rtot_0"),  str_c(output_dir, departement, "/liks_rainfall_effect.png"))
 
 }
 # Likelihood comparison ---------------------------------------------------
-load(paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
+load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
 # Compare outputs ---------------------------------------------------------
 
@@ -188,7 +190,7 @@ p.sim <- ggplot(data = sim_stochastic_quantiles,
         axis.title = element_text())
 
 p.sim
-ggsave(p.sim, filename = str_c("", departement, "/simulations_comparison.png"), width = 9, height = 10, dpi = 300)
+ggsave(p.sim, filename = str_c(output_dir, departement, "/simulations_comparison.png"), width = 9, height = 10, dpi = 300)
 
 sim_stochastic_quantiles_all <- sim_stochastic %>% 
   mutate(date = as.Date(round_date(date))) %>% 
@@ -205,7 +207,7 @@ p.all <- ggplot(data = sim_stochastic_quantiles_all,
 
 
 p.all
-ggsave(p.all, filename = str_c("", departement, "/simulations_all.png"), width = 9, height = 10, dpi = 300)
+ggsave(p.all, filename = str_c(output_dir, departement, "/simulations_all.png"), width = 9, height = 10, dpi = 300)
 
 
 # Parameter profiles ------------------------------------------------------

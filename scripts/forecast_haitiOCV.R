@@ -35,7 +35,6 @@ if (length(args)==0) {
 
 #departement <- args[1]
 run_level <- 3
-#run_level <- as.integer(args[2])
 nsim = 10
 
 
@@ -56,22 +55,27 @@ params <-unlist(best_param[names(coef(sirb_cholera))])
 
 
 
-
-
-
-
-
-
 # input parameters to the model
 input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
 # Start and end dates of epidemic
 t_start <- dateToYears(as.Date(input_parameters$t_start))
 t_end <- dateToYears(as.Date(input_parameters$t_end))
 
-t_sf <- dateToYears(as.Date(input_parameters$t_end))
-
-
 t_forecast <- dateToYears(as.Date("2029-12-20"))
+
+
+rain4max <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
+  gather(dep, rain, -date) %>% 
+  group_by(dep) %>% 
+  ungroup() %>% 
+  filter(dep == departement) %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date)) %>%
+  filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
+  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
+
+
+max_rain<- rain4max %>% select(max_rain) %>% max()
 
 
 rain_forecast <- read_csv("haiti-data/proj/rainfall.csv")  %>% 
@@ -82,7 +86,7 @@ rain_forecast <- read_csv("haiti-data/proj/rainfall.csv")  %>%
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date)) %>%
   filter(time > t_start - 0.01 & time < (t_forecast + 0.01)) %>%
-  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
+  mutate(max_rain = max_rain, rain_std = rain/max_rain) 
 
 
 time_forecast <- dateToYears(seq.Date(yearsToDate(t_start), yearsToDate(t_forecast), by = "1 week"))
@@ -107,15 +111,13 @@ time_forecast <- dateToYears(seq.Date(yearsToDate(t_start), yearsToDate(t_foreca
 
 doMC::registerDoMC(8)
 
-
 # function to simulate from a given set of paramters
 simulatePOMP <- function(params, nsim, seed = 199919L) {
   pomp::coef(sirb_cholera) <- params
   #pomp::coef(sirb_cholera_forecast) <- params
   
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
-  #pomp::simulate(sirb_cholera_forecast, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> proj
-  
+
   #rbind(calib, proj)%>% 
   calib %>%
     as_tibble() %>% 
@@ -131,25 +133,6 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
            date = yearsToDateTime(time)) %>% 
     filter(date >= yearsToDate(sirb_cholera@t0))
 }
-
-
-
-# sirb_cholera_maxrain <- pomp(sirb_cholera,
-#                              covar = rain %>%
-#                                filter(time >= min(sirb_cholera@tcovar) & time <= max(sirb_cholera@tcovar)) %>% 
-#                                select(time, rain_std) %>%
-#                                rename(rain = rain_std),
-#                              tcovar = "time")
-
-
-# New ofject with new horizon:
-#sirb_cholera_forecast <- sirb_cholera
-#time(sirb_cholera_forecast) <- time_forecast
-#timezero(sirb_cholera_forecast) <- max(time(sirb_cholera))
-#covar(sirb_cholera_forecast) <- rain_forecast
-#sirb_cholera_forecast <- pomp(sirb_cholera_forecast,
-#                              covar = rain_forecast,
-#                              tcovar = "time")
 
 sirb_cholera <- pomp(sirb_cholera,
                               covar = rain_forecast,
@@ -241,25 +224,25 @@ RI3 <-sim_stochastic %>%
 # simcol <- "#175CD6"
 # datacol <- "#ED0000"
 # 
-# p.sim <- ggplot(data = sim_stochastic_quantiles,
-#                 aes(x = date))+
-#   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
-#   geom_line(aes(y = q50), color = simcol) +
-#   geom_line(aes(y = mean), linetype = 2, color = simcol) +
-#   #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
-#   #geom_point(aes(y = cases), color = datacol, size = 0.8) +
-#   #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
-#   #facet_grid(model~type) +
-#   scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +
-#   scale_y_continuous(expand = c(0,0))+ 
-#   labs(y = "daily cholera cases", x = "date") +
-#   theme(panel.grid.major = element_line(color = "lightgray"),
-#         panel.background = element_rect(fill = "white"),
-#         axis.line = element_line(color = "black"),
-#         strip.text = element_blank(),
-#         axis.title = element_text())
-# 
-# #print(p.sim)
+p.sim <- ggplot(data = sim_stochastic_quantiles,
+                aes(x = date))+
+  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+  geom_line(aes(y = q50), color = simcol) +
+  geom_line(aes(y = mean), linetype = 2, color = simcol) +
+  #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
+  #geom_point(aes(y = cases), color = datacol, size = 0.8) +
+  #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
+  #facet_grid(model~type) +
+  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +
+  scale_y_continuous(expand = c(0,0))+
+  labs(y = "daily cholera cases", x = "date") +
+  theme(panel.grid.major = element_line(color = "lightgray"),
+        panel.background = element_rect(fill = "white"),
+        axis.line = element_line(color = "black"),
+        strip.text = element_blank(),
+        axis.title = element_text())
+
+print(p.sim)
 # 
 # sim_stochastic_quantiles_all <- sim_stochastic %>% 
 #   mutate(date = as.Date(round_date(date))) %>% 
