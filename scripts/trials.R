@@ -61,7 +61,7 @@ rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
 
 library(tidyverse)
 
-yr_thresh <- 2015
+yr_thresh <- 2010
 cases %>% 
   mutate(yr = lubridate::year(date)) %>%
   filter(yr>=yr_thresh) %>% 
@@ -73,7 +73,7 @@ cases %>%
   scale_color_manual(values = c("black", "red")) +
   # geom_vline(aes(xintercept = as.Date("2017-07-08"))) + 
   # geom_vline(aes(xintercept = as.Date("2018-07-14"))) + 
-  coord_cartesian(ylim = c(0,500)) +
+ # coord_cartesian(ylim = c(0,500)) +
   facet_wrap(~dep)
 
 

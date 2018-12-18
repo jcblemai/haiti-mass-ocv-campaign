@@ -33,8 +33,9 @@ if (length(args)==0) {
   args[2] = 1
 }
 
-departement <- args[1]
-run_level <- as.integer(args[2])
+#departement <- args[1]
+run_level <- 3
+#run_level <- as.integer(args[2])
 nsim = 10
 
 
@@ -168,7 +169,73 @@ select(-isdata, -time, -variable)# %>%
   #              rename(cases = mean))
 
 
-# create ojects for python
+# create objects for python
+cases <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "cases", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+A <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "A", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+B <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "B", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+C <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "C", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+I <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "I", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+S <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "S", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+W <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "W", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+
+RA1 <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "RA1", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+RA2 <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "RA2", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+RA3 <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "RA3", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+RI1 <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "RI1", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+RI2 <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "RI2", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+RI3 <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "RI3", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+
 
 # PLOT BOTH
 # simcol <- "#175CD6"

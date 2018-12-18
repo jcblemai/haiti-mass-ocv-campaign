@@ -172,7 +172,7 @@ param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
 param_names <- c(param_est_names, param_fixed_names)
 
 # names of parameters that are rates (MAYBE) (because time 365 since timestep is year) r_v shoudl be here
-param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA")
+param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA", 'rhoI')
 
 # Measurement model  -------------------------------------------------------
 
