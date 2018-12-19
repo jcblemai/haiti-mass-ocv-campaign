@@ -2,7 +2,19 @@
 
 
 ## TODO
-  - The coefficient are per year. Find by hand some good coeffs and run for artibonite
+  - Demographic stochasticity
+  - Vaccination projection [start curve decrease in the middle of campainfs]
+  - Solve bug gammaA
+  - Calibrate gammaI
+  - Launch bigger calibration
+  - plot precipitation
+  - Forecast with real infected
+  - Include previous vacc campaigns
+  - Fix ??nitial condition
+  - Beta Drop to match the drop with two beta calibrated
+  - Cases in notebook
+  - Rain in notebook
+  
 
 ## Data
 

@@ -35,7 +35,7 @@ if (length(args)==0) {
 
 #departement <- args[1]
 run_level <- 3
-nsim = 10
+nsim = 30
 
 
 liks_stoch <- read_csv(sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv",output_dir, departement, departement, run_level)) 
@@ -61,7 +61,7 @@ input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
 t_start <- dateToYears(as.Date(input_parameters$t_start))
 t_end <- dateToYears(as.Date(input_parameters$t_end))
 
-t_forecast <- dateToYears(as.Date("2029-12-20"))
+t_forecast <- dateToYears(as.Date("2029-12-21"))
 
 
 rain4max <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
@@ -227,25 +227,25 @@ RI3 <-sim_stochastic %>%
 # simcol <- "#175CD6"
 # datacol <- "#ED0000"
 # 
-p.sim <- ggplot(data = sim_stochastic_quantiles,
-                aes(x = date))+
-  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
-  geom_line(aes(y = q50), color = simcol) +
-  geom_line(aes(y = mean), linetype = 2, color = simcol) +
-  #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
-  #geom_point(aes(y = cases), color = datacol, size = 0.8) +
-  #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
-  #facet_grid(model~type) +
-  scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +
-  scale_y_continuous(expand = c(0,0))+
-  labs(y = "daily cholera cases", x = "date") +
-  theme(panel.grid.major = element_line(color = "lightgray"),
-        panel.background = element_rect(fill = "white"),
-        axis.line = element_line(color = "black"),
-        strip.text = element_blank(),
-        axis.title = element_text())
-
-print(p.sim)
+# p.sim <- ggplot(data = sim_stochastic_quantiles,
+#                 aes(x = date))+
+#   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+#   geom_line(aes(y = q50), color = simcol) +
+#   geom_line(aes(y = mean), linetype = 2, color = simcol) +
+#   #geom_line(aes(y = cases), color = datacol, lwd = 0.2) +
+#   #geom_point(aes(y = cases), color = datacol, size = 0.8) +
+#   #geom_text(data = psim_labels, aes (y = y, label = label), size = 7) +
+#   #facet_grid(model~type) +
+#   scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c(yearsToDate(t_start), yearsToDate(t_forecast)))) +
+#   scale_y_continuous(expand = c(0,0))+
+#   labs(y = "daily cholera cases", x = "date") +
+#   theme(panel.grid.major = element_line(color = "lightgray"),
+#         panel.background = element_rect(fill = "white"),
+#         axis.line = element_line(color = "black"),
+#         strip.text = element_blank(),
+#         axis.title = element_text())
+# 
+# print(p.sim)
 # 
 # sim_stochastic_quantiles_all <- sim_stochastic %>% 
 #   mutate(date = as.Date(round_date(date))) %>% 
