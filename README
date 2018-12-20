@@ -4,9 +4,6 @@
 ## TODO
   - Demographic stochasticity
   - Vaccination projection [start curve decrease in the middle of campainfs]
-  - Solve bug gammaA
-  - Calibrate gammaI
-  - Launch bigger calibration
   - plot precipitation
   - Forecast with real infected
   - Include previous vacc campaigns
