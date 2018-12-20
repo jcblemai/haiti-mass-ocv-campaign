@@ -29,8 +29,8 @@ density:
   - Sud-Est: 311
 
 # rate of loss of infection
-gammaA: 0.2
-gammaI: 0.2
+#gammaA: 0.2
+#gammaI: 0.2
 # natural mortality rate
 mu: 0.00004343944    # population natality and mortality rate (life exp is 63.07 year) (day^-1) 1/(63.07*365)
 

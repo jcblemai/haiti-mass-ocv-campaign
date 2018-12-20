@@ -19,6 +19,7 @@ library(tictoc)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
 hostname <- system('hostname', intern = T) 
+output_dir <- "output/"
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
@@ -47,7 +48,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Load pomp object ---------------------------------------------------------------
-load(paste0(departement, "/sirb_cholera_pomped_", departement, ".rda"))
+load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
 # Parallel setup ----------------------------------------------------------
 
@@ -86,6 +87,7 @@ parameter_bounds <- tribble(
 #  "lambda", min_param_val, 5,
    "lambdaR", min_param_val, 5,
    "gammaA", 73, 365,
+   "gammaI", 73, 365,
   "r", min_param_val, 2,
   "rhoA", 0.02, 10,
   "XrhoI", min_param_val, 1,
@@ -113,7 +115,7 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 # level 4
 cholera_Np <-           c(1e3,    3e3,    3e3,    3e3)
 cholera_Nmif <-         c(1,      100,    400,    300)      # Entre 200 et 300  
-cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs*2)   # How many rounds a cpu does
+cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs*4)   # How many rounds a cpu does
 cholera_NpLL <-         c(1e3,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
 cholera_Nreps_global <- c(1,      5,      15,     15)
 
@@ -132,7 +134,7 @@ for(array_id in array_id_vec) {
   # select model for this job in array
 
   # names of results files
-  mifruns.filename = str_c("", departement, "/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
+  mifruns.filename = str_c(output_dir, departement, "/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
   
   # create random vectors of initial paramters given the bounds
   init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
@@ -168,7 +170,8 @@ for(array_id in array_id_vec) {
                    ", XrhoI  = ",  rw.sd_param["regular"],
                    ", rhoA   = ",  rw.sd_param["regular"],
                    ", std_W  = ",  rw.sd_param["regular"],
-                   ", gammaA  = ",  rw.sd_param["regular"],
+                   ", gammaA  = ", rw.sd_param["regular"],
+                   ", gammaI  = ", rw.sd_param["regular"],
                    ", epsilon= ",  rw.sd_param["regular"],
                    ", foi_add= ",  rw.sd_param["regular"],
                    ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
@@ -183,7 +186,7 @@ for(array_id in array_id_vec) {
   # Run MIF
   tic("MIF")
   # file to store all explorations of the likelihood surface
-  all_loglik.filename <- sprintf("%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", departement, departement, run_level)
+  all_loglik.filename <- sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv", output_dir, departement, departement, run_level)
   # run computations (stew ensures not to duplicate calculations and sets RNG)
   
   stew(mifruns.filename, {

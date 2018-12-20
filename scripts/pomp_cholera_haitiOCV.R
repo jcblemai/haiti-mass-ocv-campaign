@@ -154,13 +154,13 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 # define parameter names for pomp
 ## process model parameters names to estimate OK
 param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "gammaI", "lambda", 
-                          "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k", "foi_add")
+                          "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k", "foi_add", "gammaA")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
-param_proc_fixed_names <- c("H", "D", "mu", "alpha", "gammaA")
+param_proc_fixed_names <- c("H", "D", "mu", "alpha")
 
 ## fixed initial value parameters OK 
 param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
@@ -272,6 +272,7 @@ toEstimationScale <- Csnippet("
   TB_0 = log(B_0);
   Tfoi_add = log(foi_add);
   TgammaA = log(gammaA);
+  TgammaI = log(gammaI);
   ")
 
 fromEstimationScale <- Csnippet("
@@ -292,6 +293,7 @@ fromEstimationScale <- Csnippet("
   TB_0 = exp(B_0);
   Tfoi_add = exp(foi_add);
   TgammaA = exp(gammaA);
+  TgammaI = exp(gammaI);
   ")
 
 # Build pomp object -------------------------------------------------------

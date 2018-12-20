@@ -9,62 +9,71 @@ double dN[19];        // vector of transitions between classes during integratio
 double thetaA = thetaI * XthetaA;
 double rhoI = rhoA * XrhoI;
 
-// force of infection
+  // force of infection
 foi = betaB * (B / (1 + B)) + foi_add;
 
-if(std_W > 0.0) {
-  // white noise (extra-demographic stochasticity)
-  dw = rgammawn(std_W, dt);
-  // apply stochasticity
-  foi_stoc = foi * dw/dt;
-} else {
-  foi_stoc = foi;
+if(std_W > 0.0)
+{
+    dw = rgammawn(std_W, dt);  // white noise (extra-demographic stochasticity)
+    foi_stoc = foi * dw/dt;      // apply stochasticity
+} else
+{
+    foi_stoc = foi;
 }
 
 // vaccination window
-r_v_wdn = 0.0;
+/*
+if (t >= t_vacc_start && t <= (t_vacc_end + dt))
+{
+    r_v_wdn = (r_v / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
+}
+else
+{*/
+    r_v_wdn = 0.0;
+//}
 
-// define transition rates for each type of event
+
+// define transition rates for each type of event (i.e what multplies the thing)
 // S compartment
 rate[0] = sigma * foi_stoc;   // infections
 rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
+rate[2] = r_v_wdn
 // I compartment
-rate[2] = mu;           // natural deaths
-rate[3] = alpha;        // cholera-induced deaths
-rate[4] = gammaI;       // recovery from infection
-// A compartment (not in order because was added after initial model formulation)
-rate[5] = mu;           // natural death
-rate[6] = gammaA;       // symptoms development
+rate[3] = mu;           // natural deaths
+rate[4] = alpha;        // cholera-induced deaths
+rate[5] = gammaI;       // recovery from infection
+// A compartment
+rate[6] = mu;           // natural death
+rate[7] = gammaA;       // symptoms development
+rate[8] = r_v_wdn
 // RI1,2,3 compartment
-rate[7] = 3*rhoI;        // loss of natural immunity
-rate[8] = mu;            // natural death
-// RI2 compartment
 rate[9] = 3*rhoI;        // loss of natural immunity
-rate[10] = mu;
-// RI3 compartment
-rate[11] = 3*rhoI;        // loss of natural immunity
-rate[12] = mu;
+rate[10] = mu;            // natural death
+rate[11] = r_v_wdn
 // RA1,2,3 compartment
-rate[13] = 3*rhoA;        // loss of natural immunity
-rate[14] = mu;            // natural death
-// RA2 compartment
-rate[15] = 3*rhoA;        // loss of natural immunity
-rate[16] = mu;
-// RA3 compartment
-rate[17] = 3*rhoA;        // loss of natural immunity
-rate[18] = mu;
+rate[12] = 3*rhoA;        // loss of natural immunity
+rate[13] = mu;            // natural death
+rate[15] = r_v_wdn
+// V1D compartment
+
+//V2D compartment
+
+//V2DRA1,2,3
+//
+
 
 
 // simulate all transitions
-reulermultinom(2, S, &rate[0], dt, &dN[0]);
-reulermultinom(3, I, &rate[2], dt, &dN[2]);
-reulermultinom(2, A, &rate[5], dt, &dN[5]);
-reulermultinom(2, RI1, &rate[7], dt, &dN[7]);
-reulermultinom(2, RI2, &rate[9], dt, &dN[9]);
-reulermultinom(2, RI3, &rate[11], dt, &dN[11]);
-reulermultinom(2, RA1, &rate[13], dt, &dN[13]);
-reulermultinom(2, RA2, &rate[15], dt, &dN[15]);
-reulermultinom(2, RA3, &rate[17], dt, &dN[17]);
+reulermultinom(3, S,   &rate[0], dt, &dN[0]);
+reulermultinom(3, I,   &rate[3], dt, &dN[3]);
+reulermultinom(3, A,   &rate[6], dt, &dN[6]);
+reulermultinom(3, RI1, &rate[9], dt, &dN[9]);
+reulermultinom(3, RI2, &rate[9], dt, &dN[9]); /* Probably the result should be different */
+reulermultinom(3, RI3, &rate[9], dt, &dN[9]);
+reulermultinom(3, RA1, &rate[12], dt, &dN[12]);
+reulermultinom(3, RA2, &rate[12], dt, &dN[12]);
+reulermultinom(3, RA3, &rate[12], dt, &dN[12]);
+
 
 
 // bacteria as continous state variable
@@ -77,7 +86,6 @@ k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
 dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
 // update state variables
-
 I   += dN[0] - dN[2] - dN[3] - dN[4];
 A   += dN[1] - dN[5] - dN[6];
 RI1 += dN[4] - dN[7] - dN[8];
