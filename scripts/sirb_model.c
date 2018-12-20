@@ -12,22 +12,22 @@ double rhoI = rhoA * XrhoI;
   // force of infection
 foi = betaB * (B / (1 + B)) + foi_add;
 
-if(std_W > 0.0) 
+if(std_W > 0.0)
 {
     dw = rgammawn(std_W, dt);  // white noise (extra-demographic stochasticity)
     foi_stoc = foi * dw/dt;      // apply stochasticity
-} else 
+} else
 {
     foi_stoc = foi;
 }
 
-// vaccination window 
+// vaccination window
 /*
-if (t >= t_vacc_start && t <= (t_vacc_end + dt)) 
+if (t >= t_vacc_start && t <= (t_vacc_end + dt))
 {
     r_v_wdn = (r_v / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
 }
-else 
+else
 {*/
     r_v_wdn = 0.0;
 //}
@@ -54,6 +54,12 @@ rate[11] = r_v_wdn
 rate[12] = 3*rhoA;        // loss of natural immunity
 rate[13] = mu;            // natural death
 rate[15] = r_v_wdn
+// V1D compartment
+
+//V2D compartment
+
+//V2DRA1,2,3
+//
 
 
 
@@ -62,7 +68,7 @@ reulermultinom(3, S,   &rate[0], dt, &dN[0]);
 reulermultinom(3, I,   &rate[3], dt, &dN[3]);
 reulermultinom(3, A,   &rate[6], dt, &dN[6]);
 reulermultinom(3, RI1, &rate[9], dt, &dN[9]);
-reulermultinom(3, RI2, &rate[9], dt, &dN[9]);
+reulermultinom(3, RI2, &rate[9], dt, &dN[9]); /* Probably the result should be different */
 reulermultinom(3, RI3, &rate[9], dt, &dN[9]);
 reulermultinom(3, RA1, &rate[12], dt, &dN[12]);
 reulermultinom(3, RA2, &rate[12], dt, &dN[12]);
