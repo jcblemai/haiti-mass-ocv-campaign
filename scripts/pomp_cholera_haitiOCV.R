@@ -15,13 +15,13 @@ library(magrittr)
 library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
-output_dir <- "output/"
+output_dir <- "output_old/"
 
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Artibonite"
+  args[1] = "Sud-Est"
 }
 departement <- args[1]
 
@@ -174,7 +174,7 @@ param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
 param_names <- c(param_est_names, param_fixed_names)
 
 # names of parameters that are rates (MAYBE) (because time 365 since timestep is year) r_v shoudl be here
-param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA", 'rhoI')
+param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA")
 
 # Measurement model  -------------------------------------------------------
 

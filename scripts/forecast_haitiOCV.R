@@ -22,7 +22,7 @@ yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2
 yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
-output_dir <- "output/"
+output_dir <- "output_old/"
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
