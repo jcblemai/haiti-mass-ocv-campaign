@@ -32,7 +32,7 @@ else
     r_v_wdn = 0.0;
 }
 
-// time in the vacc_eff referential
+// time in the vacc_eff referential. We assume different timing for 1d and 2d
 t_eff = t - (t_vacc_start + (t_vacc_end - t_vacc_start)/2)
 
 // define transition rates for each type of event (i.e what multplies the thing)
@@ -111,14 +111,17 @@ k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
 dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
 // update state variables
-I   += dN[0] - dN[2] - dN[3] - dN[4];
-A   += dN[1] - dN[5] - dN[6];
-RI1 += dN[4] - dN[7] - dN[8];
-RI2 += dN[7] - dN[9] - dN[10];
+I   += dN[0] - dN[3] - dN[4] - dN[5];
+A   += dN[1] - dN[6] - dN[7] - dN[8];
+RI1 += dN[5] - dN[9] - dN[10] - dN[11];
+RI2 += dN[9] - dN[9] - dN[10];
 RI3 += dN[9] - dN[11] - dN[12];
 RA1 += dN[6] - dN[13] - dN[14];
 RA2 += dN[13] - dN[15] - dN[16];
 RA3 += dN[15] - dN[17] - dN[18];
+
+VSd    += dN[2];
+VRA1d  += dN[8];
 
 C   +=  dN[0];
 W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
