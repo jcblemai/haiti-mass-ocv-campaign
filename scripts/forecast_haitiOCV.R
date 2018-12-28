@@ -23,10 +23,10 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
 
-output_dir <- "output_12-20-2gamma/"
-departement <- 'Artibonite'
-run_level <- 4
-nsim = 30
+#output_dir <- "output_12-20-2gamma/"
+#departement <- 'Artibonite'
+#run_level <- 4
+#nsim = 30
 
 
 liks_stoch <- read_csv(sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv",output_dir, departement, departement, run_level)) 
