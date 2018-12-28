@@ -28,6 +28,26 @@ coef(sirb_cholera)["mu_B"] <- 365/5
 coef(sirb_cholera)["betaB"] <- 0.1
 coef(sirb_cholera)["Rtot_0"] <-25
 
+# Initialize the parameters to estimate (just initial guesses)
+# param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
+# param_est["sigma"] <- .2
+# param_est["rhoA"] <- 1/(365*3)
+# param_est["XrhoI"] <- 0.5
+# param_est["betaB"] <- .1
+# param_est["mu_B"] <-  365/5
+# param_est["XthetaA"] <- 0.5
+# param_est["thetaI"] <- .01
+# param_est["lambda"] <- 0
+# param_est["lambdaR"] <- 10
+# param_est["r"] <- 1
+# param_est["std_W"] <- .001
+# param_est["epsilon"] <- .5
+# param_est["k"] <- 10001
+# param_est["Rtot_0"] <- 0.35
+# param_est["foi_add"] <- 0.001
+# param_est["gammaA"] <- 1/5
+# m_est["gammaI"] <- 1/5
+
 p <- simulate(sirb_cholera, nsim = 10, as.data.frame = T) %>% 
   gather(variable, value, -time, -rain, -sim)  %>% 
   ggplot(aes(x = time, y = value, color = sim)) + 

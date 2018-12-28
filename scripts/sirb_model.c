@@ -69,10 +69,10 @@ reulermultinom(2, RA3, &rate[17], dt, &dN[17]);
 
 // bacteria as continous state variable
 // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
-k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
-k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
-k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
-k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambda, lambdaR, rain, r, D);
+k1 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambdaR, rain, r, D);
+k2 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambdaR, rain, r, D);
+k3 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambdaR, rain, r, D);
+k4 = dt * fB(I, A, B, mu_B, thetaI, thetaA, lambdaR, rain, r, D);
 // bacteria increment
 dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 

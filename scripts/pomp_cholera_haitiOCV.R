@@ -15,7 +15,7 @@ library(magrittr)
 library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
-output_dir <- "output_old/"
+output_dir <- "output/"
 
 
 args = commandArgs(trailingOnly=TRUE)
@@ -153,8 +153,8 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
-param_proc_est_names <- c("sigma", "betaB", "mu_B", "XthetaA", "thetaI", "gammaI", "lambda", 
-                          "lambdaR", "r", "rhoA", "XrhoI", "std_W", "epsilon","k", "foi_add", "gammaA")
+param_proc_est_names <- c("sigma", "betaB", "mu_B", "thetaI", "XthetaA",  "lambdaR", "r",  
+                          "gammaI", "gammaA", "rhoA", "XrhoI", "foi_add", "epsilon","k","std_W")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
@@ -163,13 +163,13 @@ param_iv_est_names <- c("Rtot_0")
 param_proc_fixed_names <- c("H", "D", "mu", "alpha")
 
 ## fixed initial value parameters OK 
-param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
+#param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
 
 # all paramter names to estimate OK
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
 # all fixed parameters OK
-param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
-
+#param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
+param_fixed_names <- param_proc_fixed_names
 # all param names OK
 param_names <- c(param_est_names, param_fixed_names)
 
@@ -209,10 +209,10 @@ sirb.rproc <- Csnippet(readChar(sirb_file, file.info(sirb_file)$size))
 
 # C function to compute the time-derivative of bacterial concentration OK
 derivativeBacteria.c <- " double fB(int I, int A, double B, 
-    double mu_B, double thetaI, double XthetaA, double lambda, double lambdaR, double rain, double r, double D) {
+    double mu_B, double thetaI, double XthetaA, double lambdaR, double rain, double r, double D) {
   double thetaA = thetaI * XthetaA;
   double dB;
-  dB = -mu_B * B +  (1 + lambda * rain + lambdaR * pow(rain, r)) * D * (thetaI * (double) I + thetaA * (double) A);
+  dB = -mu_B * B +  (1 + lambdaR * pow(rain, r)) * D * (thetaI * (double) I + thetaA * (double) A);
   return(dB);
 };
 "
@@ -262,14 +262,12 @@ toEstimationScale <- Csnippet("
   TthetaI = log(thetaI);
   TXrhoI = logit(XrhoI);
   TrhoA = log(rhoA);
-  Tlambda = log(lambda);
   TlambdaR = log(lambdaR);
   Tr = log(r);
   Tstd_W = log(std_W);
   Tepsilon = logit(epsilon);
   Tk = log(k);
   TRtot_0 = logit(Rtot_0);
-  TB_0 = log(B_0);
   Tfoi_add = log(foi_add);
   TgammaA = log(gammaA);
   TgammaI = log(gammaI);
@@ -283,14 +281,12 @@ fromEstimationScale <- Csnippet("
   TXthetaA = expit(XthetaA);
   TrhoA = exp(rhoA);
   TXrhoI = expit(XrhoI);
-  Tlambda = exp(lambda);
   TlambdaR = exp(lambdaR);
   Tr = exp(r);
   Tstd_W = exp(std_W);
   Tepsilon = expit(epsilon);
   Tk = exp(k);
   TRtot_0 = expit(Rtot_0);
-  TB_0 = exp(B_0);
   Tfoi_add = exp(foi_add);
   TgammaA = exp(gammaA);
   TgammaI = exp(gammaI);
@@ -324,9 +320,9 @@ param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
 param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)  # Does not work for gammaI TODO
 
 # Initial Conditions based on forcing (These overwritten by the initilizer function)
-param_fixed["A_0"] <- 3 / param_fixed["H"]
-param_fixed["I_0"] <- 2 / param_fixed["H"]
-param_fixed["B_0"] <- 0 # B0 depends on epsilon and sigma
+#param_fixed["A_0"] <- 3 / param_fixed["H"]
+#param_fixed["I_0"] <- 2 / param_fixed["H"]
+#param_fixed["B_0"] <- 0 # B0 depends on epsilon and sigma
 
 # Cases in the last report:
 # declare matrix in C for the infected before the strat date in 2014
@@ -343,7 +339,6 @@ param_est["betaB"] <- .1
 param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
-param_est["lambda"] <- 0
 param_est["lambdaR"] <- 10
 param_est["r"] <- 1
 param_est["std_W"] <- .001
