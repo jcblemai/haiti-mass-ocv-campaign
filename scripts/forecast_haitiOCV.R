@@ -22,19 +22,10 @@ yearsToDate <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2
 yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset = 2014.0) {
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
-output_dir <- "output_old/"
 
-args = commandArgs(trailingOnly=TRUE)
-if (length(args)==0) {
-  # default departement
-  args[1] = "Artibonite"
-  args[2] = 3
-} else if (length(args)==1) {
-  args[2] = 1
-}
-
-#departement <- args[1]
-run_level <- 3
+output_dir <- "output_12-20-2gamma/"
+departement <- 'Artibonite'
+run_level <- 4
 nsim = 30
 
 
@@ -51,8 +42,8 @@ best_param <- liks %>%
 
 load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
-params <-unlist(best_param[names(coef(sirb_cholera))])
-
+params <- unlist(best_param[names(coef(sirb_cholera))]) %>% as.double()
+names(params) <- names(best_param[names(coef(sirb_cholera))])
 
 
 # input parameters to the model

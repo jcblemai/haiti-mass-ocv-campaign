@@ -21,15 +21,18 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
   args[1] = "Artibonite"
-  args[2] = 3
+  args[2] = 4
 } else if (length(args)==1) {
-  args[2] = 1
+  args[2] = 4
 }
+
 
 departement <- args[1]
 run_level <- as.integer(args[2])
 
-output_dir <- "output/"
+departement <- 'Artibonite'
+run_level <- 3
+output_dir <- "output_12-10-gammaI/"
 #output_dir <- ""
 
 
