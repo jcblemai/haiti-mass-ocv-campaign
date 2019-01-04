@@ -2,45 +2,53 @@ double foi, foi_stoc; // force of infection and its stochastic version
 double dw;            // extra-demographic stochasticity on foi
 double dB;            // deterministic forward time difference of bacteria in the environment
 double k1, k2, k3, k4;  // coefficients of  the Runge-Kutta method
-double r_v_wdn;       // rate of vaccination: 0 if out of time window, r_v if not
-double rate[19];      // vector of all rates in model
-double dN[19];        // vector of transitions between classes during integration timestep
+double rate[39];      // vector of all rates in model
+double dN[94];        // vector of transitions between classes during integration timestep
 
 double thetaA = thetaI * XthetaA;
 double rhoI = rhoA * XrhoI;
+
+int previous_vacc_campaign = TRUE ; /* flag that indicate if we are on the first or second campain */
+double r_v_wdn = 0.0;       // rate of vaccination: 0 if out of time window, r_v if not
+double p1d = 0;
+
 
   // force of infection
 foi = betaB * (B / (1 + B)) + foi_add;
 
 if(std_W > 0.0)
 {
-    dw = rgammawn(std_W, dt);  // white noise (extra-demographic stochasticity)
+    dw = rgammawn(std_W, dt);   // white noise (extra-demographic stochasticity)
     foi_stoc = foi * dw/dt;      // apply stochasticity
 } else
 {
     foi_stoc = foi;
 }
-
-// vaccination window
-
-if (t >= t_vacc_start && t <= (t_vacc_end + dt))
-{
-    r_v_wdn = (r_v / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
+if (t <= (t_vacc_end_alt + dt)){
+	previous_vacc_campaign = TRUE;
+	if (t >= t_vacc_start_alt && t <= (t_vacc_end_alt + dt)) {
+    	r_v_wdn = (r_v_alt / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
 }
-else
-{
-    r_v_wdn = 0.0;
+	p1d = p1d_alt;
+} else {
+	previous_vacc_campaign = FALSE;
+	if (t >= t_vacc_start && t <= (t_vacc_end + dt)) {
+    	r_v_wdn = (r_v  / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
 }
+	p1d = p1d_reg;
+}
+double pdd = 1 - p1d;
 
 // time in the vacc_eff referential. We assume different timing for 1d and 2d
-t_eff = t - (t_vacc_start + (t_vacc_end - t_vacc_start)/2)
+double t_eff =     t - (t_vacc_start + (t_vacc_end - t_vacc_start)/2);
+double t_eff_alt = t - (t_vacc_start_alt + (t_vacc_end_alt - t_vacc_start_alt)/2);
 
 // define transition rates for each type of event (i.e what multplies the thing)
 // S compartment
 rate[0] = sigma * foi_stoc;   // infections
 rate[1] = (1 - sigma) * foi_stoc;   // asymptomatic infections
-rate[2] = p1d * r_v_wdn
-rate[3] = pdd * r_v_wdn
+rate[2] = p1d * r_v_wdn;
+rate[3] = pdd * r_v_wdn;
 // I compartment
 rate[4] = mu;           // natural deaths
 rate[5] = alpha;        // cholera-induced deaths
@@ -48,28 +56,28 @@ rate[6] = gammaI;       // recovery from infection
 // A compartment
 rate[7] = mu;           // natural death
 rate[8] = gammaA;       // symptoms development
-rate[9] = p1d * r_v_wdn
-rate[10] = pdd * r_v_wdn
+rate[9] = p1d * r_v_wdn;
+rate[10] = pdd * r_v_wdn;
 // RI1,2,3 compartment
 rate[11] = 3*rhoI;        // loss of natural immunity
 rate[12] = mu;            // natural death
-rate[13] = p1d * r_v_wdn
-rate[14] = pdd * r_v_wdn
+rate[13] = p1d * r_v_wdn;
+rate[14] = pdd * r_v_wdn;
 // RA1,2,3 compartment
 rate[15] = 3*rhoA;        // loss of natural immunity
 rate[16] = mu;            // natural death
-rate[17] = p1d * r_v_wdn
-rate[18] = pdd * r_v_wdn
+rate[17] = p1d * r_v_wdn;
+rate[18] = pdd * r_v_wdn;
 // V1d_S compartments
 rate[19] = sigma       * (1 - eff_v_1d(t_eff)) * foi_stoc; // symptomatic infections
 rate[20] = (1 - sigma) * (1 - eff_v_1d(t_eff)) * foi_stoc; // asymptomatic infections
 rate[21] = mu;          // natural death
 // V1d_RI1,2,3 compartment and V2d_RI1,2,3 compartment
 rate[22] = mu;          // natural death
-rate[23] = 3*rhoI
+rate[23] = 3*rhoI;
 // V1d_RA1,2,3 compartment and V2d_RA1,2,3 compartment
 rate[24] = mu;          // natural death
-rate[25] = 3*rhoA
+rate[25] = 3*rhoA;
 // V2d_S compartments
 rate[26] = sigma * (1 - eff_v_2d(t_eff)) * foi_stoc; // symptomatic infections
 rate[27] = (1 - sigma) * (1 - eff_v_2d(t_eff)) * foi_stoc; // asymptomatic infections
@@ -82,10 +90,10 @@ rate[30] = (1 - sigma) * (1 - eff_v_1d(t_eff_alt)) * foi_stoc; // asymptomatic i
 rate[31] = mu;          // natural death
 // V1d_RI1,2,3 compartment and V2d_RI1,2,3 compartment
 rate[32] = mu;          // natural death
-rate[33] = 3*rhoI
+rate[33] = 3*rhoI;
 // V1d_RA1,2,3 compartment and V2d_RA1,2,3 compartment
 rate[34] = mu;          // natural death
-rate[35] = 3*rhoA
+rate[35] = 3*rhoA;
 // V2d_S compartments
 rate[36] = sigma *       (1 - eff_v_2d(t_eff_alt)) * foi_stoc; // symptomatic infections
 rate[37] = (1 - sigma) * (1 - eff_v_2d(t_eff_alt)) * foi_stoc; // asymptomatic infections
@@ -121,24 +129,23 @@ reulermultinom(2, VRI3dd,&rate[22], dt, &dN[57]);
 reulermultinom(2, VRA1dd,&rate[24], dt, &dN[59]);
 reulermultinom(2, VRA2dd,&rate[24], dt, &dN[61]);
 reulermultinom(2, VRA3dd,&rate[24], dt, &dN[63]);
-
 /* For the previous vaccination campain */
 /* Vaccinated 1 dose */
-reulermultinom(3, VSd,   &rate[29], dt, &dN[65]);
-reulermultinom(2, VRI1d, &rate[32], dt, &dN[68]);
-reulermultinom(2, VRI2d, &rate[32], dt, &dN[70]);
-reulermultinom(2, VRI3d, &rate[32], dt, &dN[72]);
-reulermultinom(2, VRA1d, &rate[34], dt, &dN[74]);
-reulermultinom(2, VRA2d, &rate[34], dt, &dN[76]);
-reulermultinom(2, VRA3d, &rate[34], dt, &dN[78]);
+reulermultinom(3, VSd_alt,   &rate[29], dt, &dN[65]);
+reulermultinom(2, VRI1d_alt, &rate[32], dt, &dN[68]);
+reulermultinom(2, VRI2d_alt, &rate[32], dt, &dN[70]);
+reulermultinom(2, VRI3d_alt, &rate[32], dt, &dN[72]);
+reulermultinom(2, VRA1d_alt, &rate[34], dt, &dN[74]);
+reulermultinom(2, VRA2d_alt, &rate[34], dt, &dN[76]);
+reulermultinom(2, VRA3d_alt, &rate[34], dt, &dN[78]);
 /* Vaccinated 2 doses */
-reulermultinom(3, VSdd,  &rate[36], dt, &dN[80]);
-reulermultinom(2, VRI1dd,&rate[32], dt, &dN[83]);
-reulermultinom(2, VRI2dd,&rate[32], dt, &dN[85]);
-reulermultinom(2, VRI3dd,&rate[32], dt, &dN[87]);
-reulermultinom(2, VRA1dd,&rate[34], dt, &dN[89]);
-reulermultinom(2, VRA2dd,&rate[34], dt, &dN[91]);
-reulermultinom(2, VRA3dd,&rate[34], dt, &dN[93]);
+reulermultinom(3, VSdd_alt,  &rate[36], dt, &dN[80]);
+reulermultinom(2, VRI1dd_alt,&rate[32], dt, &dN[83]);
+reulermultinom(2, VRI2dd_alt,&rate[32], dt, &dN[85]);
+reulermultinom(2, VRI3dd_alt,&rate[32], dt, &dN[87]);
+reulermultinom(2, VRA1dd_alt,&rate[34], dt, &dN[89]);
+reulermultinom(2, VRA2dd_alt,&rate[34], dt, &dN[91]);
+reulermultinom(2, VRA3dd_alt,&rate[34], dt, &dN[93]);
 
 // bacteria as continous state variable
 // implement Runge-Kutta integration assuming S, I, R, V* stay constant during dt
@@ -175,7 +182,7 @@ if (previous_vacc_campaign){
 	VRI2d_alt  += dN[17];
 	VRI3d_alt  += dN[21];
 	VRA1d_alt  += dN[9] + dN[25] ;
-	VRA2d_alt  += dn[29];
+	VRA2d_alt  += dN[29];
 	VRA3d_alt  += dN[33];
 	
 	VSdd_alt    += dN[3];
@@ -191,7 +198,7 @@ if (previous_vacc_campaign){
 	VRI2d  += dN[17];
 	VRI3d  += dN[21];
 	VRA1d  += dN[9] + dN[25] ;
-	VRA2d  += dn[29];
+	VRA2d  += dN[29];
 	VRA3d  += dN[33];
 	
 	VSdd    += dN[3];
@@ -237,10 +244,6 @@ VRI3dd_alt  +=  dN[56+20] - dN[57+20] - dN[58+20];
 VRA1dd_alt  += - dN[59+20] - dN[60+20];
 VRA2dd_alt  +=  dN[60+20] - dN[61+20] - dN[62+20];
 VRA3dd_alt  +=  dN[62+20] - dN[63+20] - dN[64+20];
-
-
-
-
 
 
 C   +=  dN[0] + dN[35] + dN[50] + dN[35+20] + dN[50+20];

@@ -21,7 +21,7 @@ output_dir <- "output/"
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Sud-Est"
+  args[1] = "Artibonite"
 }
 departement <- args[1]
 
@@ -149,7 +149,14 @@ if(make_plots) {
 # Set variables -----------------------------------------------------------
 
 # define stat variable names OK
-state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3", "B", "C", "W")
+state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3",
+ "VSd", "VRI1d", "VRI2d", "VRI3d", "VRA1d", "VRA2d", "VRA3d",
+ "VSdd", "VRI1dd", "VRI2dd", "VRI3dd", "VRA1dd", "VRA2dd", "VRA3dd",
+"VSd_alt", "VRI1d_alt", "VRI2d_alt", "VRI3d_alt", "VRA1d_alt", "VRA2d_alt", "VRA3d_alt",
+ "VSdd_alt", "VRI1dd_alt", "VRI2dd_alt", "VRI3dd_alt", "VRA1dd_alt", "VRA2dd_alt", "VRA3dd_alt",
+"B", "C", "W")
+
+
 
 # define parameter names for pomp
 ## process model parameters names to estimate OK
@@ -162,13 +169,9 @@ param_iv_est_names <- c("Rtot_0")
 ## fixed process model parameters  OK
 param_proc_fixed_names <- c("H", "D", "mu", "alpha")
 
-## fixed initial value parameters OK 
-#param_iv_fixed_names <- c("I_0","A_0", "B_0", "RI1_0", "RI2_0", "RI3_0", "RA1_0", "RA2_0", "RA3_0")
-
 # all paramter names to estimate OK
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
 # all fixed parameters OK
-#param_fixed_names <- c(param_proc_fixed_names, param_iv_fixed_names)
 param_fixed_names <- param_proc_fixed_names
 # all param names OK
 param_names <- c(param_est_names, param_fixed_names)
@@ -203,7 +206,7 @@ rmeas <- Csnippet("
 
 # Process model ----------------------------------------------------------------- OK
 
-sirb_file <- 'scripts/sirb_model.c'
+sirb_file <- 'scripts/sirb_model_vacc.c'
 
 sirb.rproc <- Csnippet(readChar(sirb_file, file.info(sirb_file)$size))
 
@@ -248,7 +251,47 @@ initalizeStates <- Csnippet("
   B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
   C   = 0;
   W   = 0;
-  ")
+ VSd = 0;
+ VRI1d = 0;
+ VRI2d = 0;
+ VRI3d = 0;
+ VRA1d = 0;
+ VRA2d = 0;
+ VRA3d = 0;
+ VSdd = 0;
+ VRI1dd = 0;
+ VRI2dd = 0;
+ VRI3dd = 0;
+ VRA1dd = 0;
+ VRA2dd = 0;
+ VRA3dd = 0;
+ VSd_alt = 0;
+ VRI1d_alt = 0;
+ VRI2d_alt = 0;
+ VRI3d_alt = 0;
+ VRA1d_alt = 0;
+ VRA2d_alt = 0;
+ VRA3d_alt = 0;
+ VSdd_alt = 0;
+ VRI1dd_alt = 0;
+ VRI2dd_alt = 0;
+ VRI3dd_alt = 0;
+ VRA1dd_alt = 0;
+ VRA2dd_alt = 0;
+ VRA3dd_alt = 0;
+ ")
+
+eff_v_1d.c <- " double eff_v_1d(double t_since_vacc) {
+  return 0;
+};
+"
+
+eff_v_2d.c <- " double eff_v_2d(double t_since_vacc) {
+  return 0;
+};
+"
+
+
 
 
 # Parameter transformations -----------------------------------------------
@@ -319,10 +362,6 @@ param_proc_fixed['D'] <- densities[departement]
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
 param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)  # Does not work for gammaI TODO
 
-# Initial Conditions based on forcing (These overwritten by the initilizer function)
-#param_fixed["A_0"] <- 3 / param_fixed["H"]
-#param_fixed["I_0"] <- 2 / param_fixed["H"]
-#param_fixed["B_0"] <- 0 # B0 depends on epsilon and sigma
 
 # Cases in the last report:
 # declare matrix in C for the infected before the strat date in 2014
@@ -355,6 +394,16 @@ dt_yrs <- 1/365.25 * .2
 # adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days) TODO CHECK
 params <- c(param_est, param_fixed)  
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
+
+
+t_vacc_start_alt = 2016
+t_vacc_end_alt = 2016
+t_vacc_start = 2016
+t_vacc_end = 2016
+r_v_year = 2016
+r_v_alt_year = 2016
+p1d_alt = 0
+p1d_reg = 0
 
 sirb_cholera <- pomp(
   # set data
@@ -394,8 +443,14 @@ sirb_cholera <- pomp(
   fromEstimationScale = fromEstimationScale,
   # global C definitions
   globals = str_c(
+    sprintf("double t_vacc_start_alt = %f; double t_vacc_end_alt = %f;", t_vacc_start_alt, t_vacc_end_alt),
+    sprintf("double t_vacc_start = %f; double t_vacc_end = %f;", t_vacc_start, t_vacc_end),
+    sprintf("double r_v = %f; double r_v_alt = %f;", r_v_year, r_v_alt_year),
+    sprintf("double p1d_alt = %f; double p1d_reg = %f;", p1d_alt, p1d_reg),
     derivativeBacteria.c,
     cases_at_t_start.string,
+    eff_v_1d.c,
+    eff_v_2d.c,
     sep = " ")
 )
 

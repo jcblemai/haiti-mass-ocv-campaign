@@ -8,7 +8,8 @@
   - Forecast with real infected
   - Include previous vacc campaigns
   - Fix ??nitial condition
-  - Beta Drop to match the drop with two beta   
+  - Beta Drop to match the drop with two beta
+  - change t_eff for dd and 1d
 
 ## Data
 

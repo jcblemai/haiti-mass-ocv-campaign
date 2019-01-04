@@ -19,8 +19,8 @@ if (length(args)==0) {
   args[1] = "Artibonite"
 }
 departement <- args[1]
-
-load(paste0("sirb_cholera_pomped_", departement, ".rda")
+output_dir <- "output/"
+load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda")
      )
 
 
