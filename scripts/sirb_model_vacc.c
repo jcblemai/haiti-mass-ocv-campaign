@@ -156,10 +156,12 @@ S = -dN[0] - dN[1] /* FOI */
 + dN[4] + dN[7] + dN[12] + dN[16] + dN[20] + dN[24] + dN[28] + dN[32] /* Mortality of nn vacc: rebirth*/
 + dN[19] + dN[31]  /* Recovery */
 + dN[37] + dN[38] + dN[40] + dN[42] + dN[44] + dN[46] + dN[48]        /* Mortality of 1d vacc: rebirth*/
-+ dN[52] + dN[53] + dN[55] + dN[57] + dN[59] + dN[61] + dN[63]
++ dN[52] + dN[53] + dN[55] + dN[57] + dN[59] + dN[61] + dN[63]		   /* Mortality of dd vacc: rebirth*/
++ dN[37+20] + dN[38+20] + dN[40+20] + dN[42+20] + dN[44+20] + dN[46+20] + dN[48+20]        /* Prev campain*/
++ dN[52+20] + dN[53+20] + dN[55+20] + dN[57+20] + dN[59+20] + dN[61+20] + dN[63+20];		   
 
-I   += dN[0] + dN[35] + dN[50] - dN[4] - dN[5] - dN[6];
-A   += dN[1] + dN[36] + dN[51]- dN[7] - dN[8] - dN[9] - dN[10];
+I   += dN[0] + dN[35] + dN[50] + dN[35+20] + dN[50+20] - dN[4] - dN[5] - dN[6];
+A   += dN[1] + dN[36] + dN[51] + dN[36+20] + dN[51+20] - dN[7] - dN[8] - dN[9] - dN[10];
 RI1 += dN[6] -  dN[11] - dN[12] - dN[13] - dN[14] ;
 RI2 += dN[11] - dN[15] - dN[16] - dN[17] - dN[18];
 RI3 += dN[15] - dN[19] - dN[20] - dN[21] - dN[22];
@@ -167,59 +169,83 @@ RA1 += dN[8]  - dN[23] - dN[24] - dN[25] - dN[26];
 RA2 += dN[23] - dN[27] - dN[28] - dN[29] - dN[30];
 RA3 += dN[27] - dN[31] - dN[32] - dN[33] - dN[34];
 
-VSd    += dN[2] + dN[43] + dN[49] - dN[35] - dN[36] - dN[37];
-VRI1d  += dN[13] - dN[38] - dN[39];
-VRI2d  += dN[17] + dN[39] - dN[40] - dN[41];
-VRI3d  += dN[21] + dN[41] - dN[42] - dN[43];
-VRA1d  += dN[9] + dN[25] - dN[44] - dN[45];
-VRA2d  += dn[29] + dN[45] - dN[46] - dN[47];
-VRA3d  += dN[33] + dN[47] - dN[48] - dN[49];
+if (previous_vacc_campaign){
+	VSd_alt    += dN[2];
+	VRI1d_alt  += dN[13];
+	VRI2d_alt  += dN[17];
+	VRI3d_alt  += dN[21];
+	VRA1d_alt  += dN[9] + dN[25] ;
+	VRA2d_alt  += dn[29];
+	VRA3d_alt  += dN[33];
+	
+	VSdd_alt    += dN[3];
+	VRI1dd_alt  += dN[14];
+	VRI2dd_alt  += dN[18];
+	VRI3dd_alt  += dN[22];
+	VRA1dd_alt  += dN[10] + dN[26];
+	VRA2dd_alt  += dN[30];
+	VRA3dd_alt  += dN[34];
+} else {
+	VSd    += dN[2];
+	VRI1d  += dN[13];
+	VRI2d  += dN[17];
+	VRI3d  += dN[21];
+	VRA1d  += dN[9] + dN[25] ;
+	VRA2d  += dn[29];
+	VRA3d  += dN[33];
+	
+	VSdd    += dN[3];
+	VRI1dd  += dN[14];
+	VRI2dd  += dN[18];
+	VRI3dd  += dN[22];
+	VRA1dd  += dN[10] + dN[26];
+	VRA2dd  += dN[30];
+	VRA3dd  += dN[34];
 
-VSdd    += dN[3] + dN[58] + dN[64] - dN[50] - dN[51] - dN[52];
-VRI1dd  += dN[14] - dN[53] - dN[54];
-VRI2dd  += dN[18] + dN[54] - dN[55] - dN[56] ;
-VRI3dd  += dN[22] + dN[56] - dN[57] - dN[58];
-VRA1dd  += dN[10] + dN[26] - dN[59] - dN[60];
-VRA2dd  += dN[30] + dN[60] - dN[61] - dN[62];
-VRA3dd  += dN[34] + dN[62] - dN[63] - dN[64];
+}
+
+VSd    += dN[43] + dN[49] - dN[35] - dN[36] - dN[37];
+VRI1d  += - dN[38] - dN[39];
+VRI2d  += dN[39] - dN[40] - dN[41];
+VRI3d  += dN[41] - dN[42] - dN[43];
+VRA1d  += - dN[44] - dN[45];
+VRA2d  += dN[45] - dN[46] - dN[47];
+VRA3d  += dN[47] - dN[48] - dN[49];
+
+VSdd    +=  dN[58] + dN[64] - dN[50] - dN[51] - dN[52];
+VRI1dd  += - dN[53] - dN[54];
+VRI2dd  +=  dN[54] - dN[55] - dN[56] ;
+VRI3dd  +=  dN[56] - dN[57] - dN[58];
+VRA1dd  += - dN[59] - dN[60];
+VRA2dd  +=  dN[60] - dN[61] - dN[62];
+VRA3dd  +=  dN[62] - dN[63] - dN[64];
+
+/* *previous* vacccination campain */
+
+VSd_alt    += dN[43+20] + dN[49+20] - dN[35+20] - dN[36+20] - dN[37+20];
+VRI1d_alt  += - dN[38+20] - dN[39+20];
+VRI2d_alt  += dN[39+20] - dN[40+20] - dN[41+20];
+VRI3d_alt  += dN[41+20] - dN[42+20] - dN[43+20];
+VRA1d_alt  += - dN[44+20] - dN[45+20];
+VRA2d_alt  += dN[45+20] - dN[46+20] - dN[47+20];
+VRA3d_alt  += dN[47+20] - dN[48+20] - dN[49+20];
+
+VSdd_alt    +=  dN[58+20] + dN[64+20] - dN[50+20] - dN[51+20] - dN[52+20];
+VRI1dd_alt  += - dN[53+20] - dN[54+20];
+VRI2dd_alt  +=  dN[54+20] - dN[55+20] - dN[56+20] ;
+VRI3dd_alt  +=  dN[56+20] - dN[57+20] - dN[58+20];
+VRA1dd_alt  += - dN[59+20] - dN[60+20];
+VRA2dd_alt  +=  dN[60+20] - dN[61+20] - dN[62+20];
+VRA3dd_alt  +=  dN[62+20] - dN[63+20] - dN[64+20];
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ---- Prevuous vaccination campaign */
-VSd_alt    += dN[2];
-VRI1d_alt  += dN[8];
-VRI2d_alt  += ;
-VRI3d_alt  += ;
-VRA1d_alt  += ;
-VRA2d_alt  += ;
-VRA3d_alt  += ;
-VSdd_alt    += ;
-VRI2dd_alt  += ;
-VRI3dd_alt  += ;
-VRA1dd_alt  += ;
-VRA2dd_alt  += ;
-VRA3dd_alt  += ;
-
-
-C   +=  dN[0];
+C   +=  dN[0] + dN[35] + dN[50] + dN[35+20] + dN[50+20];
 W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
 B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
 // susceptibles so as to match total population
-S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
+//S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
