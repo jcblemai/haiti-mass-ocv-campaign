@@ -282,12 +282,12 @@ initalizeStates <- Csnippet("
  ")
 
 eff_v_1d.c <- " double eff_v_1d(double t_since_vacc) {
-  return 0;
+  return 0.5;
 };
 "
 
 eff_v_2d.c <- " double eff_v_2d(double t_since_vacc) {
-  return 0;
+  return 0.5;
 };
 "
 
@@ -396,14 +396,14 @@ params <- c(param_est, param_fixed)
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 
 
-t_vacc_start_alt = 2016
-t_vacc_end_alt = 2016
-t_vacc_start = 2016
+t_vacc_start_alt = 2016.1
+t_vacc_end_alt = 2016.2
+t_vacc_start = 20160
 t_vacc_end = 2016
-r_v_year = 2016
+r_v_year = 200016
 r_v_alt_year = 2016
-p1d_alt = 0
-p1d_reg = 0
+p1d_alt = 0.5
+p1d_reg = 0.5
 
 sirb_cholera <- pomp(
   # set data

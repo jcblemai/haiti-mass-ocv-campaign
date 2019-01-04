@@ -28,6 +28,40 @@ density:
   - Sud: 292
   - Sud-Est: 311
 
+# Summary previous vaccination campagain:
+# Grande Anse: 
+#Target pop :  37616 + 32635 + 8900 + 27342 + 40041 + 138802 + 24155 + 32197 + 46149 = 387837
+#p2d =       (21255 + 17270 + 5688 + 18979 + 26480 + 90245 + 17882 + 19732 + 26897) /387837 = 0.63
+
+
+t_vacc_start_alt:
+   - Artibonite: 353
+  - Centre: 214
+  - Grande_Anse: 245
+  - Nippes: 270
+  - Nord: 505
+  - Nord-Est: 243
+  - Nord-Ouest: 347
+  - Ouest: 809
+  - Sud: 292
+  - Sud-Est: 311
+
+t_vacc_end_alt:
+  - Artibonite: 353
+  - Centre: 214
+  - Grande_Anse: 245
+  - Nippes: 270
+  - Nord: 505
+  - Nord-Est: 243
+  - Nord-Ouest: 347
+  - Ouest: 809
+  - Sud: 292
+  - Sud-Est: 311
+
+#r_v_year = 200016
+#r_v_alt_year = 2016
+#p1d_alt = 0.5
+
 # rate of loss of infection
 #gammaA: 0.2
 #gammaI: 0.2

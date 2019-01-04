@@ -164,11 +164,11 @@ S = -dN[0] - dN[1] /* FOI */
 + dN[19] + dN[31]  /* Recovery */
 + dN[37] + dN[38] + dN[40] + dN[42] + dN[44] + dN[46] + dN[48]        /* Mortality of 1d vacc: rebirth*/
 + dN[52] + dN[53] + dN[55] + dN[57] + dN[59] + dN[61] + dN[63]		   /* Mortality of dd vacc: rebirth*/
-+ dN[37+20] + dN[38+20] + dN[40+20] + dN[42+20] + dN[44+20] + dN[46+20] + dN[48+20]        /* Prev campain*/
-+ dN[52+20] + dN[53+20] + dN[55+20] + dN[57+20] + dN[59+20] + dN[61+20] + dN[63+20];		   
++ dN[37+30] + dN[38+30] + dN[40+30] + dN[42+30] + dN[44+30] + dN[46+30] + dN[48+30]        /* Prev campain*/
++ dN[52+30] + dN[53+30] + dN[55+30] + dN[57+30] + dN[59+30] + dN[61+30] + dN[63+30];		   
 
-I   += dN[0] + dN[35] + dN[50] + dN[35+20] + dN[50+20] - dN[4] - dN[5] - dN[6];
-A   += dN[1] + dN[36] + dN[51] + dN[36+20] + dN[51+20] - dN[7] - dN[8] - dN[9] - dN[10];
+I   += dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30] - dN[4] - dN[5] - dN[6];
+A   += dN[1] + dN[36] + dN[51] + dN[36+30] + dN[51+30] - dN[7] - dN[8] - dN[9] - dN[10];
 RI1 += dN[6] -  dN[11] - dN[12] - dN[13] - dN[14] ;
 RI2 += dN[11] - dN[15] - dN[16] - dN[17] - dN[18];
 RI3 += dN[15] - dN[19] - dN[20] - dN[21] - dN[22];
@@ -229,24 +229,24 @@ VRA3dd  +=  dN[62] - dN[63] - dN[64];
 
 /* *previous* vacccination campain */
 
-VSd_alt    += dN[43+20] + dN[49+20] - dN[35+20] - dN[36+20] - dN[37+20];
-VRI1d_alt  += - dN[38+20] - dN[39+20];
-VRI2d_alt  += dN[39+20] - dN[40+20] - dN[41+20];
-VRI3d_alt  += dN[41+20] - dN[42+20] - dN[43+20];
-VRA1d_alt  += - dN[44+20] - dN[45+20];
-VRA2d_alt  += dN[45+20] - dN[46+20] - dN[47+20];
-VRA3d_alt  += dN[47+20] - dN[48+20] - dN[49+20];
+VSd_alt    += dN[43+30] + dN[49+30] - dN[35+30] - dN[36+30] - dN[37+30];
+VRI1d_alt  += - dN[38+30] - dN[39+30];
+VRI2d_alt  += dN[39+30] - dN[40+30] - dN[41+30];
+VRI3d_alt  += dN[41+30] - dN[42+30] - dN[43+30];
+VRA1d_alt  += - dN[44+30] - dN[45+30];
+VRA2d_alt  += dN[45+30] - dN[46+30] - dN[47+30];
+VRA3d_alt  += dN[47+30] - dN[48+30] - dN[49+30];
 
-VSdd_alt    +=  dN[58+20] + dN[64+20] - dN[50+20] - dN[51+20] - dN[52+20];
-VRI1dd_alt  += - dN[53+20] - dN[54+20];
-VRI2dd_alt  +=  dN[54+20] - dN[55+20] - dN[56+20] ;
-VRI3dd_alt  +=  dN[56+20] - dN[57+20] - dN[58+20];
-VRA1dd_alt  += - dN[59+20] - dN[60+20];
-VRA2dd_alt  +=  dN[60+20] - dN[61+20] - dN[62+20];
-VRA3dd_alt  +=  dN[62+20] - dN[63+20] - dN[64+20];
+VSdd_alt    +=  dN[58+30] + dN[64+30] - dN[50+30] - dN[51+30] - dN[52+30];
+VRI1dd_alt  += - dN[53+30] - dN[54+30];
+VRI2dd_alt  +=  dN[54+30] - dN[55+30] - dN[56+30] ;
+VRI3dd_alt  +=  dN[56+30] - dN[57+30] - dN[58+30];
+VRA1dd_alt  += - dN[59+30] - dN[60+30];
+VRA2dd_alt  +=  dN[60+30] - dN[61+30] - dN[62+30];
+VRA3dd_alt  +=  dN[62+30] - dN[63+30] - dN[64+30];
 
 
-C   +=  dN[0] + dN[35] + dN[50] + dN[35+20] + dN[50+20];
+C   +=  dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30];
 W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
 B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
