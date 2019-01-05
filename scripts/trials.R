@@ -16,7 +16,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Artibonite"
+  args[1] = "Sud"
 }
 departement <- args[1]
 output_dir <- "output/"

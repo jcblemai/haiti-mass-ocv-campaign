@@ -21,7 +21,7 @@ output_dir <- "output/"
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Artibonite"
+  args[1] = "Sud"
 }
 departement <- args[1]
 
@@ -357,6 +357,23 @@ densities <- unlist(flatten(input_parameters["density"]))
 param_proc_fixed['H'] <- populations[departement]
 param_proc_fixed['D'] <- densities[departement]
 
+p1d_alt_year  <- unlist(flatten(input_parameters["p1d_alt_year"]))
+nb_doses_alt_year <- unlist(flatten(input_parameters["nb_doses_alt_year"]))
+t_vacc_start_alt  <- unlist(flatten(input_parameters["t_vacc_start_alt"]))
+t_vacc_end_alt <- unlist(flatten(input_parameters["t_vacc_end_alt"]))
+
+# Vaccination information:
+t_vacc_start_alt = dateToYears(as.Date(t_vacc_start_alt[departement]))
+t_vacc_end_alt   = dateToYears(as.Date(t_vacc_end_alt[departement]))
+t_vacc_start = 20160
+t_vacc_end = 2016
+r_v_year = 200016
+r_v_alt_year = nb_doses_alt_year[departement]/(t_vacc_end_alt - t_vacc_start_alt)
+r_v_alt_year <- 100000
+p1d_alt = p1d_alt_year[departement]
+p1d_reg = 0.5
+
+
 
 # Initialize the fixed parameters
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
@@ -395,15 +412,6 @@ dt_yrs <- 1/365.25 * .2
 params <- c(param_est, param_fixed)  
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 
-
-t_vacc_start_alt = 2016.1
-t_vacc_end_alt = 2016.2
-t_vacc_start = 20160
-t_vacc_end = 2016
-r_v_year = 200016
-r_v_alt_year = 2016
-p1d_alt = 0.5
-p1d_reg = 0.5
 
 sirb_cholera <- pomp(
   # set data
