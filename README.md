@@ -8,10 +8,12 @@
   - Check simulation to not repeat error
 
 ### TODO vaccination
-  - Write down data for previous vacc campaign (like what I did for Artibonite)
   - Put the table for efficacity into the eff_function
   - change t_eff for dd and 1d
-  - Finally make so that we can changed v_eff and every parameter choosing a scenario, a posteriori
+  - Damiano:
+    - How to read the table for vaccination
+    - Who can be vaccinated again
+    
 
 ## Data
 

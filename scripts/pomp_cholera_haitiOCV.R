@@ -169,10 +169,13 @@ param_iv_est_names <- c("Rtot_0")
 ## fixed process model parameters  OK
 param_proc_fixed_names <- c("H", "D", "mu", "alpha")
 
+# Vaccination senario:
+param_vacc_fixed_names <- c("t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year")
+
 # all paramter names to estimate OK
 param_est_names <- c(param_proc_est_names, param_iv_est_names)
 # all fixed parameters OK
-param_fixed_names <- param_proc_fixed_names
+param_fixed_names <- c(param_proc_fixed_names, param_vacc_fixed_names)
 # all param names OK
 param_names <- c(param_est_names, param_fixed_names)
 
@@ -281,15 +284,14 @@ initalizeStates <- Csnippet("
  VRA3dd_alt = 0;
  ")
 
-eff_v_1d.c <- " double eff_v_1d(double t_since_vacc) {
-  return 0.5;
-};
-"
 
-eff_v_2d.c <- " double eff_v_2d(double t_since_vacc) {
-  return 0.5;
+eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " double eff_v_1d(double t_since_vacc, int scenario) {
+  if (t_since_vacc < 1) 
+    return eff_v_2d(t_since_vacc, scenario);
+  else
+   return 0;
 };
-"
+")
 
 
 
@@ -365,13 +367,8 @@ t_vacc_end_alt <- unlist(flatten(input_parameters["t_vacc_end_alt"]))
 # Vaccination information:
 t_vacc_start_alt = dateToYears(as.Date(t_vacc_start_alt[departement]))
 t_vacc_end_alt   = dateToYears(as.Date(t_vacc_end_alt[departement]))
-t_vacc_start = 20160
-t_vacc_end = 2016
-r_v_year = 200016
 r_v_alt_year = nb_doses_alt_year[departement]/(t_vacc_end_alt - t_vacc_start_alt)
-r_v_alt_year <- 100000
 p1d_alt = p1d_alt_year[departement]
-p1d_reg = 0.5
 
 
 
@@ -380,7 +377,7 @@ param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
 param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)  # Does not work for gammaI TODO
 
 
-# Cases in the last report:
+#Cases in the last report:
 # declare matrix in C for the infected before the strat date in 2014
 cases_at_t_start <- cases %>% filter(dateToYears(date) <= t_start) %>% tail(n=1)%>% select('cases') %>% unlist()
 cases_at_t_start.string <- sprintf("double cases0 = %i;", cases_at_t_start)
@@ -391,7 +388,7 @@ param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
 param_est["sigma"] <- .2
 param_est["rhoA"] <- 1/(365*3)
 param_est["XrhoI"] <- 0.5
-param_est["betaB"] <- .1
+param_est["betaB"] <- .001
 param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5
 param_est["thetaI"] <- .01
@@ -404,6 +401,11 @@ param_est["Rtot_0"] <- 0.35
 param_est["foi_add"] <- 0.001
 param_est["gammaA"] <- 1/5
 param_est["gammaI"] <- 1/5
+
+param_est["t_vacc_start"] <- 0
+param_est["t_vacc_end"] <- 0
+param_est["r_v_year"] <- 0
+param_est["p1d_reg"] <- 0
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
@@ -452,13 +454,11 @@ sirb_cholera <- pomp(
   # global C definitions
   globals = str_c(
     sprintf("double t_vacc_start_alt = %f; double t_vacc_end_alt = %f;", t_vacc_start_alt, t_vacc_end_alt),
-    sprintf("double t_vacc_start = %f; double t_vacc_end = %f;", t_vacc_start, t_vacc_end),
-    sprintf("double r_v = %f; double r_v_alt = %f;", r_v_year, r_v_alt_year),
-    sprintf("double p1d_alt = %f; double p1d_reg = %f;", p1d_alt, p1d_reg),
+    sprintf("double r_v_alt = %f;", r_v_alt_year),
+    sprintf("double p1d_alt = %f;", p1d_alt),
     derivativeBacteria.c,
     cases_at_t_start.string,
-    eff_v_1d.c,
-    eff_v_2d.c,
+    eff_v.c,
     sep = " ")
 )
 

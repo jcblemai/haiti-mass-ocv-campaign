@@ -12,6 +12,15 @@ int previous_vacc_campaign = TRUE ; /* flag that indicate if we are on the first
 double r_v_wdn = 0.0;       // rate of vaccination: 0 if out of time window, r_v if not
 double p1d = 0;
 
+int scenario = 1;
+
+if (p1d_reg < 2.)
+	scenario = 3;
+else if (p1d_reg < 12)
+	scenario = 1;
+else if (p1d_reg < 25)
+	scenario = 2;
+
 
   // force of infection
 foi = betaB * (B / (1 + B)) + foi_add;
@@ -33,11 +42,13 @@ if (t <= (t_vacc_end_alt + dt)){
 } else {
 	previous_vacc_campaign = FALSE;
 	if (t >= t_vacc_start && t <= (t_vacc_end + dt)) {
-    	r_v_wdn = (r_v  / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
+    	r_v_wdn = (r_v_year  / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
 }
 	p1d = p1d_reg;
 }
 double pdd = 1 - p1d;
+if ((S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3) < 1000)
+	r_v_wdn = 0;
 
 // time in the vacc_eff referential. We assume different timing for 1d and 2d
 double t_eff =     t - (t_vacc_start + (t_vacc_end - t_vacc_start)/2);
@@ -69,8 +80,8 @@ rate[16] = mu;            // natural death
 rate[17] = p1d * r_v_wdn;
 rate[18] = pdd * r_v_wdn;
 // V1d_S compartments
-rate[19] = sigma       * (1 - eff_v_1d(t_eff)) * foi_stoc; // symptomatic infections
-rate[20] = (1 - sigma) * (1 - eff_v_1d(t_eff)) * foi_stoc; // asymptomatic infections
+rate[19] = sigma       * (1 - eff_v_1d(t_eff, scenario)) * foi_stoc; // symptomatic infections
+rate[20] = (1 - sigma) * (1 - eff_v_1d(t_eff, scenario)) * foi_stoc; // asymptomatic infections
 rate[21] = mu;          // natural death
 // V1d_RI1,2,3 compartment and V2d_RI1,2,3 compartment
 rate[22] = mu;          // natural death
@@ -79,14 +90,14 @@ rate[23] = 3*rhoI;
 rate[24] = mu;          // natural death
 rate[25] = 3*rhoA;
 // V2d_S compartments
-rate[26] = sigma * (1 - eff_v_2d(t_eff)) * foi_stoc; // symptomatic infections
-rate[27] = (1 - sigma) * (1 - eff_v_2d(t_eff)) * foi_stoc; // asymptomatic infections
+rate[26] = sigma * (1 - eff_v_2d(t_eff, scenario)) * foi_stoc; // symptomatic infections
+rate[27] = (1 - sigma) * (1 - eff_v_2d(t_eff, scenario)) * foi_stoc; // asymptomatic infections
 rate[28] = mu;          // natural death
 
 /* For previous vacc campagain */
 // V1d_S compartments
-rate[29] = sigma       * (1 - eff_v_1d(t_eff_alt)) * foi_stoc; // symptomatic infections
-rate[30] = (1 - sigma) * (1 - eff_v_1d(t_eff_alt)) * foi_stoc; // asymptomatic infections
+rate[29] = sigma       * (1 - eff_v_1d(t_eff_alt, scenario)) * foi_stoc; // symptomatic infections
+rate[30] = (1 - sigma) * (1 - eff_v_1d(t_eff_alt, scenario)) * foi_stoc; // asymptomatic infections
 rate[31] = mu;          // natural death
 // V1d_RI1,2,3 compartment and V2d_RI1,2,3 compartment
 rate[32] = mu;          // natural death
@@ -95,8 +106,8 @@ rate[33] = 3*rhoI;
 rate[34] = mu;          // natural death
 rate[35] = 3*rhoA;
 // V2d_S compartments
-rate[36] = sigma *       (1 - eff_v_2d(t_eff_alt)) * foi_stoc; // symptomatic infections
-rate[37] = (1 - sigma) * (1 - eff_v_2d(t_eff_alt)) * foi_stoc; // asymptomatic infections
+rate[36] = sigma *       (1 - eff_v_2d(t_eff_alt, scenario)) * foi_stoc; // symptomatic infections
+rate[37] = (1 - sigma) * (1 - eff_v_2d(t_eff_alt, scenario)) * foi_stoc; // asymptomatic infections
 rate[38] = mu;          // natural death
 
 
