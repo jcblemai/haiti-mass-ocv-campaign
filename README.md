@@ -5,7 +5,6 @@
   - Demographic stochasticity
   - Fix initial condition
   - Beta Drop to match the drop with two beta
-  - Check simulation to not repeat error
 
 ### TODO vaccination
   - change t_eff for dd and 1d

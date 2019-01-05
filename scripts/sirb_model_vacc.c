@@ -24,7 +24,6 @@ else if (p1d_reg < 25)
 
   // force of infection
 foi = betaB * (B / (1 + B)) + foi_add;
-
 if(std_W > 0.0)
 {
     dw = rgammawn(std_W, dt);   // white noise (extra-demographic stochasticity)
@@ -33,6 +32,7 @@ if(std_W > 0.0)
 {
     foi_stoc = foi;
 }
+/*
 if (t <= (t_vacc_end_alt + dt)){
 	previous_vacc_campaign = TRUE;
 	if (t >= t_vacc_start_alt && t <= (t_vacc_end_alt + dt)) {
@@ -49,6 +49,11 @@ if (t <= (t_vacc_end_alt + dt)){
 double pdd = 1 - p1d;
 if ((S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3) < 1000)
 	r_v_wdn = 0;
+*/
+
+r_v_wdn = 0;
+double pdd = 0;
+
 
 // time in the vacc_eff referential. We assume different timing for 1d and 2d
 double t_eff =     t - (t_vacc_start + (t_vacc_end - t_vacc_start)/2);
@@ -169,14 +174,14 @@ dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 
 
 // update state variables
-S = -dN[0] - dN[1] /* FOI */
-- dN[2] - dN[3] /* VACC */
-+ dN[4] + dN[7] + dN[12] + dN[16] + dN[20] + dN[24] + dN[28] + dN[32] /* Mortality of nn vacc: rebirth*/
-+ dN[19] + dN[31]  /* Recovery */
-+ dN[37] + dN[38] + dN[40] + dN[42] + dN[44] + dN[46] + dN[48]        /* Mortality of 1d vacc: rebirth*/
-+ dN[52] + dN[53] + dN[55] + dN[57] + dN[59] + dN[61] + dN[63]		   /* Mortality of dd vacc: rebirth*/
-+ dN[37+30] + dN[38+30] + dN[40+30] + dN[42+30] + dN[44+30] + dN[46+30] + dN[48+30]        /* Prev campain*/
-+ dN[52+30] + dN[53+30] + dN[55+30] + dN[57+30] + dN[59+30] + dN[61+30] + dN[63+30];		   
+//S = -dN[0] - dN[1] /* FOI */
+//- dN[2] - dN[3] /* VACC */
+//+ dN[4] + dN[7] + dN[12] + dN[16] + dN[20] + dN[24] + dN[28] + dN[32] /* Mortality of nn vacc: rebirth*/
+//+ dN[19] + dN[31]  /* Recovery */
+//+ dN[37] + dN[38] + dN[40] + dN[42] + dN[44] + dN[46] + dN[48]        /* Mortality of 1d vacc: rebirth*/
+//+ dN[52] + dN[53] + dN[55] + dN[57] + dN[59] + dN[61] + dN[63]		   /* Mortality of dd vacc: rebirth*/
+//+ dN[37+30] + dN[38+30] + dN[40+30] + dN[42+30] + dN[44+30] + dN[46+30] + dN[48+30]        /* Prev campain*/
+//+ dN[52+30] + dN[53+30] + dN[55+30] + dN[57+30] + dN[59+30] + dN[61+30] + dN[63+30];		   
 
 I   += dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30] - dN[4] - dN[5] - dN[6];
 A   += dN[1] + dN[36] + dN[51] + dN[36+30] + dN[51+30] - dN[7] - dN[8] - dN[9] - dN[10];
@@ -262,4 +267,8 @@ W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
 B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
 // susceptibles so as to match total population
-//S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
+S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3 - 
+	VSd - VRI1d - VRI2d - VRI3d - VRA1d - VRA2d -VRA3d -
+	VSdd- VRI1dd -VRI2dd -VRI3dd -VRA1dd-VRA2dd-VRA3dd -
+	VSd_alt - VRI1d_alt - VRI2d_alt - VRI3d_alt - VRA1d_alt - VRA2d_alt - VRA3d_alt - 
+	VSdd_alt - VRI1dd_alt - VRI2dd_alt - VRI3dd_alt - VRA1dd_alt - VRA2dd_alt - VRA3dd_alt);

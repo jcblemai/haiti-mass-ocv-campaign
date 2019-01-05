@@ -61,13 +61,13 @@ t_vacc_end_alt:
   - Artibonite: 2018-05-15
   - Centre: 2017-12-16
   - Grande_Anse: 2017-06-02
-  - Nippes: 2010-01-01 # No previous campagin 
-  - Nord: 2010-01-01 # No previous campagin 
-  - Nord-Est: 2010-01-01 # No previous campagin 
-  - Nord-Ouest: 2010-01-01 # No previous campagin 
+  - Nippes: 2000-01-01 # No previous campagin 
+  - Nord: 2000-01-01 # No previous campagin 
+  - Nord-Est: 2000-01-01 # No previous campagin 
+  - Nord-Ouest: 2000-01-01 # No previous campagin 
   - Ouest: 2017-08-25
   - Sud: 2017-05-31
-  - Sud-Est: 2010-01-01 # No previous campagin 
+  - Sud-Est: 2000-01-01 # No previous campagin 
 
 p1d_alt_year:
   - Artibonite: 0.05

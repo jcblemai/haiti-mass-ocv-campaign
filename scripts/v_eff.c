@@ -1,4 +1,5 @@
  double eff_v_2d(double t_since_vacc, int scenario) {
+      return 0;
   double eff_v_2d = 0.0;
   switch(scenario){
     case 1:

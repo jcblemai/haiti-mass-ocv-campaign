@@ -24,8 +24,8 @@ output_dir <- "output/"
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Artibonite"
-  args[2] = 1
+  args[1] = "Nippes"
+  args[2] = 3
 } else if (length(args)==1) {
   args[2] = 1
 }
