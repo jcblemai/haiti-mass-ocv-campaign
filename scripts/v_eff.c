@@ -22,7 +22,7 @@
       else if (t_since_vacc <=  18./12) eff_v_2d =  0.636291931592122;
       else if (t_since_vacc <=  19./12) eff_v_2d =  0.628033264620864;
       else if (t_since_vacc <=  20./12) eff_v_2d =  0.619655355383277;
-      else if (t_since_vacc <=  21./12) eff_v_2d =  0.61115648220707  ;
+      else if (t_since_vacc <=  21./12) eff_v_2d =  0.61115648220707 ;
       else if (t_since_vacc <=  22./12) eff_v_2d =  0.602534898561692;
       else if (t_since_vacc <=  23./12) eff_v_2d =  0.593788832699414;
       else if (t_since_vacc <=  24./12) eff_v_2d =  0.584916487291234;
