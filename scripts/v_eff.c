@@ -132,5 +132,7 @@
       else if (t_since_vacc <=  61./12) eff_v_2d = 0.12314899589607;
     break;
   }
+  if (t_since_vacc >  61./12) 
+      eff_v_2d =  0.0;
   return eff_v_2d;
 }

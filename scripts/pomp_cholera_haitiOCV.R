@@ -21,7 +21,7 @@ output_dir <- "output/"
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Nippes"
+  args[1] = "Sud"
 }
 departement <- args[1]
 

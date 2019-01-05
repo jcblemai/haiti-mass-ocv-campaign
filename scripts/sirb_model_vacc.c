@@ -32,7 +32,7 @@ if(std_W > 0.0)
 {
     foi_stoc = foi;
 }
-/*
+
 if (t <= (t_vacc_end_alt + dt)){
 	previous_vacc_campaign = TRUE;
 	if (t >= t_vacc_start_alt && t <= (t_vacc_end_alt + dt)) {
@@ -47,12 +47,8 @@ if (t <= (t_vacc_end_alt + dt)){
 	p1d = p1d_reg;
 }
 double pdd = 1 - p1d;
-if ((S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3) < 1000)
-	r_v_wdn = 0;
-*/
-
-r_v_wdn = 0;
-double pdd = 0;
+//if ((S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3) < 1000)
+//	r_v_wdn = 0;
 
 
 // time in the vacc_eff referential. We assume different timing for 1d and 2d
