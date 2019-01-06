@@ -402,11 +402,6 @@ param_est["foi_add"] <- 0.001
 param_est["gammaA"] <- 1/5
 param_est["gammaI"] <- 1/5
 
-param_est["t_vacc_start"] <- 0
-param_est["t_vacc_end"] <- 0
-param_est["r_v_year"] <- 0
-param_est["p1d_reg"] <- 0
-
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
 

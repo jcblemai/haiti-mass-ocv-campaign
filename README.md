@@ -11,6 +11,7 @@
   - Damiano:
     - How to read the table for vaccination
     - Who can be vaccinated again
+  - diff cases and C
 
 
 ## Data

@@ -14,11 +14,12 @@ double p1d = 0;
 
 int scenario = 1;
 
-if (p1d_reg < 2.)
+/* Shoudl be chacked TODO */
+if (p1d_reg <  0.02)
 	scenario = 3;
-else if (p1d_reg < 12)
+else if (p1d_reg < .130)
 	scenario = 1;
-else if (p1d_reg < 25)
+else if (p1d_reg < .40)
 	scenario = 2;
 
 
@@ -37,13 +38,13 @@ if (t <= (t_vacc_end_alt + dt)){
 	previous_vacc_campaign = TRUE;
 	if (t >= t_vacc_start_alt && t <= (t_vacc_end_alt + dt)) {
     	r_v_wdn = (r_v_alt / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
-}
+	}
 	p1d = p1d_alt;
 } else {
 	previous_vacc_campaign = FALSE;
 	if (t >= t_vacc_start && t <= (t_vacc_end + dt)) {
-    	r_v_wdn = (r_v_year  / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
-}
+    	r_v_wdn = (r_v_year / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
+	}
 	p1d = p1d_reg;
 }
 double pdd = 1 - p1d;
@@ -177,7 +178,7 @@ dB = (k1 + 2*k2 + 2*k3 + k4) / 6.0;
 //+ dN[37] + dN[38] + dN[40] + dN[42] + dN[44] + dN[46] + dN[48]        /* Mortality of 1d vacc: rebirth*/
 //+ dN[52] + dN[53] + dN[55] + dN[57] + dN[59] + dN[61] + dN[63]		   /* Mortality of dd vacc: rebirth*/
 //+ dN[37+30] + dN[38+30] + dN[40+30] + dN[42+30] + dN[44+30] + dN[46+30] + dN[48+30]        /* Prev campain*/
-//+ dN[52+30] + dN[53+30] + dN[55+30] + dN[57+30] + dN[59+30] + dN[61+30] + dN[63+30];		   
+//+ dN[52+30] + dN[53+30] + dN[55+30] + dN[57+30] + dN[59+30] + dN[61+30] + dN[63+30];
 
 I   += dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30] - dN[4] - dN[5] - dN[6];
 A   += dN[1] + dN[36] + dN[51] + dN[36+30] + dN[51+30] - dN[7] - dN[8] - dN[9] - dN[10];
@@ -196,7 +197,7 @@ if (previous_vacc_campaign){
 	VRA1d_alt  += dN[9] + dN[25] ;
 	VRA2d_alt  += dN[29];
 	VRA3d_alt  += dN[33];
-	
+
 	VSdd_alt    += dN[3];
 	VRI1dd_alt  += dN[14];
 	VRI2dd_alt  += dN[18];
@@ -212,7 +213,7 @@ if (previous_vacc_campaign){
 	VRA1d  += dN[9] + dN[25] ;
 	VRA2d  += dN[29];
 	VRA3d  += dN[33];
-	
+
 	VSdd    += dN[3];
 	VRI1dd  += dN[14];
 	VRI2dd  += dN[18];
@@ -263,8 +264,8 @@ W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
 B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
 
 // susceptibles so as to match total population
-S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3 - 
+S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3 -
 	VSd - VRI1d - VRI2d - VRI3d - VRA1d - VRA2d -VRA3d -
 	VSdd- VRI1dd -VRI2dd -VRI3dd -VRA1dd-VRA2dd-VRA3dd -
-	VSd_alt - VRI1d_alt - VRI2d_alt - VRI3d_alt - VRA1d_alt - VRA2d_alt - VRA3d_alt - 
+	VSd_alt - VRI1d_alt - VRI2d_alt - VRI3d_alt - VRA1d_alt - VRA2d_alt - VRA3d_alt -
 	VSdd_alt - VRI1dd_alt - VRI2dd_alt - VRI3dd_alt - VRA1dd_alt - VRA2dd_alt - VRA3dd_alt);

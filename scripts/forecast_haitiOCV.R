@@ -105,8 +105,11 @@ doMC::registerDoMC(8)
 # function to simulate from a given set of paramters
 simulatePOMP <- function(params, nsim, seed = 199919L) {
   pomp::coef(sirb_cholera) <- params
-  #pomp::coef(sirb_cholera_forecast) <- params
-  
+  coef(sirb_cholera)["t_vacc_start"] <- dateToYears(as.Date(t_vacc_start))
+  coef(sirb_cholera)["t_vacc_end"] <- dateToYears(as.Date(t_vacc_end))
+  coef(sirb_cholera)["p1d_reg"] <-  as.numeric(p1d_reg)
+  coef(sirb_cholera)["r_v_year"] <- as.numeric(r_v_year)
+
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
 
   #rbind(calib, proj)%>% 
@@ -213,6 +216,78 @@ RI3 <-sim_stochastic %>%
   select(-isdata, -time, -variable)
 
 
+VSd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VSd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI1d <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI1d", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI2d <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI2d", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI3d <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI3d", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA1d <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA1d", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA2d <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA2d", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA3d <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA3d", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+
+# double doses:
+
+VSdd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VSdd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI1dd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI1dd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI2dd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI2dd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI3dd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI3dd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA1dd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA1dd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA2dd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA2dd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA3dd <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA3dd", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
 
 # PLOT BOTH
 # simcol <- "#175CD6"
@@ -252,5 +327,81 @@ RI3 <-sim_stochastic %>%
 # scale_x_date(date_labels = "%b-%y", expand = c(0,0), limits = as.Date(c("2014-03-01", "2018-07-14")))
 
 #print(p.all)
+
+
+
+
+VSd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VSd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI1d_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI1d_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI2d_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI2d_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI3d_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI3d_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA1d_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA1d_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA2d_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA2d_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA3d_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA3d_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+
+# double doses:
+
+VSdd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VSdd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI1dd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI1dd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI2dd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI2dd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRI3dd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRI3dd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA1dd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA1dd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA2dd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA2dd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
+
+VRA3dd_alt <-sim_stochastic %>% 
+  mutate(date = as.Date(round_date(date))) %>% 
+  filter(variable == "VRA3dd_alt", isdata == "simulation") %>% 
+  select(-isdata, -time, -variable)
 
 
