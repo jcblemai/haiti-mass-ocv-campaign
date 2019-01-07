@@ -10,9 +10,17 @@
   - change t_eff for dd and 1d
   - Damiano:
     - How to read the table for vaccination
-    - Who can be vaccinated again
-  - todo case and C
+    - Who can be vaccinated again ?
+  - Implement initial condition damiano
+  - calibrate till 2017-01 to see if another beta is rooted in evidence.
+  - Use artibonite (Xcept rainfall) as starting point for other simulation
+  - Calibrate without FOI_ADD
 
+# As of the last big calibration we have (12-20) is:
+  - good in Artibonite, Sud, Grande Anse, Centre, Sud-Est
+  - bad in Nord-Est, Nord, Mord Ouest, OUest, Centre, Nippes.
+
+Drop is needed in Nippes, Grande Anse, Nord, Nord-Est, Ouest, Sud, ...
 
 
 ## Data

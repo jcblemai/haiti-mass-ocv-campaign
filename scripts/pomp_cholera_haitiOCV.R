@@ -15,13 +15,13 @@ library(magrittr)
 library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
-output_dir <- "output_12-20-2gamma/"
+output_dir <- "output/"
 
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Sud-Est"
+  args[1] = "Artibonite"
 }
 departement <- args[1]
 
@@ -398,7 +398,7 @@ param_est["std_W"] <- .001
 param_est["epsilon"] <- .5
 param_est["k"] <- 10001
 param_est["Rtot_0"] <- 0.35
-param_est["foi_add"] <- 0.001
+param_est["foi_add"] <- 0.0
 param_est["gammaA"] <- 1/5
 param_est["gammaI"] <- 1/5
 

@@ -31,8 +31,8 @@ departement <- args[1]
 run_level <- as.integer(args[2])
 
 departement <- 'Artibonite'
-run_level <- 3
-output_dir <- "output_12-10-gammaI/"
+run_level <- 1
+output_dir <- "output/"
 #output_dir <- ""
 
 
