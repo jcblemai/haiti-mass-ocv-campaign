@@ -15,13 +15,13 @@ library(magrittr)
 library(lubridate)
 rm(list = ls())
 Sys.setlocale("LC_ALL","C")
-output_dir <- "output/"
+output_dir <- "output_12-20-2gamma/"
 
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Sud"
+  args[1] = "Sud-Est"
 }
 departement <- args[1]
 
@@ -180,7 +180,7 @@ param_fixed_names <- c(param_proc_fixed_names, param_vacc_fixed_names)
 param_names <- c(param_est_names, param_fixed_names)
 
 # names of parameters that are rates (MAYBE) (because time 365 since timestep is year) r_v shoudl be here
-param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA")
+param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA") #muB
 
 # Measurement model  -------------------------------------------------------
 
@@ -226,8 +226,8 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 
 # Initializer -------------------------------------------------------------
 initalizeStates <- Csnippet("
-  A     = nearbyint(1/sigma * 1/epsilon * cases0);
-  I     = nearbyint(1/epsilon * cases0);
+  A     = nearbyint(sigma/(1-sigma) * 1/epsilon * cases0/7 * 365 /(mu+gammaA));
+  I     = nearbyint(1/epsilon * cases0/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
   RI1   = nearbyint(sigma * Rtot_0*H/3.0);
   RI2   = nearbyint(sigma * Rtot_0*H/3.0);
   RI3   = nearbyint(sigma * Rtot_0*H/3.0);
