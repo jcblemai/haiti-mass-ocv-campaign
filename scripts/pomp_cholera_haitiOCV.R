@@ -226,7 +226,7 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
 
 # Initializer -------------------------------------------------------------
 initalizeStates <- Csnippet("
-  A     = nearbyint(sigma/(1-sigma) * 1/epsilon * cases0/7 * 365 /(mu+gammaA));
+  A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases0/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases0/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
   RI1   = nearbyint(sigma * Rtot_0*H/3.0);
   RI2   = nearbyint(sigma * Rtot_0*H/3.0);
