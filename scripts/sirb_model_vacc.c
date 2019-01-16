@@ -262,7 +262,7 @@ VRA3dd_alt  +=  dN[62+30] - dN[63+30] - dN[64+30];
 C   +=  dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30];
 W   +=  (dw - dt)/std_W;  // standardized i.i.d. white noise
 B += (((dB) < -B) ? (-B + 1.0e-3) : (dB)); // condition to ensure B>0
-
+I = 19;
 // susceptibles so as to match total population
 S = nearbyint(H - I - A - RI1 - RI2 - RI3 - RA1 - RA2 - RA3 -
 	VSd - VRI1d - VRI2d - VRI3d - VRA1d - VRA2d -VRA3d -

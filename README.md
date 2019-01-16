@@ -5,6 +5,7 @@
   - Demographic stochasticity
   - Fix initial condition
   - Beta Drop to match the drop with two beta
+  - VE proportional to population
 
 ### TODO vaccination
   - change t_eff for dd and 1d

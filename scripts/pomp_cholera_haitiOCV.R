@@ -21,7 +21,7 @@ output_dir <- "output/"
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Artibonite"
+  args[1] = "Sud"
 }
 departement <- args[1]
 
@@ -254,35 +254,35 @@ initalizeStates <- Csnippet("
   B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
   C   = 0;
   W   = 0;
- VSd = 0;
- VRI1d = 0;
- VRI2d = 0;
- VRI3d = 0;
- VRA1d = 0;
- VRA2d = 0;
- VRA3d = 0;
- VSdd = 0;
- VRI1dd = 0;
- VRI2dd = 0;
- VRI3dd = 0;
- VRA1dd = 0;
- VRA2dd = 0;
- VRA3dd = 0;
- VSd_alt = 0;
- VRI1d_alt = 0;
- VRI2d_alt = 0;
- VRI3d_alt = 0;
- VRA1d_alt = 0;
- VRA2d_alt = 0;
- VRA3d_alt = 0;
- VSdd_alt = 0;
- VRI1dd_alt = 0;
- VRI2dd_alt = 0;
- VRI3dd_alt = 0;
- VRA1dd_alt = 0;
- VRA2dd_alt = 0;
- VRA3dd_alt = 0;
- ")
+  VSd = 0;
+  VRI1d = 0;
+  VRI2d = 0;
+  VRI3d = 0;
+  VRA1d = 0;
+  VRA2d = 0;
+  VRA3d = 0;
+  VSdd = 0;
+  VRI1dd = 0;
+  VRI2dd = 0;
+  VRI3dd = 0;
+  VRA1dd = 0;
+  VRA2dd = 0;
+  VRA3dd = 0;
+  VSd_alt = 0;
+  VRI1d_alt = 0;
+  VRI2d_alt = 0;
+  VRI3d_alt = 0;
+  VRA1d_alt = 0;
+  VRA2d_alt = 0;
+  VRA3d_alt = 0;
+  VSdd_alt = 0;
+  VRI1dd_alt = 0;
+  VRI2dd_alt = 0;
+  VRI3dd_alt = 0;
+  VRA1dd_alt = 0;
+  VRA2dd_alt = 0;
+  VRA3dd_alt = 0;
+   ")
 
 
 eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " double eff_v_1d(double t_since_vacc, int scenario) {
