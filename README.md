@@ -16,6 +16,9 @@
   - calibrate till 2017-01 to see if another beta is rooted in evidence.
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - Calibrate without FOI_ADD
+  - epsilon might be 30%
+  - Fix gammaA and gammaI, 5days for both
+  
 
 # As of the last big calibration we have (12-20) is:
   - good in Artibonite, Sud, Grande Anse, Centre, Sud-Est
