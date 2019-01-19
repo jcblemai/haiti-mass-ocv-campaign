@@ -5,19 +5,19 @@
   - Demographic stochasticity
   - Fix initial condition
   - Beta Drop to match the drop with two beta
-  - VE proportional to population
+  - VE proportional to population U5
 
 ### TODO vaccination
   - change t_eff for dd and 1d
-  - Damiano:
-    - How to read the table for vaccination
-    - Who can be vaccinated again ?
   - Implement initial condition damiano
   - calibrate till 2017-01 to see if another beta is rooted in evidence.
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - Calibrate without FOI_ADD
   - epsilon might be 30%
   - Fix gammaA and gammaI, 5days for both
+  +  - Why isn't the first value of the dataframe the same between q05 and q95
+  CRTL+F TODO ?
+
   
 
 # As of the last big calibration we have (12-20) is:

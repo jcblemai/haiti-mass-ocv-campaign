@@ -81,6 +81,15 @@ rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
   filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
   mutate(max_rain = max(rain), rain_std = rain/max_rain) 
 
+cases_other_dept <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
+  gather(dep, cases, -date) %>% 
+  filter(dep != departement) %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date))
+
+cases_other_dept <- aggregate(cases_other_dept$cases, by=list(Category=cases_other_dept$time), FUN=sum, na.rm=TRUE, na.action=NULL) %>%
+  mutate(time = Category) 
+ # TODO Sum along tedepartement
 
 make_plots <- F
 if(make_plots) {
@@ -222,18 +231,53 @@ derivativeBacteria.c <- " double fB(int I, int A, double B,
   return(dB);
 };
 "
+cases_at_t_start <- cases %>% filter(dateToYears(date) <= t_start)
+cases_at_t_start.string <- foreach(r = iter(cases_at_t_start, by = "row"),
+                                   .combine = c) %do% {
+                                     sprintf(" {%f, %f} ", r$time, r$cases)
+                                   } %>% 
+  str_c(collapse = ", \n")
 
+matrix_cases_at_t_start.string <- str_c(sprintf("double cases_at_t_start[%i][%i] = {\n", nrow(cases_at_t_start), 2),
+                                        cases_at_t_start.string,
+                                        " \n };")
+
+
+# Cases from other departement as a mobility rational
+cases_other.string <- foreach(r = iter(cases_other_dept, by = "row"),
+                                   .combine = c) %do% {
+                                     sprintf(" {%f, %f} ", r$time, r$cases)
+                                   } %>% 
+  str_c(collapse = ", \n")
+
+matrix_cases_other.string <- str_c(sprintf("double cases_other[%i][%i] = {\n", nrow(cases_other), 2),
+                                        cases_other.string,
+                                        " \n };")
 
 # Initializer -------------------------------------------------------------
+compute_R0.c <- "double* compute_R0(double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double epsilon){
+  double R0[6];
+  double rhoI = rhoA * XrhoI;
+
+  for(int i = 0; i < n_cases_start; i++){
+    R0[0] += cases_at_t_start[i][1] * (1-sigma)/sigma/epsilon  * exp((cases_at_t_start[i][0] - t0) * rho);
+    /* TODO Formula for R_0 */
+  }
+
+  return(R0i);
+};
+"
+
 initalizeStates <- Csnippet("
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases0/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases0/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
-  RI1   = nearbyint(sigma * Rtot_0*H/3.0);
-  RI2   = nearbyint(sigma * Rtot_0*H/3.0);
-  RI3   = nearbyint(sigma * Rtot_0*H/3.0);
-  RA1   = nearbyint((1-sigma) * Rtot_0*H/3.0);
-  RA2   = nearbyint((1-sigma) * Rtot_0*H/3.0);
-  RA3   = nearbyint((1-sigma) * Rtot_0*H/3.0);
+  double R0[6] = compute_R0(t0, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, epsilon);
+  RI1   = nearbyint(R0[0]);
+  RI2   = nearbyint(R0[1]);
+  RI3   = nearbyint(R0[2]);
+  RA1   = nearbyint(R0[3]);
+  RA2   = nearbyint(R0[4]);
+  RA3   = nearbyint(R0[5]);
   if (A + I + RI1 + RI2 + RI3 + RA1 + RA2 + RA3 >= H)
   {
     double R_tot = H - A - I - 100.0;
@@ -377,12 +421,6 @@ param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
 param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)  # Does not work for gammaI TODO
 
 
-#Cases in the last report:
-# declare matrix in C for the infected before the strat date in 2014
-cases_at_t_start <- cases %>% filter(dateToYears(date) <= t_start) %>% tail(n=1)%>% select('cases') %>% unlist()
-cases_at_t_start.string <- sprintf("double cases0 = %i;", cases_at_t_start)
-
-
 # Initialize the parameters to estimate (just initial guesses)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
 param_est["sigma"] <- .2
@@ -451,8 +489,11 @@ sirb_cholera <- pomp(
     sprintf("double t_vacc_start_alt = %f; double t_vacc_end_alt = %f;", t_vacc_start_alt, t_vacc_end_alt),
     sprintf("double r_v_alt = %f;", r_v_alt_year),
     sprintf("double p1d_alt = %f;", p1d_alt),
+    sprintf("int n_cases_start = %i;",  nrow(cases_at_t_start)),
+    compute_R0.c,
     derivativeBacteria.c,
-    cases_at_t_start.string,
+    matrix_cases_at_t_start.string,
+    matrix_cases_other.string,
     eff_v.c,
     sep = " ")
 )
