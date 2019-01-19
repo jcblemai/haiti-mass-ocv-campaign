@@ -176,7 +176,7 @@ param_proc_est_names <- c("sigma", "betaB", "mu_B", "thetaI", "XthetaA",  "lambd
 param_iv_est_names <- c("Rtot_0")
 
 ## fixed process model parameters  OK
-param_proc_fixed_names <- c("H", "D", "mu", "alpha")
+param_proc_fixed_names <- c("H", "D", "mu", "alpha", "cases_ext")
 
 # Vaccination senario:
 param_vacc_fixed_names <- c("t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year")
@@ -250,28 +250,26 @@ cases_other.string <- foreach(r = iter(cases_other_dept, by = "row"),
                                    } %>% 
   str_c(collapse = ", \n")
 
-matrix_cases_other.string <- str_c(sprintf("double cases_other[%i][%i] = {\n", nrow(cases_other), 2),
+matrix_cases_other.string <- str_c(sprintf("double cases_other[%i][%i] = {\n", nrow(cases_other_dept), 2),
                                         cases_other.string,
                                         " \n };")
 
 # Initializer -------------------------------------------------------------
-compute_R0.c <- "double* compute_R0(double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double epsilon){
-  double R0[6];
+compute_R0.c <- "void compute_R0(double R0[6],double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double epsilon){
   double rhoI = rhoA * XrhoI;
 
   for(int i = 0; i < n_cases_start; i++){
-    R0[0] += cases_at_t_start[i][1] * (1-sigma)/sigma/epsilon  * exp((cases_at_t_start[i][0] - t0) * rho);
-    /* TODO Formula for R_0 */
-  }
+    R0[0] += cases_at_t_start[i][1] * (1-sigma)/sigma/epsilon  * exp((cases_at_t_start[i][0] - t0) * rhoI);
 
-  return(R0i);
+  }
 };
 "
 
 initalizeStates <- Csnippet("
-  A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases0/7 * 365 /(mu+gammaA));
-  I     = nearbyint(1/epsilon * cases0/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
-  double R0[6] = compute_R0(t0, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, epsilon);
+  A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
+  I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
+  double R0[6];
+  compute_R0(R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, epsilon);
   RI1   = nearbyint(R0[0]);
   RI2   = nearbyint(R0[1]);
   RI3   = nearbyint(R0[2]);
@@ -418,7 +416,7 @@ p1d_alt = p1d_alt_year[departement]
 
 # Initialize the fixed parameters
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
-param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)  # Does not work for gammaI TODO
+param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)
 
 
 # Initialize the parameters to estimate (just initial guesses)
@@ -490,6 +488,9 @@ sirb_cholera <- pomp(
     sprintf("double r_v_alt = %f;", r_v_alt_year),
     sprintf("double p1d_alt = %f;", p1d_alt),
     sprintf("int n_cases_start = %i;",  nrow(cases_at_t_start)),
+    sprintf("int n_cases_other = %i;",  nrow(cases_other_dept)),
+    sprintf("double t_start = %f;",  t_start - dt_yrs),
+    sprintf("double t_end = %f;",  t_end),
     compute_R0.c,
     derivativeBacteria.c,
     matrix_cases_at_t_start.string,

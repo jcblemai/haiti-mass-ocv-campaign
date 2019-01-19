@@ -11,16 +11,32 @@ double rhoI = rhoA * XrhoI;
 int previous_vacc_campaign = TRUE ; /* flag that indicate if we are on the first or second campain */
 double r_v_wdn = 0.0;       // rate of vaccination: 0 if out of time window, r_v if not
 double p1d = 0;
+double mobility = 0;
 
 int scenario = 1;
 
-/* Shoudl be chacked TODO */
+/* Shoudl be checked TODO */
 if (p1d_reg <  0.02)
 	scenario = 3;
 else if (p1d_reg < .130)
 	scenario = 1;
 else if (p1d_reg < .40)
 	scenario = 2;
+
+
+/* Compute mobility term */
+if (t < t_end) {
+      for(int i = 0; i < n_cases_start - 1; i++){
+           if (t >= cases_other[i][0] && t <= cases_other[i+1][0])
+               mobility = cases_other[i][1];
+      }
+      if (t > cases_other[n_cases_start-1][0])
+          mobility = cases_other[n_cases_start-1][1];
+}
+else {
+    mobility = cases_ext;
+}
+
 
 
   // force of infection

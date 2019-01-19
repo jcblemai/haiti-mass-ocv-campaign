@@ -6,6 +6,7 @@
   - Fix initial condition
   - Beta Drop to match the drop with two beta
   - VE proportional to population U5
+  - Rechange date, see change since last commits
 
 ### TODO vaccination
   - change t_eff for dd and 1d
