@@ -433,8 +433,8 @@ param_est["epsilon"] <- .5
 param_est["k"] <- 10001
 param_est["Rtot_0"] <- 0.35
 param_est["foi_add"] <- 0.0
-param_est["gammaA"] <- 1/5
-param_est["gammaI"] <- 1/5
+param_est["gammaA"] <- 1/2
+param_est["gammaI"] <- 1/2
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
