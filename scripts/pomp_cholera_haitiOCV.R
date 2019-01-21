@@ -254,11 +254,12 @@ matrix_cases_other.string <- str_c(sprintf("double cases_other[%i][%i] = {\n", n
                                         " \n };")
 
 # Initializer -------------------------------------------------------------
-compute_R0.c <- "void compute_R0(double* R0,double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double mu, double epsilon){
+compute_R0.c <- "void compute_R0(double R0[2], double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double mu, double epsilon){
   double rhoI = rhoA * XrhoI;
 
   for(int i = 0; i < n_cases_start; i++){
-    *R0 += cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t0)  * (rhoI+mu));
+    R0[0] +=                   cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t0)  * (rhoI+mu)); /* because t_i in past so t_ - t_0 negative */
+    R0[1] += (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t0)  * (rhoA+mu));
   }
 };
 "
@@ -266,14 +267,14 @@ compute_R0.c <- "void compute_R0(double* R0,double t0,  int n_cases_start, doubl
 initalizeStates <- Csnippet("
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
-  double R0;
-  compute_R0(&R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, mu, epsilon);
-  RI1   = nearbyint(R0/3);
-  RI2   = nearbyint(R0/3);
-  RI3   = nearbyint(R0/3);
-  RA1   = nearbyint((1-sigma)/sigma * R0/3);
-  RA2   = nearbyint((1-sigma)/sigma * R0/3);
-  RA3   = nearbyint((1-sigma)/sigma * R0/3);
+  double R0[2];
+  compute_R0(R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, mu, epsilon);
+  RI1   = nearbyint(R0[0]/3);
+  RI2   = nearbyint(R0[0]/3);
+  RI3   = nearbyint(R0[0]/3);
+  RA1   = nearbyint(R0[1]/3);
+  RA2   = nearbyint(R0[1]/3);
+  RA3   = nearbyint(R0[1]/3);
   if (A + I + RI1 + RI2 + RI3 + RA1 + RA2 + RA3 >= H)
   {
     double R_tot = H - A - I - 100.0;
