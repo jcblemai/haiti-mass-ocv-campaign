@@ -10,8 +10,6 @@
 
 ### TODO vaccination
   - change t_eff for dd and 1d
-  - Implement initial condition damiano
-  - calibrate till 2017-01 to see if another beta is rooted in evidence.
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - Calibrate without FOI_ADD
   - epsilon might be 30%

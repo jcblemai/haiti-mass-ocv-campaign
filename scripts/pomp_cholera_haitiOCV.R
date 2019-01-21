@@ -89,7 +89,6 @@ cases_other_dept <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
 
 cases_other_dept <- aggregate(cases_other_dept$cases, by=list(Category=cases_other_dept$time), FUN=sum, na.rm=TRUE, na.action=NULL) %>%
   mutate(time = Category) 
- # TODO Sum along tedepartement
 
 make_plots <- F
 if(make_plots) {
@@ -188,14 +187,14 @@ param_fixed_names <- c(param_proc_fixed_names, param_vacc_fixed_names)
 # all param names OK
 param_names <- c(param_est_names, param_fixed_names)
 
-# names of parameters that are rates (MAYBE) (because time 365 since timestep is year) r_v shoudl be here
+# names of parameters that are rates (MAYBE) (because time 365 since timestep is year)
 param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA") #muB
 
 # Measurement model  -------------------------------------------------------
 
 ## density
 
-## NegBinomial density (if k -> inf then becomes Poisson) OK TODO S
+## NegBinomial density (if k -> inf then becomes Poisson)
 dmeas <- Csnippet("
   double mean_cases = epsilon * C;
   if (ISNA(cases)) {
@@ -255,12 +254,11 @@ matrix_cases_other.string <- str_c(sprintf("double cases_other[%i][%i] = {\n", n
                                         " \n };")
 
 # Initializer -------------------------------------------------------------
-compute_R0.c <- "void compute_R0(double R0[6],double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double epsilon){
+compute_R0.c <- "void compute_R0(double* R0,double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double mu, double epsilon){
   double rhoI = rhoA * XrhoI;
 
   for(int i = 0; i < n_cases_start; i++){
-    R0[0] += cases_at_t_start[i][1] * (1-sigma)/sigma/epsilon  * exp((cases_at_t_start[i][0] - t0) * rhoI);
-
+    *R0 += cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t0)  * (rhoI+mu));
   }
 };
 "
@@ -268,14 +266,14 @@ compute_R0.c <- "void compute_R0(double R0[6],double t0,  int n_cases_start, dou
 initalizeStates <- Csnippet("
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state
-  double R0[6];
-  compute_R0(R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, epsilon);
-  RI1   = nearbyint(R0[0]);
-  RI2   = nearbyint(R0[1]);
-  RI3   = nearbyint(R0[2]);
-  RA1   = nearbyint(R0[3]);
-  RA2   = nearbyint(R0[4]);
-  RA3   = nearbyint(R0[5]);
+  double R0;
+  compute_R0(&R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, mu, epsilon);
+  RI1   = nearbyint(R0/3);
+  RI2   = nearbyint(R0/3);
+  RI3   = nearbyint(R0/3);
+  RA1   = nearbyint((1-sigma)/sigma * R0/3);
+  RA2   = nearbyint((1-sigma)/sigma * R0/3);
+  RA3   = nearbyint((1-sigma)/sigma * R0/3);
   if (A + I + RI1 + RI2 + RI3 + RA1 + RA2 + RA3 >= H)
   {
     double R_tot = H - A - I - 100.0;
@@ -441,7 +439,7 @@ param_est["gammaI"] <- 1/5
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
 
-# adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days) TODO CHECK
+# adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days)
 params <- c(param_est, param_fixed)  
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 
