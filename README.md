@@ -2,18 +2,15 @@
 
 
 ## TODO
-  - Demographic stochasticity
+  - *Demographic stochasticity*
   - Beta Drop to match the drop with two beta
-  - VE proportional to population U5
-  - Rechange date, see change since last commits
-    - Use artibonite (Xcept rainfall) as starting point for other simulation
+  - *VE proportional to population U5*
+  - Use artibonite (Xcept rainfall) as starting point for other simulation
 
 
 ### TODO vaccination
   - change t_eff for dd and 1d
-  - Calibrate without FOI_ADD
   - epsilon might be 30%
-  - Fix gammaA and gammaI, 5days for both
   +  - Why isn't the first value of the dataframe the same between q05 and q95
 
   

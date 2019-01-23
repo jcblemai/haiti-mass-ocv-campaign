@@ -254,17 +254,12 @@ matrix_cases_other.string <- str_c(sprintf("double cases_other[%i][%i] = {\n", n
                                         cases_other.string,
                                         " \n };")
 
-# Initializer -------------------------------------------------------------
-compute_R0.c <- "void compute_R0(double R0[2], double t0,  int n_cases_start, double cases_at_t_start[][2], double sigma, double rhoA, double XrhoI, double mu, double epsilon){
 
-};
-"
 
 initalizeStates <- Csnippet("
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state, DP says its correct.
   double R0[2] = {0,0};
-  //compute_R0(R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, mu, epsilon);
   double rhoI = rhoA * XrhoI;
   for(int i = 0; i < n_cases_start; i++){
     R0[0] +=                   cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t_start)  * (rhoI+mu)); /* because t_i in past so t_ - t_0 negative */
@@ -491,7 +486,6 @@ sirb_cholera <- pomp(
     sprintf("int n_cases_other = %i;",  nrow(cases_other_dept)),
     sprintf("double t_start = %f;",  t_start),
     sprintf("double t_end = %f;",  t_end),
-    compute_R0.c,
     derivativeBacteria.c,
     matrix_cases_at_t_start.string,
     matrix_cases_other.string,
