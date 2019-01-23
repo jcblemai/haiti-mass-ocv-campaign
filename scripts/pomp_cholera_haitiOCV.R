@@ -263,7 +263,7 @@ compute_R0.c <- "void compute_R0(double R0[2], double t0,  int n_cases_start, do
 initalizeStates <- Csnippet("
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state, DP says its correct.
-  double R0[2];
+  double R0[2] = {0,0};
   //compute_R0(R0, t_start, n_cases_start, cases_at_t_start, sigma, rhoA, XrhoI, mu, epsilon);
   double rhoI = rhoA * XrhoI;
   for(int i = 0; i < n_cases_start; i++){
@@ -489,7 +489,7 @@ sirb_cholera <- pomp(
     sprintf("double p1d_alt = %f;", p1d_alt),
     sprintf("int n_cases_start = %i;",  nrow(cases_at_t_start)),
     sprintf("int n_cases_other = %i;",  nrow(cases_other_dept)),
-    sprintf("double t_start = %f;",  t_start - dt_yrs),
+    sprintf("double t_start = %f;",  t_start),
     sprintf("double t_end = %f;",  t_end),
     compute_R0.c,
     derivativeBacteria.c,
