@@ -40,7 +40,7 @@ else {
 
 
   // force of infection
-foi = betaB * (B / (1 + B)) + foi_add;
+foi = betaB * (B / (1 + B)) + foi_add*mobility;
 if(std_W > 0.0)
 {
     dw = rgammawn(std_W, dt);   // white noise (extra-demographic stochasticity)
