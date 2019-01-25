@@ -8,7 +8,10 @@
   - Rain may does not account for mobility -> seems ok
   
   
-  1. Implement mobility 30 minscenearios
+  1. Implement mobility
+    1. ok to change initial condition
+    one forecast and one forcast with mobility.
+    will be long
   2. Create good param Arti. Relaunch calib on other from that 1h. vary beta and lambda
   3. Create code to generate 
   4. *VE proportional to population U5* 

@@ -27,7 +27,12 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 #departement <- 'Artibonite'
 #run_level <- 4
 #nsim = 30
-
+    nsim <- 2
+    cases_ext <- 456 
+    t_vacc_start <- '2010-01-01'
+    t_vacc_end  <- '2010-01-01'
+    p1d_reg <- 0 
+    r_v_year <- 0
 
 liks_stoch <- read_csv(sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv",output_dir, departement, departement, run_level)) 
 liks <- liks_stoch
@@ -100,6 +105,57 @@ time_forecast <- dateToYears(seq.Date(yearsToDate(t_start), yearsToDate(t_foreca
 
 # Compare outputs ---------------------------------------------------------
 
+
+initalizeStates <- Csnippet("
+  A     = 0;
+  I     = 0;
+  RI1   = 0;
+  RI2   = 0;
+  RI3   = 0;
+  RA1   = 0;
+  RA2   = 0;
+  RA3   = 0;
+
+  S   = 120;
+  B   = 0;
+  C   = 0;
+  W   = 0;
+  VSd = 0;
+  VRI1d = 0;
+  VRI2d = 0;
+  VRI3d = 0;
+  VRA1d = 0;
+  VRA2d = 0;
+  VRA3d = 0;
+  VSdd = 0;
+  VRI1dd = 0;
+  VRI2dd = 0;
+  VRI3dd = 0;
+  VRA1dd = 0;
+  VRA2dd = 0;
+  VRA3dd = 0;
+  VSd_alt = 0;
+  VRI1d_alt = 0;
+  VRI2d_alt = 0;
+  VRI3d_alt = 0;
+  VRA1d_alt = 0;
+  VRA2d_alt = 0;
+  VRA3d_alt = 0;
+  VSdd_alt = 0;
+  VRI1dd_alt = 0;
+  VRI2dd_alt = 0;
+  VRI3dd_alt = 0;
+  VRA1dd_alt = 0;
+  VRA2dd_alt = 0;
+  VRA3dd_alt = 0;
+   ")
+state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3",
+ "VSd", "VRI1d", "VRI2d", "VRI3d", "VRA1d", "VRA2d", "VRA3d",
+ "VSdd", "VRI1dd", "VRI2dd", "VRI3dd", "VRA1dd", "VRA2dd", "VRA3dd",
+"VSd_alt", "VRI1d_alt", "VRI2d_alt", "VRI3d_alt", "VRA1d_alt", "VRA2d_alt", "VRA3d_alt",
+ "VSdd_alt", "VRI1dd_alt", "VRI2dd_alt", "VRI3dd_alt", "VRA1dd_alt", "VRA2dd_alt", "VRA3dd_alt",
+"B", "C", "W")
+
 doMC::registerDoMC(8)
 
 # function to simulate from a given set of paramters
@@ -110,11 +166,9 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["p1d_reg"] <-  as.numeric(p1d_reg)
   coef(sirb_cholera)["r_v_year"] <- as.numeric(r_v_year)
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
-  #coef(sirb_cholera)["foi_add"] <- 0
 
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
 
-  #rbind(calib, proj)%>% 
   calib %>%
     as_tibble() %>% 
     mutate(isdata = sim == "data") %>%
@@ -135,7 +189,9 @@ sirb_cholera <- pomp(sirb_cholera,
                      filter(time > (t_start - 0.01) & time < (t_forecast + 0.01)) %>% 
                      select(time, rain_std) %>% 
                      rename(rain = rain_std),
-                     tcovar = "time")
+                     tcovar = "time",
+                     statenames = state_names,
+                     initializer = initalizeStates)
 
 # run simulations for each model
 sim_stochastic <- simulatePOMP(params, nsim = nsim)
