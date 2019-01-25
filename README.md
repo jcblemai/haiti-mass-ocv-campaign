@@ -4,12 +4,19 @@
 ## TODO
   - *Demographic stochasticity*
   - Beta Drop to match the drop with two beta
-  - *VE proportional to population U5*
   - Use artibonite (Xcept rainfall) as starting point for other simulation
+  - Rain may does not account for mobility -> seems ok
+  
+  
+  1. Implement mobility 30 minscenearios
+  2. Create good param Arti. Relaunch calib on other from that 1h. vary beta and lambda
+  3. Create code to generate 
+  4. *VE proportional to population U5* 
+  5. Wake up early and generate results.
+
 
 
 ### TODO vaccination
-  - change t_eff for dd and 1d
   - epsilon might be 30%
   +  - Why isn't the first value of the dataframe the same between q05 and q95
 

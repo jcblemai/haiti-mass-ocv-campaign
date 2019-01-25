@@ -109,6 +109,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["t_vacc_end"] <- dateToYears(as.Date(t_vacc_end))
   coef(sirb_cholera)["p1d_reg"] <-  as.numeric(p1d_reg)
   coef(sirb_cholera)["r_v_year"] <- as.numeric(r_v_year)
+  coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
   #coef(sirb_cholera)["foi_add"] <- 0
 
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib

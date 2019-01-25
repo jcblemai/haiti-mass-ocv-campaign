@@ -432,6 +432,8 @@ param_est["Rtot_0"] <- 0.35
 param_est["foi_add"] <- 0.0
 param_est["gammaA"] <- 1/2
 param_est["gammaI"] <- 1/2
+cases_ext_mean <- cases_other_dept %>% filter(time > t_start)
+cases_ext_mean <- mean(cases_ext_mean$cases)
 
 # rate of simulation in fractions of years
 dt_yrs <- 1/365.25 * .2
