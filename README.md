@@ -9,10 +9,14 @@
   
   
   1. Implement mobility
-    1. ok to change initial condition
-    one forecast and one forcast with mobility.
-    will be long
-  2. Create good param Arti. Relaunch calib on other from that 1h. vary beta and lambda
+    1. Manage to recreate initial conditions:
+    launch sim by simulation b.c pomp store state
+    2 Do it in the pomp object
+    3. Iterative (easier but wronger) via csv
+    4. Do it with cover !! possible several
+    
+@/!\ Comment in forcast to run the python stuff
+  2. Create good param Arti. Relaunch calib on other from that 1h. vary beta and lambda DONE
   3. Create code to generate 
   4. *VE proportional to population U5* 
   5. Wake up early and generate results.
