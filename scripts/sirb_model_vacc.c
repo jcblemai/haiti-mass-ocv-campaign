@@ -34,7 +34,7 @@ if (t < t_end) {
           mobility = cases_other[n_cases_start-1][1];
 }
 else {
-    mobility = cases_ext;
+    mobility = cases_covar_c;
 }
 
 

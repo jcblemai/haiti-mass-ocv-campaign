@@ -79,7 +79,7 @@ rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date)) %>%
   filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
-  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
+  mutate(max_rain = max(rain), rain_std = rain/max_rain)
 
 cases_other_dept <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>% 
   gather(dep, cases, -date) %>% 
@@ -90,6 +90,18 @@ cases_other_dept <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
 cases_other_dept <- aggregate(cases_other_dept$cases, by=list(Category=cases_other_dept$time), FUN=sum, na.rm=TRUE, na.action=NULL) %>%
   mutate(time = Category) %>%
   mutate(cases = x)
+
+
+cases_covar <- read_csv("covar_zero.csv")  %>% 
+  gather(dep, cases, -date) %>% 
+  filter(dep != departement) %>% 
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date))
+
+cases_covar <- aggregate(cases_covar$cases, by=list(Category=cases_covar$time), FUN=sum, na.rm=TRUE, na.action=NULL) %>%
+  mutate(time = Category) %>%
+  mutate(cases = x)
+
 
 make_plots <- F
 if(make_plots) {
@@ -442,6 +454,18 @@ dt_yrs <- 1/365.25 * .2
 params <- c(param_est, param_fixed)  
 params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
 
+rain <- rain  %>% 
+    filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
+    select(time, rain_std) %>% 
+    rename(rain = rain_std)
+
+cases_covar <- cases_covar %>% 
+    filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
+    select(time, cases) %>% 
+    rename(cases_covar_c = cases)
+
+covar <- full_join(rain, cases_covar)
+
 
 sirb_cholera <- pomp(
   # set data
@@ -462,10 +486,7 @@ sirb_cholera <- pomp(
   # measurement model density
   dmeasure = dmeas,
   # covariates
-  covar = rain  %>% 
-    filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
-    select(time, rain_std) %>% 
-    rename(rain = rain_std),
+  covar = covar,
   tcovar = "time",
   # names of state variables
   statenames = state_names,
@@ -475,7 +496,7 @@ sirb_cholera <- pomp(
   # names of paramters
   paramnames = param_names,
   # names of covariates
-  covarnames = "rain",
+ # covarnames = "rain",
   initializer = initalizeStates,
   toEstimationScale = toEstimationScale,
   fromEstimationScale = fromEstimationScale,

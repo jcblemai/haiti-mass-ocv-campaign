@@ -24,15 +24,15 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # TODO comment to run in python
-output_dir <- "output/"
-departement <- 'Artibonite'
-run_level <- 3
-    nsim <- 2
-    cases_ext <- 456 
-    t_vacc_start <- '2010-01-01'
-    t_vacc_end  <- '2010-01-01'
-    p1d_reg <- 0 
-    r_v_year <- 0
+#output_dir <- "output/"
+#departement <- 'Artibonite'
+#run_level <- 3
+#    nsim <- 2
+#    cases_ext <- 456 
+#    t_vacc_start <- '2010-01-01'
+#    t_vacc_end  <- '2010-01-01'
+#    p1d_reg <- 0 
+#    r_v_year <- 0
 
 liks_stoch <- read_csv(sprintf("%s%s/Haiti_OCV-%s-param_logliks-10-l%i.csv",output_dir, departement, departement, run_level)) 
 liks <- liks_stoch
