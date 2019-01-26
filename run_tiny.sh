@@ -4,6 +4,6 @@ for dept in Centre Ouest Nord-Ouest Nord Sud  Nippes Nord-Est  Sud-Est Grande_An
     rm -R output/$dept/
     mkdir output/$dept;
     Rscript scripts/pomp_cholera_haitiOCV.R $dept
-    nohup Rscript scripts/run_mif_haitiOCV.R  $dept $runlvl > output/$dept/out$dept &
+    nohup Rscript scripts/run_tiny_mif_haitiOCV.R  $dept $runlvl > output/$dept/out$dept &
 done;
 
