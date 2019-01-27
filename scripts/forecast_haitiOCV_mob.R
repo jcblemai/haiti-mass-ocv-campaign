@@ -25,7 +25,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # TODO comment to run in python
-#output_dir <- "output/"
+#output_dir <- "output_12-20-2gammaMOD/"
 #departement <- 'Artibonite'
 #run_level <- 3
 #nsim <- 1
@@ -116,6 +116,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["p1d_reg"] <-  as.numeric(p1d_reg)
   coef(sirb_cholera)["r_v_year"] <- as.numeric(r_v_year)
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
+  coef(sirb_cholera)["foi_add"] <- coef(sirb_cholera)["foi_add"]/calib_corr
   
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
   save(calib, file = "calib.rda")
