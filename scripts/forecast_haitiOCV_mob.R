@@ -29,7 +29,7 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 #departement <- 'Artibonite'
 #run_level <- 3
 #nsim <- 1
-#cases_ext <- 456 
+#cases_ext <- 1 
 #t_vacc_start <- '2010-01-01'
 #t_vacc_end  <- '2010-01-01'
 #p1d_reg <- 0 
@@ -118,6 +118,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
   
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
+  save(calib, file = "calib.rda")
   
   calib %>%
     as_tibble() %>% 
@@ -132,6 +133,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
     mutate(isdata = ifelse(isdata, "data", "simulation"),
            date = yearsToDateTime(time)) %>% 
     filter(date >= yearsToDate(sirb_cholera@t0))
+  
 }
 
 # Build new covariate:
