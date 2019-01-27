@@ -424,7 +424,7 @@ p1d_alt = p1d_alt_year[departement]
 # Initialize the fixed parameters
 param_fixed <-  set_names(seq_along(param_fixed_names) * 0, param_fixed_names)
 param_fixed[param_proc_fixed_names] <- as.numeric(param_proc_fixed)
-
+param_fixed['cases_ext'] <- 1
 
 # Initialize the parameters to estimate (just initial guesses)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)

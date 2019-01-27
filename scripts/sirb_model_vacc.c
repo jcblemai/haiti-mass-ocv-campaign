@@ -15,13 +15,6 @@ double mobility = 0;
 
 int scenario = 1;
 
-/* Shoudl be checked TODO */
-if (p1d_reg <  0.02)
-	scenario = 3;
-else if (p1d_reg < .130)
-	scenario = 1;
-else if (p1d_reg < .40)
-	scenario = 2;
 
 
 /* Compute mobility term */
@@ -58,6 +51,7 @@ if (t <= (t_vacc_end_alt + dt)){
 	p1d = p1d_alt;
 } else {
 	previous_vacc_campaign = FALSE;
+    scenario = cases_ext;
 	if (t >= t_vacc_start && t <= (t_vacc_end + dt)) {
     	r_v_wdn = (r_v_year / (S + A + RI1 + RI2 + RI3 + RA1 + RA2 + RA3));
 	}
