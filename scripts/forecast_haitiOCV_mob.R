@@ -118,7 +118,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
   coef(sirb_cholera)["foi_add"] <- coef(sirb_cholera)["foi_add"]/calib_corr
   
-  pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = seed, times = time_forecast) -> calib
+  pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = runif(1,1,10000), times = time_forecast) -> calib
   save(calib, file = "calib.rda")
   
   calib %>%

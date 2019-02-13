@@ -1,5 +1,8 @@
+
 import matplotlib
+# Force matplotlib to not use any Xwindows backend.
 matplotlib.use('Agg')
+
 from rpy2 import robjects
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -9,6 +12,7 @@ import numpy as np
 import datetime
 import yaml
 import os
+
 
 nsim = 100
 run_lvl = 2
@@ -125,22 +129,12 @@ scenario = S3
 index = pd.DatetimeIndex(start =  t_start,  end = t_for, freq = 'W-SAT')
 r_source = robjects.r['source'];
 
-csv_all_q50 =  pd.DataFrame(0, index = pd.DatetimeIndex(start =  t_start, 
+csv_all =  pd.DataFrame(0, index = pd.DatetimeIndex(start =  t_start, 
                                       end = t_for, freq = 'W-SAT'), columns = dept_name)
-
-csv_all_q05 =  pd.DataFrame(0, index = pd.DatetimeIndex(start =  t_start, 
-                                      end = t_for, freq = 'W-SAT'), columns = dept_name)
-
-csv_all_q95 =  pd.DataFrame(0, index = pd.DatetimeIndex(start =  t_start, 
-                                      end = t_for, freq = 'W-SAT'), columns = dept_name)
-
-
-#covar_init = pd.concat([cases[t_start:]]*6, ignore_index=True)[0:-362]
-#covar_init.index = pd.DatetimeIndex(start =  datetime.date(2010,10,23), 
- #                                     end = t_for, freq = 'W-SAT')
-covar_init = pd.read_csv('S3_ref.csv', index_col = 0, parse_dates = True)
-covar_init.to_csv('covar_mob.csv', index_label='date')
-
+covar_init = pd.concat([cases[t_start:]]*6, ignore_index=True)[0:-362]
+covar_init.index = pd.DatetimeIndex(start =  datetime.date(2010,10,23), 
+                                      end = t_for, freq = 'W-SAT')
+#covar_init.to_csv('covar_mob.csv', index_label='date')
 for i in range(1):
     print(i,)
     all_data_vacc = {}
@@ -159,7 +153,7 @@ for i in range(1):
         robjects.r('cases_ext <- 1')
 
 
-        r_source('~/phd/haiti-ocv-pomp/scripts/forecast_haitiOCV_mob.R')
+        r_source('scripts/forecast_haitiOCV_mob.R')
   
         for comp in compartments:
             temp = pandas2ri.ri2py(robjects.r[comp])
@@ -168,15 +162,12 @@ for i in range(1):
             dept_data[comp] = temp
         all_data_vacc[dp] = dept_data
     
-        csv_all_q50[dp] = all_data_vacc[dp]['cases']['q50']
-        csv_all_q95[dp] = all_data_vacc[dp]['cases']['q95']
-        csv_all_q05[dp] = all_data_vacc[dp]['cases']['q05']
+        csv_all[dp] = all_data_vacc[dp]['cases']['q50']
         
-    csv_all_q05.to_csv('S0_q05.csv', index_label='date')
-    csv_all_q95.to_csv('S0_q95.csv', index_label='date')
-    csv_all_q05.to_csv('S0_q50.csv', index_label='date')
+    csv_all.to_csv('S3q50.csv', index_label='date')
     
-fig, axes = plt.subplots(5, 2, figsize=(15,15), squeeze = True);
+    
+fig, axes = plt.subplots((len(all_data_vacc))//2, 2, figsize=(15,15), squeeze = True);
 axes = axes.flatten();
 fig.patch.set_facecolor('white')
 
@@ -210,6 +201,6 @@ for i, dp in enumerate(dept_avail):
 
 fig.tight_layout()
 
-plt.savefig('S1q.png')
-#all_data_vacc[dp]['cases']['q50'].to_csv('S1.csv', index_label='date')
+plt.savefig('S3.png')
+all_data_vacc[dp]['cases']['q50'].to_csv('S3.csv', index_label='date')
 
