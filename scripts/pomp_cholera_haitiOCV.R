@@ -91,16 +91,16 @@ cases_other_dept <- aggregate(cases_other_dept$cases, by=list(Category=cases_oth
   mutate(time = Category) %>%
   mutate(cases = x)
 
+cases_covar <- cases_other_dept
+#cases_covar <- read_csv("covar_zero.csv")  %>% 
+#  gather(dep, cases, -date) %>% 
+#  filter(dep != departement) %>% 
+#  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+#         time = dateToYears(date))
 
-cases_covar <- read_csv("covar_zero.csv")  %>% 
-  gather(dep, cases, -date) %>% 
-  filter(dep != departement) %>% 
-  mutate(date = as.Date(date, format = "%Y-%m-%d"),
-         time = dateToYears(date))
-
-cases_covar <- aggregate(cases_covar$cases, by=list(Category=cases_covar$time), FUN=sum, na.rm=TRUE, na.action=NULL) %>%
-  mutate(time = Category) %>%
-  mutate(cases = x)
+#cases_covar <- aggregate(cases_covar$cases, by=list(Category=cases_covar$time), FUN=sum, na.rm=TRUE, na.action=NULL) %>%
+#  mutate(time = Category) %>%
+#  mutate(cases = x)
 
 
 make_plots <- F

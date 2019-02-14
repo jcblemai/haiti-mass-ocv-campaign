@@ -30,6 +30,11 @@ if (length(args)==0) {
   args[2] = 1
 }
 
+# Choose to restart from a previous file (named checkpoint.csv)
+restart <- T
+
+
+
 departement <- args[1]
 run_level <- as.integer(args[2])
 
@@ -100,6 +105,7 @@ parameter_bounds <- tribble(
 #  "Rtot_0", min_param_val, 0.1
 )
 
+
 # convert to matrix for ease
 parameter_bounds <- set_rownames(as.matrix(parameter_bounds[, -1]), parameter_bounds[["param"]])
 
@@ -123,7 +129,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
 # Run the computations -----------------------------------------------
 # if on one machine run all models in sequence if only one task per model 
 # seq(1, nrow(model_specs))
-for(array_id in array_id_vec) {
+#for(array_id in array_id_vec) {
   print(sprintf(">>>> Running on departement %s with run level %d", departement, run_level))
   print(sprintf(">>>> Np : %d | Nmif: %d | Ninit: %d | NpLL: %d | Nrep: %d ", 
                 cholera_Np[run_level], cholera_Nmif[run_level], cholera_Ninit_param[run_level], 
@@ -137,12 +143,34 @@ for(array_id in array_id_vec) {
   mifruns.filename = str_c(output_dir, departement, "/", str_c(projname, run_level, departement, sep = "-"), "-mif_runs.rda", sep = "")
   
   # create random vectors of initial paramters given the bounds
-  init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
-                             upper = parameter_bounds[, "upper"], 
-                             nseq = cholera_Ninit_param[run_level])
-  
-  # Allow large variation of k to chose neg in and poisson
-  init_params %<>% mutate(k=10^k) 
+  if (restart) {
+    liks_stoch <- read_csv("checkpoint.csv") 
+    liks <- liks_stoch
+    
+    # get MLE paramter sets 
+    best_param <- liks %>% 
+      arrange(desc(loglik)) %>% 
+      slice(1)  %>% 
+      arrange(desc(loglik)) %>% 
+      ungroup %>% 
+      left_join(liks_stoch)
+    
+    load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
+    
+    params <- unlist(best_param[names(coef(sirb_cholera))]) %>% as.double()
+    names(params) <- names(best_param[names(coef(sirb_cholera))])
+
+  }
+  else {
+    init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
+                               upper = parameter_bounds[, "upper"], 
+                               nseq = cholera_Ninit_param[run_level])
+    
+    # Allow large variation of k to chose neg in and poisson
+    init_params %<>% mutate(k=10^k) 
+    
+  }
+
   
   # get the names of the paramters that are fixed
   param_fixed_names <- setdiff(names(coef(sirb_cholera)), colnames(init_params))
@@ -252,7 +280,7 @@ for(array_id in array_id_vec) {
   }, 
   seed = master.seed, kind="L'Ecuyer")
   
-}
+#}
 
 closeAllConnections()
 
