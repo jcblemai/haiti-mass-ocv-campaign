@@ -145,23 +145,36 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
   # create random vectors of initial paramters given the bounds
   if (restart) {
     liks_stoch <- read_csv("checkpoint.csv") 
-    liks <- liks_stoch
-    
-    # get MLE paramter sets 
-    best_param <- liks %>% 
-      arrange(desc(loglik)) %>% 
-      slice(1)  %>% 
-      arrange(desc(loglik)) %>% 
-      ungroup %>% 
-      left_join(liks_stoch)
-    
-    load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
-    
-    params <- unlist(best_param[names(coef(sirb_cholera))]) %>% as.double()
-    names(params) <- names(best_param[names(coef(sirb_cholera))])
+    best_like <- liks_stoch %>% 
+           arrange(desc(loglik)) %>% 
+           slice(1)
+    best_like <- best_like$loglik
 
-  }
-  else {
+    # get MLE paramter sets 
+    best_param <- liks_stoch %>% filter(loglik > best_like - 2) %>% arrange(desc(loglik)) 
+    
+    to_generate = cholera_Ninit_param[run_level] - nrow(best_param)
+    
+    allready_there = nrow(best_param)
+    
+    if (to_generate > 0) {
+      for (i in 0:to_generate) {
+        new_par = as.data.frame(t(rnorm(ncol(best_param), 
+                                    mean = unlist(slice(best_param,  i%%allready_there +1 )), 
+                                    sd =   unlist(slice(best_param,  i%%allready_there  +1)/2))))  
+        names(new_par) <- names(best_param)
+        best_param <- bind_rows(best_param, new_par)
+      }
+    } else if (to_generate < 0) {
+      best_param <- head(best_param, to_generate)
+    }
+    
+    
+    best_param <- best_param[rownames(parameter_bounds)]
+    
+    init_params <- as.data.frame(best_param)
+    
+  } else {
     init_params <- sobolDesign(lower = parameter_bounds[, "lower"],
                                upper = parameter_bounds[, "upper"], 
                                nseq = cholera_Ninit_param[run_level])
