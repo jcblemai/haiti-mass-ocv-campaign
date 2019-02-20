@@ -155,10 +155,11 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
     
     to_generate = cholera_Ninit_param[run_level] - nrow(best_param)
     
+    print(to_generate)
     allready_there = nrow(best_param)
     
     if (to_generate > 0) {
-      for (i in 0:to_generate) {
+      for (i in 0:(to_generate-1)) {
         new_par = as.data.frame(t(rnorm(ncol(best_param), 
                                     mean = unlist(slice(best_param,  i%%allready_there +1 )), 
                                     sd =   unlist(slice(best_param,  i%%allready_there  +1)/2))))  
