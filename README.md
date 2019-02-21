@@ -1,49 +1,43 @@
 # Rainfall effects on the 2015 Juba cholera epidemic
 
+
+## TODO
+  - Demographic stochasticity ?
+  - Beta Drop to match the drop with two beta ?
+    
+  - Mobility a better way:
+    1. Manage to recreate initial conditions: launch sim by simulation b.c pomp store state
+    2 Do it in the pomp object
+    3. Iterative (easier but wronger) via csv
+
+  - *VE proportional to population U5* 
+  - Wake up early and generate results.
+  - Clean up files and write workflow
+  - Cancel some parameters
+  - Find what's need to be calibrated
+  - add new data
+  - being able to run stuff in parallel
+  - Why isn't the first value of the dataframe the same between q05 and q95
+
+## DONE since feb 20. 2019
+  - Use artibonite (Xcept rainfall) as starting point for other simulation
+
+
 ### FIRST RESULT ROUND FOR HAITI JANUARY
     - data used was 'output_12-20-2gammaMOD/'
     - scripts on echopc40 for probablity of extinction
     - foi_add was scaled :)
 
 
-## TODO
-  - *Demographic stochasticity*
-  - Beta Drop to match the drop with two beta
-  - Use artibonite (Xcept rainfall) as starting point for other simulation
-  - Rain may does not account for mobility -> seems ok
-  
-  
-  1. Implement mobility
-    1. Manage to recreate initial conditions:
-    launch sim by simulation b.c pomp store state
-    2 Do it in the pomp object
-    3. Iterative (easier but wronger) via csv
-    4. Do it with cover !! possible several
-    
-@/!\ Comment in forcast to run the python stuff
-  2. Create good param Arti. Relaunch calib on other from that 1h. vary beta and lambda DONE
-  3. Create code to generate 
-  4. *VE proportional to population U5* 
-  5. Wake up early and generate results.
-
-
-
-### TODO vaccination
-  - epsilon might be 30%
-  +  - Why isn't the first value of the dataframe the same between q05 and q95
-
-  
-
 # As of the last big calibration we have (12-20) is:
   - good in Artibonite, Sud, Grande Anse, Centre, Sud-Est
   - bad in Nord-Est, Nord, Mord Ouest, OUest, Centre, Nippes.
-
-Drop is needed in Nippes, Grande Anse, Nord, Nord-Est, Ouest, Sud, ...
+        -> Drop is needed in Nippes, Grande Anse, Nord, Nord-Est, Ouest, Sud, ...
 
 
 ## Data
 
-1. `cases_data.csv`: reported cholera cases for 2014-2015 in Juba
+1. `cases_corrected.csv`: Cases corrected with some NAs on big drops
 2. `rain_data.csv`: remote sensing estimate of daily rainfall (TRMM data)
 3. `input_parameters.yaml`: fixed parameters for the SIRB model in [YAML](http://yaml.org/) format
 
