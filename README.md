@@ -1,5 +1,10 @@
 # Rainfall effects on the 2015 Juba cholera epidemic
 
+### FIRST RESULT ROUND FOR HAITI JANUARY
+    - data used was 'output_12-20-2gammaMOD/'
+    - scripts on echopc40 for probablity of extinction
+    - foi_add was scaled :)
+
 
 ## TODO
   - *Demographic stochasticity*
