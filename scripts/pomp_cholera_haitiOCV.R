@@ -61,15 +61,15 @@ case_dates <- with(cases %>%
 # check if weekly reports are missing
 missing_dates <- setdiff(case_dates, cases$date) %>% as.Date(origin = as.Date("1970-01-01"))
 
-if (length(missing_dates) > 0) {
-# fill in the data
-  cases %<>% 
-    bind_rows(slice(cases, 1:2) %>% 
-                mutate(date = missing_dates,
-                      cases = NA,
-                      time = dateToYears(date))) %>%
-    arrange(time)
-}
+#if (length(missing_dates) > 0) {
+## fill in the data
+#  cases %<>% 
+#    bind_rows(slice(cases, 1:2) %>% 
+#                mutate(date = missing_dates,
+#                      cases = NA,
+#                      time = dateToYears(date))) %>%
+#    arrange(time)
+#} # forgot how that work ^ and cannot adapt it to new data
 
 rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
   gather(dep, rain, -date) %>% 
@@ -429,8 +429,8 @@ param_fixed['cases_ext'] <- 1
 # Initialize the parameters to estimate (just initial guesses)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
 param_est["sigma"] <- .2
-param_est["rhoA"] <- 1/(365*3)
-param_est["XrhoI"] <- 0.5
+param_est["rhoA"] <- 1/(365*8)
+param_est["XrhoI"] <- 1
 param_est["betaB"] <- .001
 param_est["mu_B"] <-  365/5
 param_est["XthetaA"] <- 0.5

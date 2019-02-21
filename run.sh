@@ -1,5 +1,6 @@
 dept=$1
 runlvl=$2
+mkdir output/
 rm -R output/$dept/
 mkdir output/$dept
 #mkdir results/$dept/figures

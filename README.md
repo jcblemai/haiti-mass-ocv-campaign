@@ -2,25 +2,27 @@
 
 
 ## TODO
+CODE CALIB
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
-    
+  - Calibrate Ouest later (using run_tiny_mif) ?
+
+
+NOTEBOOK AND CODE RUN
   - Mobility a better way:
     1. Manage to recreate initial conditions: launch sim by simulation b.c pomp store state
     2 Do it in the pomp object
     3. Iterative (easier but wronger) via csv
-
   - *VE proportional to population U5* 
-  - Wake up early and generate results.
-  - Clean up files and write workflow
-  - Cancel some parameters
   - Find what's need to be calibrated
-  - add new data
   - being able to run stuff in parallel
   - Why isn't the first value of the dataframe the same between q05 and q95
 
 ## DONE since feb 20. 2019
   - Use artibonite (Xcept rainfall) as starting point for other simulation
+  - add new data
+  - Cancel some parameters
+
 
 
 ### FIRST RESULT ROUND FOR HAITI JANUARY
