@@ -119,9 +119,9 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 # Level of detail on which to run the computations [Allow to chose easly set of params]
 # level 1 is short
 # level 2 is 12h
-# level 4
-cholera_Np <-           c(1e2,    3e3,    2e3,    4e3)
-cholera_Nmif <-         c(5,      300,    200,    400)      # Entre 200 et 300  
+# level 4 is 3.2 days
+cholera_Np <-           c(1e2,    3e3,    3e3,    4e3)
+cholera_Nmif <-         c(5,      300,    300,    400)      # Entre 200 et 300  
 cholera_Ninit_param <-  c(n_runs, n_runs, n_runs*2, n_runs*4)   # How many rounds a cpu does
 cholera_NpLL <-         c(1e2,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
 cholera_Nreps_global <- c(1,      5,      10,     15)

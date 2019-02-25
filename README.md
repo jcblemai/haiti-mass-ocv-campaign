@@ -17,6 +17,7 @@ NOTEBOOK AND CODE RUN
   - Find what's need to be calibrated
   - being able to run stuff in parallel
   - Why isn't the first value of the dataframe the same between q05 and q95
+  - Why all simulation begins at 0 ?
 
 ## DONE since feb 20. 2019
   - Use artibonite (Xcept rainfall) as starting point for other simulation
