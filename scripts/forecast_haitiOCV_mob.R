@@ -25,10 +25,10 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # TODO comment to run in python
-#output_dir <- "output_12-20-2gammaMOD/"
+#output_dir <- "output_14-21-newdata/"
 #departement <- 'Artibonite'
 #run_level <- 3
-#nsim <- 1
+#nsim <- 1000
 #cases_ext <- 1 
 #t_vacc_start <- '2010-01-01'
 #t_vacc_end  <- '2010-01-01'
