@@ -56,7 +56,7 @@ NOTEBOOK AND CODE RUN
 ## Package to install
 
   install.packages(c("tictoc", "pomp", "tidyverse", "magrittr", "ggthemes", "GGally", "foreach", "itertools", "lubridate", "dplyr", "purrr", "readr", "stringr", "tibble", "doMC","doSNOW","truncnorm")  , dependencies=TRUE)
-
+ 
 ## Show error in R
 
   options(show.error.locations=TRUE)
