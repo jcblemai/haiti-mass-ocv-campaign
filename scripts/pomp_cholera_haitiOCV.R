@@ -428,7 +428,7 @@ param_fixed['cases_ext'] <- 1
 
 # Initialize the parameters to estimate (just initial guesses)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
-param_est["sigma"] <- .2
+param_est["sigma"] <- .25
 param_est["rhoA"] <- 1/(365*8)
 param_est["XrhoI"] <- 1
 param_est["betaB"] <- .001

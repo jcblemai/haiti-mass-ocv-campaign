@@ -9,11 +9,6 @@ CODE CALIB
 
 
 NOTEBOOK AND CODE RUN
-  - Mobility a better way:
-    1. Manage to recreate initial conditions: launch sim by simulation b.c pomp store state
-    2 Do it in the pomp object
-    3. Iterative (easier but wronger) via csv
-      -> I keep nobility like this because it's too long otherwise
   - *VE proportional to population U5* 
   - Find what's need to be calibrated
   - Why isn't the first value of the dataframe the same between q05 and q95
@@ -24,6 +19,11 @@ NOTEBOOK AND CODE RUN
   - add new data
   - Cancel some parameters
   - being able to run stuff in parallel
+  - Mobility a better way:
+    1. Manage to recreate initial conditions: launch sim by simulation b.c pomp store state
+    2 Do it in the pomp object
+    3. Iterative (easier but wronger) via csv
+      -> I keep nobility like this because it's too long otherwise
 
 
 

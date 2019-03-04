@@ -85,7 +85,7 @@ min_param_val <- 1e-5
 parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   # Regular paramters
-  "sigma", 0.3, 1 - min_param_val,
+#  "sigma", 0.3, 1 - min_param_val,
   "betaB", min_param_val, 3,
   "mu_B", min_param_val, 1e2,
   "XthetaA", min_param_val, .5,
@@ -120,6 +120,7 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 # Level of detail on which to run the computations [Allow to chose easly set of params]
 # level 1 is short
 # level 2 is 12h
+# level 3 is 24h.
 # level 4 is 3.2 days
 cholera_Np <-           c(1e2,    3e3,    3e3,    4e3)
 cholera_Nmif <-         c(5,      300,    300,    400)      # Entre 200 et 300  
@@ -205,8 +206,9 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
   # Define the variance of the perturbation kernel for the paramters
   job_rw.sd <- eval(
     parse(
-      text = str_c("rw.sd(sigma  = ",  rw.sd_param["regular"],
-                   ", betaB  = ",  rw.sd_param["regular"],
+      text = str_c("rw.sd(",
+                  # "sigma  = ",    rw.sd_param["regular"], ", ",
+                   "betaB  = ",  rw.sd_param["regular"],
                    ", mu_B   = ",  rw.sd_param["regular"],
                    ", XthetaA= ",  rw.sd_param["regular"],
                    ", thetaI = ",  rw.sd_param["regular"],
