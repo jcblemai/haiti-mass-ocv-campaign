@@ -87,22 +87,22 @@ parameter_bounds <- tribble(
   # Regular paramters
 #  "sigma", 0.3, 1 - min_param_val,
   "betaB", min_param_val, 3,
-  "mu_B", min_param_val, 1e2,
-  "XthetaA", min_param_val, .5,
-  "thetaI", min_param_val, 2,
+#  "mu_B", min_param_val, 1e2,
+#  "XthetaA", min_param_val, .5,
+#  "thetaI", min_param_val, 2,
 #  "lambda", min_param_val, 5,
-   "lambdaR", min_param_val, 5,
+#   "lambdaR", min_param_val, 5,
   # "gammaA", 73, 365,
   # "gammaI", 73, 365,
-  "r", min_param_val, 2,
+#  "r", min_param_val, 2,
   #"rhoA", 0.02, 10,
   #"XrhoI", min_param_val, 1,
   # Process noise
-  "std_W", min_param_val, 1e-1,
+#  "std_W", min_param_val, 1e-1,
   # Measurement model
-  "epsilon", min_param_val, 1,
-  "foi_add", min_param_val, 0.005,
-  "k", -3, 4 #,   # hard to get negbin like this, sobol in log scale -5 et 4
+#  "epsilon", min_param_val, 1,
+  "foi_add", min_param_val, 0.0005#,
+#  "k", -3, 4 #,   # hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT
 #  "Rtot_0", min_param_val, 0.1
 )
 
@@ -186,7 +186,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
                                nseq = cholera_Ninit_param[run_level])
     
     # Allow large variation of k to chose neg in and poisson
-    init_params %<>% mutate(k=10^k) 
+    #init_params %<>% mutate(k=10^k) 
     
   }
 
@@ -209,21 +209,21 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
       text = str_c("rw.sd(",
                   # "sigma  = ",    rw.sd_param["regular"], ", ",
                    "betaB  = ",  rw.sd_param["regular"],
-                   ", mu_B   = ",  rw.sd_param["regular"],
-                   ", XthetaA= ",  rw.sd_param["regular"],
-                   ", thetaI = ",  rw.sd_param["regular"],
+                  # ", mu_B   = ",  rw.sd_param["regular"],
+                  # ", XthetaA= ",  rw.sd_param["regular"],
+                  # ", thetaI = ",  rw.sd_param["regular"],
                    #", lambda = ",  rw.sd_param["regular"],
-                   ", lambdaR = ",  rw.sd_param["regular"],
-                   ", r      = ",  rw.sd_param["regular"],
+                  # ", lambdaR = ",  rw.sd_param["regular"],
+                  # ", r      = ",  rw.sd_param["regular"],
                    #", XrhoI  = ",  rw.sd_param["regular"],
                    #", rhoA   = ",  rw.sd_param["regular"],
-                   ", std_W  = ",  rw.sd_param["regular"],
+                  # ", std_W  = ",  rw.sd_param["regular"],
                    #", gammaA  = ", rw.sd_param["regular"],
                    #", gammaI  = ", rw.sd_param["regular"],
                    #", Rtot_0  = ivp(",  rw.sd_param["ivp"],")",
-                   ", epsilon= ",  rw.sd_param["regular"],
+                  # ", epsilon= ",  rw.sd_param["regular"],
                    ", foi_add= ",  rw.sd_param["regular"],
-                   ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
+                  # ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
                    ")")
     )
   )
