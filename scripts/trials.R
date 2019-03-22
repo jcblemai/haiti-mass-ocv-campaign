@@ -11,18 +11,40 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
 
-# Analisis Run  --------------------------------------------------------------
+# Analysis Calibration  --------------------------------------------------------------
 output_dir <- "output_15-05-long/"
 departement <- "Artibonite"
 load(paste0(output_dir,departement, '/HaitiOCV-4-Artibonite-mif_runs.rda' ))
 plot(mf)
+
+# Analysis Projection -----------------------------------------------------------
+load('calib.rda')
+load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
+
+p <- calib %>%  gather(variable, value, -time, -rain, -sim)  %>% 
+  ggplot(aes(x = time, y = value, color = sim)) + 
+  #  geom_line(aes(y = cases), color = datacol, lwd = 0.2) 
+  geom_line() + 
+  facet_wrap(~variable, scales = "free_y") 
+# ok but slow
+
+datacol <- "#ED0000"
+print(p)
+
+calib %>% as_tibble() %>% 
+  mutate(isdata = sim == "data") %>%
+  gather(variable, value, -time, -rain, -sim, -isdata) %>% 
+  group_by(time, isdata, variable) %>% 
+  ungroup %>% 
+  mutate(isdata = ifelse(isdata, "data", "simulation"),
+         date = yearsToDateTime(time))  # How it is done in forecast
 
 # One simulation  --------------------------------------------------------------
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
   # default departement
-  args[1] = "Sud"
+  args[1] = "Artibonite"
 }
 departement <- args[1]
 output_dir <- "output/"

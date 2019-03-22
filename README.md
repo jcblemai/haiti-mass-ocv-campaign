@@ -14,7 +14,10 @@
 ### Forecast and results
   - Why isn't the first value of the dataframe the same between q05 and q95
   - Why all simulation begins at 0 ?
-  - Build some calibration diagnosis
+  - Better mobility ? or at least the ability to see simulation by simulation [WIP in trials.R]
+  
+### Reading
+  - Tidy data
 
 ### DONE since feb 20. 2019
 
@@ -30,6 +33,8 @@
     2 Do it in the pomp object
     3. Iterative (easier but wronger) via csv
       -> I keep nobility like this because it's too long otherwise
+  - Build some calibration diagnosis
+
 
 
 
@@ -49,6 +54,7 @@ We have good results except in *Ouest* (see `15-05-long`)
   - foi_add was scaled :)
   - see `meeting 27-01-2019 output`
   - Allow run of one simulation for diagnosis
+  - Plot national scale.
 
 
 ### As of the last big calibration we have (12-20) is:
