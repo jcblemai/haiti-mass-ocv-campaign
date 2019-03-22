@@ -9,12 +9,12 @@ CODE CALIB
 
 
 NOTEBOOK AND CODE RUN
-  - *VE proportional to population U5* 
   - Find what's need to be calibrated
   - Why isn't the first value of the dataframe the same between q05 and q95
   - Why all simulation begins at 0 ?
 
 ## DONE since feb 20. 2019
+  - *VE proportional to population U5* 
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - add new data
   - Cancel some parameters
