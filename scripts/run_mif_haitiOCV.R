@@ -56,6 +56,18 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 # Load pomp object ---------------------------------------------------------------
 load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
+# Another way to set parameter from artibonite
+#coef(sirb_cholera)["sigma"] <- 6.651372e-01
+#coef(sirb_cholera)["mu_B"] <-  8.805273e+02
+#coef(sirb_cholera)["XthetaA"] <- 3.717466e-01
+#coef(sirb_cholera)["thetaI"] <- 6.061175e-04
+#coef(sirb_cholera)["rhoA"] <- 5.051574e+01
+#coef(sirb_cholera)["XrhoI"] <- 8.996542e-01
+#coef(sirb_cholera)["std_W"] <- 3.160177e-03
+#coef(sirb_cholera)["epsilon"] <- 2.706321e-01
+#coef(sirb_cholera)["k"] <- 8.302246e+01
+
+
 # Parallel setup ----------------------------------------------------------
 
 # run on a single multi-core machine or on a cluster (using SLURM)
