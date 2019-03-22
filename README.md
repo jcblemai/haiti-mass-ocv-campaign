@@ -2,19 +2,25 @@
 
 
 ## TODO
-CODE CALIB
+
+### Calibration
+
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
-  - Calibrate Ouest later (using run_tiny_mif) ?
+  - Calibrate Ouest later ?
+  - Check Artibonite on echopc20
 
 
-NOTEBOOK AND CODE RUN
-  - Find what's need to be calibrated
+### Forecast and results
   - Why isn't the first value of the dataframe the same between q05 and q95
   - Why all simulation begins at 0 ?
+  - Build some calibration diagnosis
 
-## DONE since feb 20. 2019
-  - *VE proportional to population U5* 
+### DONE since feb 20. 2019
+
+  - VE proportional to population U5*
+  - Find what's need to be calibrated
+
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - add new data
   - Cancel some parameters
@@ -27,16 +33,25 @@ NOTEBOOK AND CODE RUN
 
 
 
+## Results
+
+### Calibration for next round of results (April 8 2019)
+    
+  - Big calibration in Artibonite
+  - Calibrate only foi and beta in all other departement, take param from artibonite
+    
+We have good results except in *Ouest* (see `15-05-long`)
+
+### Results for the haiti meeting in January:
+    
+  - data used was 'output_12-20-2gammaMOD/'
+  - scripts on echopc40 for probablity of extinction
+  - foi_add was scaled :)
+  - see `meeting 27-01-2019 output`
+  - Allow run of one simulation for diagnosis
 
 
-
-### FIRST RESULT ROUND FOR HAITI JANUARY
-    - data used was 'output_12-20-2gammaMOD/'
-    - scripts on echopc40 for probablity of extinction
-    - foi_add was scaled :)
-
-
-# As of the last big calibration we have (12-20) is:
+### As of the last big calibration we have (12-20) is:
   - good in Artibonite, Sud, Grande Anse, Centre, Sud-Est
   - bad in Nord-Est, Nord, Mord Ouest, OUest, Centre, Nippes.
         -> Drop is needed in Nippes, Grande Anse, Nord, Nord-Est, Ouest, Sud, ...
@@ -55,7 +70,7 @@ NOTEBOOK AND CODE RUN
 2. `run_mif_cholera.R`: fit the models using [multiple iterated filtering](http://www.pnas.org/content/112/3/719)
 3. `analysis_haitiOCV.R`: plot some information about calibration.
 5. `forecast_haitiOCV.R`: code to project the model. Take files `haiti-data/proj/rainfall.csv` for rainfall and file `covar_mob.csv` for the mobility covariate.
-4. `trials.R`: A little scratchpad !
+4. `trials.R`: A little scratchpad ! (now to plot also diagnosis)
 
 
 ### Code: Python notebook
@@ -66,6 +81,7 @@ NOTEBOOK AND CODE RUN
 
 
 ### Code: C functions
+
 1. `sirb_model_vacc.c`: The pomp model containing the transitions, able to support two vaccination campaign.
 2. `v_eff.c`: Function for the two doses vaccine efficacity
 

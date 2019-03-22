@@ -11,6 +11,12 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
 
+# Analisis Run  --------------------------------------------------------------
+output_dir <- "output_15-05-long/"
+departement <- "Artibonite"
+load(paste0(output_dir,departement, '/HaitiOCV-4-Artibonite-mif_runs.rda' ))
+plot(mf)
+
 # One simulation  --------------------------------------------------------------
 
 args = commandArgs(trailingOnly=TRUE)
