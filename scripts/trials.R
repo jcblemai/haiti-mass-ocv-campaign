@@ -21,23 +21,16 @@ plot(mf)
 load('calib.rda')
 load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
-p <- calib %>%  gather(variable, value, -time, -rain, -sim)  %>% 
+d <- calib %>%
+  gather(variable, value, -time, -rain, -sim)  %>% 
   ggplot(aes(x = time, y = value, color = sim)) + 
   #  geom_line(aes(y = cases), color = datacol, lwd = 0.2) 
   geom_line() + 
-  facet_wrap(~variable, scales = "free_y") 
-# ok but slow
+  facet_wrap(~variable, scales = "free_y") +  
+  theme(legend.position = "none") # Legend take too much space
 
 datacol <- "#ED0000"
-print(p)
-
-calib %>% as_tibble() %>% 
-  mutate(isdata = sim == "data") %>%
-  gather(variable, value, -time, -rain, -sim, -isdata) %>% 
-  group_by(time, isdata, variable) %>% 
-  ungroup %>% 
-  mutate(isdata = ifelse(isdata, "data", "simulation"),
-         date = yearsToDateTime(time))  # How it is done in forecast
+print(d)
 
 # One simulation  --------------------------------------------------------------
 
