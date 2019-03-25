@@ -7,13 +7,13 @@
 
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
-  - Calibrate Ouest later ?
-
 
 ### Forecast and results
   - Why isn't the first value of the dataframe the same between q05 and q95
   - Why all simulation begins at 0 ?
   - Better mobility ? or at least the ability to see simulation by simulation [WIP in trials.R]
+  - Investigate starting parameters
+  
   
 ### Reading
   - Tidy data
@@ -33,6 +33,8 @@
       -> I keep nobility like this because it's too long otherwise
   - Build some calibration diagnosis
   - Check Artibonite on echopc20
+  - Produce national plots
+
 
 
 
