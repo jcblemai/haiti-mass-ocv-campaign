@@ -265,7 +265,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
              Np = cholera_Np[run_level],
              Nmif = cholera_Nmif[run_level],
              cooling.type = "geometric",
-             cooling.fraction.50 = 0.4,
+             cooling.fraction.50 = 0.4,   # 0.4-> Stabilize after 200 -> stop at 300.
              transform = TRUE,
              rw.sd = job_rw.sd,
              verbose = F

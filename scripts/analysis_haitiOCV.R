@@ -33,6 +33,8 @@ run_level <- as.integer(args[2])
 departement <- 'Artibonite'
 run_level <- 4
 output_dir <- "output_15-05-long/"
+output_dir <- "../echopc20/haiti-ocv-pomp/15-05-long/output/"
+
 
 
 # Pair plots ---------------------------------------------------------------

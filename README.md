@@ -8,7 +8,6 @@
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
   - Calibrate Ouest later ?
-  - Check Artibonite on echopc20
 
 
 ### Forecast and results
@@ -23,7 +22,6 @@
 
   - VE proportional to population U5*
   - Find what's need to be calibrated
-
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - add new data
   - Cancel some parameters
@@ -34,6 +32,7 @@
     3. Iterative (easier but wronger) via csv
       -> I keep nobility like this because it's too long otherwise
   - Build some calibration diagnosis
+  - Check Artibonite on echopc20
 
 
 
