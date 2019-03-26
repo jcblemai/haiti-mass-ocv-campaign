@@ -7,12 +7,19 @@
 
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
-
+  - *Get a more realistic reporting rate.*
+  
 ### Forecast and results
   - Why isn't the first value of the dataframe the same between q05 and q95
   - Why all simulation begins at 0 ?
-  - Better mobility ? or at least the ability to see simulation by simulation [WIP in trials.R]
-  - Investigate starting parameters
+  - Better mobility ? 
+  - *Investigate starting parameters ro improve artinonite*
+  - *Get better Ouest by calibrating*
+  - Make use of CDC case definiation information ?
+  - *Investigate issue with rhoA (diff for Artibonite, move in calibration for Ouest)* -> is good in Artibonite but has been multiplied by 365 in ohter
+  
+  -> Tomorrow relaunch better calibrations
+
   
   
 ### Reading
@@ -34,6 +41,7 @@
   - Build some calibration diagnosis
   - Check Artibonite on echopc20
   - Produce national plots
+  - the ability to see simulation by simulation [WIP in trials.R]
 
 
 
