@@ -428,11 +428,18 @@ param_fixed['cases_ext'] <- 1
 
 # Initialize the parameters to estimate (just initial guesses)
 param_est <- set_names(seq_along(param_est_names) * 0, param_est_names)
-param_est["sigma"] <- .25
-param_est["rhoA"] <- 1/(365*8)
-param_est["XrhoI"] <- 1
-param_est["betaB"] <- 0.296517 	
-param_est["mu_B"] <-  159.593008 #365/5
+param_est["sigma"] <- .25               # Fixed
+param_est["rhoA"] <- 1/(365*8)*365.25   # Fixed
+param_est["XrhoI"] <- 1                 # Fixed
+param_est["gammaA"] <- 182.625          # Fixed 	
+param_est["gammaI"] <- 182.625          # Fixed
+param_est["Rtot_0"] <- 0.35             # Useless
+
+# Estimated parameters for all dept:
+param_est["betaB"] <- 0.296517
+param_est["foi_add"] <- 0.0
+# Estimated parameters for Artibonite:
+param_est["mu_B"] <-  159.593008
 param_est["XthetaA"] <- 0.033616
 param_est["thetaI"] <- 0.000767
 param_est["lambdaR"] <- 0.902726
@@ -440,10 +447,8 @@ param_est["r"] <- 1.041372
 param_est["std_W"] <- 0.007852
 param_est["epsilon"] <- 0.975316
 param_est["k"] <- 379.266151
-param_est["Rtot_0"] <- 0.35
-param_est["foi_add"] <- 0.0
-param_est["gammaA"] <- 182.625 	
-param_est["gammaI"] <- 182.625 
+
+
 cases_ext_mean <- cases_other_dept %>% filter(time > t_start)
 cases_ext_mean <- mean(cases_ext_mean$cases)
 
@@ -453,7 +458,7 @@ dt_yrs <- 1/365.25 * .2
 # adjust the rate parameters depending on the integration delta time in years (some parameter inputs given in days)
 params <- c(param_est, param_fixed)  
 #params[param_rates_in_days_names] <- params[param_rates_in_days_names] * 365.25
-
+# Was mu", "alpha", "gammaI", "gammaA", "rhoA"
 rain <- rain  %>% 
     filter(time > (t_start - 0.01) & time < (t_end + 0.01)) %>% 
     select(time, rain_std) %>% 

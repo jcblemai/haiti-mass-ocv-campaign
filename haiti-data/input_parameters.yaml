@@ -96,11 +96,10 @@ nb_doses_alt_year:
 # rate of loss of infection
 #gammaA: 0.2
 #gammaI: 0.2
-# natural mortality rate
-mu: 0.00004343944    # population natality and mortality rate (life exp is 63.07 year) (day^-1) 1/(63.07*365)
-
-# rate of cholera-induced mortality
-alpha: 0.004            # mortality rate due to cholera (day^-1) (2% case fatality rate)
+# natural mortality rate in year-1
+mu: 0.01586625546    # population natality and mortality rate (life exp is 63.07 year) (day^-1) 1/(63.07*365) *365.25
+# rate of cholera-induced mortality in year^-1
+alpha: 1.461            # mortality rate due to cholera (day^-1) (2% case fatality rate) * 365.25
 
 # start and end times of epidemic
 t_start: 2014-03-01
