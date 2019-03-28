@@ -1,8 +1,8 @@
-runlvl=$1
-output_dir="output_12-20-2gammaMOD"
+#runlvl=$1
+output_dir="output_15-05-long"
 
 for dept in Artibonite Centre Ouest Nord-Ouest Nord Sud  Nippes Nord-Est Sud-Est Grande_Anse; do
-    # rm -R output/$dept/
+    rm -R output/$dept/
     mkdir output/$dept;
     Rscript scripts/pomp_cholera_haitiOCV.R $dept;
     cp -v "output/$dept/sirb_cholera_pomped_$dept.rda" "$output_dir/$dept/sirb_cholera_pomped_$dept.rda"

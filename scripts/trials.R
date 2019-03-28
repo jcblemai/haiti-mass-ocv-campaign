@@ -13,8 +13,9 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 
 # Analysis Calibration  --------------------------------------------------------------
 output_dir <- "output_15-05-long/"
-departement <- "Ouest"
-run_level <- 3
+#departement <- "Ouest"
+#run_level <- 3
+
 load(paste0(output_dir,departement, '/HaitiOCV-',run_level,'-',departement, '-mif_runs.rda' ))
 plot(mf)
 
@@ -33,6 +34,59 @@ d <- calib %>%
 datacol <- "#ED0000"
 print(d)
 
+
+# Analysis Projection -----------------------------------------------------------
+departement <- 'Artibonite'
+nsim <- 100
+scenario <- 'S0'
+load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
+load(sprintf("output/Simulations/Haiti_OCV_Projection-%s-%i-%s.rda", departement, nsim, scenario))
+input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
+
+# Start and end dates of epidemic
+t_start <- dateToYears(as.Date(input_parameters$t_start))
+t_end <- dateToYears(as.Date(input_parameters$t_end))
+t_forecast <- dateToYears(as.Date("2029-12-21"))
+
+
+quant <- projec %>%
+  as_tibble() %>% 
+  mutate(isdata = sim == "data") %>%
+  gather(variable, value, -time, -rain, -sim, -isdata) %>% 
+  group_by(time, isdata, variable) %>% 
+  summarise( q05 = quantile(value, 0.025, na.rm = T),
+             mean = mean(value, na.rm = T),
+             q50 = quantile(value, 0.5, na.rm = T),
+             q95 = quantile(value, 0.975, na.rm = T)) %>% 
+  ungroup %>% 
+  mutate(isdata = ifelse(isdata, "data", "simulation"),
+         date = yearsToDateTime(time)) %>% 
+  filter(date >= yearsToDate(sirb_cholera@t0))
+
+
+simcol <- "#175CD6"
+datacol <- "#ED0000"
+
+p.sim <- ggplot(data = quant,
+                 aes(x = date))+
+   geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+   geom_line(aes(y = q50), color = simcol) + 
+  facet_wrap(~variable, scales = "free_y") +  
+  theme(legend.position = "none") + # Legend take too much space
+  theme(panel.grid.major = element_line(color = "lightgray"),
+        panel.background = element_rect(fill = "white"),
+        axis.line = element_line(color = "black"),
+        strip.text = element_blank(),
+        axis.title = element_text()) +
+scale_y_continuous(expand = c(0,0))+
+   labs(y = "daily cholera cases", x = "date") +
+   theme(panel.grid.major = element_line(color = "lightgray"),
+         panel.background = element_rect(fill = "white"),
+         axis.line = element_line(color = "black"),
+         strip.text = element_blank(),
+           axis.title = element_text())
+ 
+ print(p.sim)
 # One simulation  --------------------------------------------------------------
 
 args = commandArgs(trailingOnly=TRUE)

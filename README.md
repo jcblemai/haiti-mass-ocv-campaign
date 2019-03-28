@@ -12,12 +12,15 @@
 ### Forecast and results
   - Why isn't the first value of the dataframe the same between q05 and q95
   - Why all simulation begins at 0 ?
+    -> probably because the first day of reporting is really not taken into account (is a saturday, so 1/7 cases less.that week.)
+      - Move 1 day ? yes but may disrupt some reporting. But this date is not good because begining of saturday, should be end.
+      - For now ignore first data point
+      
+    -> I and A seems fine. but B is strange, I should correct it.Oh 
   - Better mobility ? 
-  - *Investigate starting parameters ro improve artinonite*
+  - *Investigate starting parameters ro improve artinonite*, especially reporting ? Javier says 97% is fine, better calibrated than anything
   - *Get better Ouest by calibrating*
-  - Make use of CDC case definiation information ?
-  - *Investigate issue with rhoA (diff for Artibonite, move in calibration for Ouest)* -> is good in Artibonite but has been multiplied by 365 in ohter
-  
+  - *Make use of CDC case definiation information ?*
   -> Tomorrow relaunch better calibrations
 
   
@@ -26,7 +29,6 @@
   - Tidy data
 
 ### DONE since feb 20. 2019
-
   - VE proportional to population U5*
   - Find what's need to be calibrated
   - Use artibonite (Xcept rainfall) as starting point for other simulation

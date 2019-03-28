@@ -118,7 +118,7 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
 
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = runif(1,1,10000), times = time_forecast) -> projec
-  save(projec, file = sprintf("output/Simulations/Haiti_OCV_Projection-%s-%i-%s.csv", departement, nsim, scenario))
+  save(projec, file = sprintf("output/Simulations/Haiti_OCV_Projection-%s-%i-%s.rda", departement, nsim, scenario))
   
   projec %>%
     as_tibble() %>% 
