@@ -166,7 +166,7 @@ if(make_plots) {
 # rho_v:    loss of vaccine-induced immunity
 ### Measurement model
 # epsilon:  under-rerpoting fraction
-
+# cas_def: parameter for the change of reporting induced by the CDC cases definition on January 1, 2018
 # Set variables -----------------------------------------------------------
 
 # define stat variable names OK
@@ -182,7 +182,7 @@ state_names <- c("S", "I", "A", "RI1", "RI2", "RI3", "RA1", "RA2", "RA3",
 # define parameter names for pomp
 ## process model parameters names to estimate OK
 param_proc_est_names <- c("sigma", "betaB", "mu_B", "thetaI", "XthetaA",  "lambdaR", "r",  
-                          "gammaI", "gammaA", "rhoA", "XrhoI", "foi_add", "epsilon","k","std_W")
+                          "gammaI", "gammaA", "rhoA", "XrhoI", "foi_add", "epsilon","k","std_W", "cas_def")
 
 ## initial value parameters to estimate OK
 param_iv_est_names <- c("Rtot_0")
@@ -210,6 +210,8 @@ param_rates_in_days_names <- c("mu", "alpha", "gammaI", "gammaA", "rhoA") #muB
 ## NegBinomial density (if k -> inf then becomes Poisson)
 dmeas <- Csnippet("
   double mean_cases = epsilon * C;
+  if (t > 2018)
+    mean_cases = mean_cases * cas_def;
   if (ISNA(cases)) {
     lik = (give_log) ? 0 : 1;
     } else {
@@ -224,6 +226,8 @@ dmeas <- Csnippet("
 ## NegBinomial simulator OK
 rmeas <- Csnippet("
   double mean_cases = epsilon * C;
+  if (t > 2018)
+    mean_cases = mean_cases * cas_def;
   // cases = mean_cases;
   cases = rnbinom_mu(k, mean_cases);
   ")
@@ -366,6 +370,7 @@ toEstimationScale <- Csnippet("
   Tr = log(r);
   Tstd_W = log(std_W);
   Tepsilon = logit(epsilon);
+  Tcas_def = logit(cas_def);
   Tk = log(k);
   TRtot_0 = logit(Rtot_0);
   Tfoi_add = log(foi_add);
@@ -385,6 +390,7 @@ fromEstimationScale <- Csnippet("
   Tr = exp(r);
   Tstd_W = exp(std_W);
   Tepsilon = expit(epsilon);
+  Tcas_def = expit(cas_def);
   Tk = exp(k);
   TRtot_0 = expit(Rtot_0);
   Tfoi_add = exp(foi_add);
@@ -453,6 +459,8 @@ param_est["r"] <- 1.041372
 param_est["std_W"] <- 0.007852
 param_est["epsilon"] <- 0.975316
 param_est["k"] <- 379.266151
+param_est["cas_def"] <- 0.5
+
 
 
 cases_ext_mean <- cases_other_dept %>% filter(time > t_start)

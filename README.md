@@ -4,24 +4,12 @@
 ## TODO
 
 ### Calibration
-
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
-  - *Get a more realistic reporting rate.*
   
 ### Forecast and results
-  - Why isn't the first value of the dataframe the same between q05 and q95
-  - Why all simulation begins at 0 ?
-    -> probably because the first day of reporting is really not taken into account (is a saturday, so 1/7 cases less.that week.)
-      - Move 1 day ? yes but may disrupt some reporting. But this date is not good because begining of saturday, should be end.
-      - For now ignore first data point
-      
-    -> I and A seems fine. but B is strange, I should correct it.Oh 
   - Better mobility ? 
-  - *Investigate starting parameters ro improve artinonite*, especially reporting ? Javier says 97% is fine, better calibrated than anything
   - *Get better Ouest by calibrating*
-  - *Make use of CDC case definiation information ?*
-  -> Tomorrow relaunch better calibrations
 
   
   
@@ -44,6 +32,19 @@
   - Check Artibonite on echopc20
   - Produce national plots
   - the ability to see simulation by simulation [WIP in trials.R]
+  - Why isn't the first value of the dataframe the same between q05 and q95 -> because same starting point
+  - I and A seems fine. but B is strange, I should correct it, the initial condition is one order of magnitude too low
+  - Get a more realistic reporting rate. -> Javier says 0.97 is ok
+  - Why all simulation begins at 0 ?
+    -> probably because the first day of reporting is really not taken into account (is a saturday, so 1/7 cases less.that week.)
+      - Move 1 day ? yes but may disrupt some reporting. But this date is not good because begining of saturday, should be end.
+      - For now ignore first data point
+    - Investigate starting parameters ro improve artinonite, especially reporting ? Javier says 97% is fine, better calibrated than anything
+  - Make use of CDC case definiation information
+
+
+
+
 
 
 

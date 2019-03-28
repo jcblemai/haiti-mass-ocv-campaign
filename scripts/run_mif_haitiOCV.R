@@ -34,8 +34,6 @@ if (length(args)==0) {
 # Choose to restart from a previous file (named checkpoint.csv)
 restart <- F
 
-
-
 departement <- args[1]
 run_level <- as.integer(args[2])
 
@@ -87,33 +85,57 @@ array_id_vec <- seq(1,1) * 100 + 1
 registerDoMC(ncpus)
 
 
+# Initialize the parameters to estimate (just initial guesses)
+# Fixed:
+# -----> sigma rhoA XrhoI gammaA
+# Estimated parameters for all dept:
+# -----> betaB foi_add
+# Estimated parameters for Artibonite:
+# -----> mu_B XthetaA thetaI lambdaR r std_W epsilon k cas_def
+
+
 # Set parameter bounds -----------------------------------------------------
 
 # lower bound for positive parameter values
-min_param_val <- 1e-5 
+min_param_val <- 1e-6 
 # define the bounds for the paramters to estimate, juste to give initial parameters.
+# parameter_bounds <- tribble(
+#   ~param, ~lower, ~upper,
+#   # Regular paramters
+# #  "sigma", 0.3, 1 - min_param_val,
+#   "betaB", min_param_val, 3,
+# #  "mu_B", min_param_val, 1e2,
+# #  "XthetaA", min_param_val, .5,
+# #  "thetaI", min_param_val, 1e-3,
+# #  "lambda", min_param_val, 5,
+# #   "lambdaR", min_param_val, 5,
+#   # "gammaA", 73, 365,
+#   # "gammaI", 73, 365,
+# #  "r", min_param_val, 2,
+#   #"rhoA", 0.02, 10,
+#   #"XrhoI", min_param_val, 1,
+#   # Process noise
+# #  "std_W", min_param_val, 1e-1,
+#   # Measurement model
+# #  "epsilon", min_param_val, 1,
+#   "foi_add", min_param_val, 0.0005#,
+# #  "k", -3, 4 #,   # hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT
+# #  "Rtot_0", min_param_val, 0.1
+# )
+
 parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
-  # Regular paramters
-#  "sigma", 0.3, 1 - min_param_val,
   "betaB", min_param_val, 3,
-#  "mu_B", min_param_val, 1e2,
-#  "XthetaA", min_param_val, .5,
-#  "thetaI", min_param_val, 1e-3,
-#  "lambda", min_param_val, 5,
-#   "lambdaR", min_param_val, 5,
-  # "gammaA", 73, 365,
-  # "gammaI", 73, 365,
-#  "r", min_param_val, 2,
-  #"rhoA", 0.02, 10,
-  #"XrhoI", min_param_val, 1,
-  # Process noise
-#  "std_W", min_param_val, 1e-1,
-  # Measurement model
-#  "epsilon", min_param_val, 1,
-  "foi_add", min_param_val, 0.0005#,
-#  "k", -3, 4 #,   # hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT
-#  "Rtot_0", min_param_val, 0.1
+  "mu_B", min_param_val, 1e2,
+  "XthetaA", min_param_val, .5,
+  "thetaI", min_param_val, 1e-3,
+  "lambdaR", min_param_val, 5,
+  "r", min_param_val, 2,
+  "std_W", min_param_val, 1e-1,
+  "epsilon", min_param_val, 1,
+  "k", -3, 4,                   # hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT ID2314
+  "cas_def", min_param_val, 1,
+  "foi_add", min_param_val, 0.0005
 )
 
 
@@ -196,7 +218,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
                                nseq = cholera_Ninit_param[run_level])
     
     # Allow large variation of k to chose neg in and poisson
-    #init_params %<>% mutate(k=10^k) 
+    init_params %<>% mutate(k=10^k)    # ID2314
     
   }
 
@@ -216,24 +238,37 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
   # Define the variance of the perturbation kernel for the paramters
   job_rw.sd <- eval(
     parse(
+      # text = str_c("rw.sd(",
+      #             # "sigma  = ",    rw.sd_param["regular"], ", ",
+      #              "betaB  = ",  rw.sd_param["regular"],
+      #             # ", mu_B   = ",  rw.sd_param["regular"],
+      #             # ", XthetaA= ",  rw.sd_param["regular"],
+      #             # ", thetaI = ",  rw.sd_param["regular"],
+      #              #", lambda = ",  rw.sd_param["regular"],
+      #             # ", lambdaR = ",  rw.sd_param["regular"],
+      #             # ", r      = ",  rw.sd_param["regular"],
+      #              #", XrhoI  = ",  rw.sd_param["regular"],
+      #              #", rhoA   = ",  rw.sd_param["regular"],
+      #             # ", std_W  = ",  rw.sd_param["regular"],
+      #              #", gammaA  = ", rw.sd_param["regular"],
+      #              #", gammaI  = ", rw.sd_param["regular"],
+      #              #", Rtot_0  = ivp(",  rw.sd_param["ivp"],")",
+      #             # ", epsilon= ",  rw.sd_param["regular"],
+      #              ", foi_add= ",  rw.sd_param["regular"],
+      #             # ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
+      #              ")")
       text = str_c("rw.sd(",
-                  # "sigma  = ",    rw.sd_param["regular"], ", ",
-                   "betaB  = ",  rw.sd_param["regular"],
-                  # ", mu_B   = ",  rw.sd_param["regular"],
-                  # ", XthetaA= ",  rw.sd_param["regular"],
-                  # ", thetaI = ",  rw.sd_param["regular"],
-                   #", lambda = ",  rw.sd_param["regular"],
-                  # ", lambdaR = ",  rw.sd_param["regular"],
-                  # ", r      = ",  rw.sd_param["regular"],
-                   #", XrhoI  = ",  rw.sd_param["regular"],
-                   #", rhoA   = ",  rw.sd_param["regular"],
-                  # ", std_W  = ",  rw.sd_param["regular"],
-                   #", gammaA  = ", rw.sd_param["regular"],
-                   #", gammaI  = ", rw.sd_param["regular"],
-                   #", Rtot_0  = ivp(",  rw.sd_param["ivp"],")",
-                  # ", epsilon= ",  rw.sd_param["regular"],
-                   ", foi_add= ",  rw.sd_param["regular"],
-                  # ", k = "     ,  rw.sd_param["regular"],        # to get binomial, comment for poisson.
+                   "betaB  = ",   rw.sd_param["regular"],
+                 ", mu_B   = ",   rw.sd_param["regular"],
+                 ", XthetaA= ",   rw.sd_param["regular"],
+                 ", thetaI = ",   rw.sd_param["regular"],
+                 ", lambdaR = ",  rw.sd_param["regular"],
+                 ", r      = ",   rw.sd_param["regular"],
+                 ", std_W  = ",   rw.sd_param["regular"],
+                 ", epsilon= ",   rw.sd_param["regular"],
+                 ", k = "     ,   rw.sd_param["regular"],
+                 ", cas_def = ifelse(time<2018., 0, ",  rw.sd_param["regular"], ")",
+                 ", foi_add= ",   rw.sd_param["regular"],
                    ")")
     )
   )
@@ -263,7 +298,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
              Np = cholera_Np[run_level],
              Nmif = cholera_Nmif[run_level],
              cooling.type = "geometric",
-             cooling.fraction.50 = 0.4,   # 0.4-> Stabilize after 200 -> stop at 300.
+             cooling.fraction.50 = 0.6,   # 0.4-> Stabilize after 200 -> stop at 300.
              transform = TRUE,
              rw.sd = job_rw.sd,
              verbose = F
