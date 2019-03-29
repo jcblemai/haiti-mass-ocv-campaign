@@ -4,19 +4,21 @@
 ## TODO
 
 ### Calibration
+
   - Demographic stochasticity ?
   - Beta Drop to match the drop with two beta ?
   
 ### Forecast and results
+
   - Better mobility ? 
   - *Get better Ouest by calibrating*
-
-  
   
 ### Reading
+
   - Tidy data
 
 ### DONE since feb 20. 2019
+
   - VE proportional to population U5*
   - Find what's need to be calibrated
   - Use artibonite (Xcept rainfall) as starting point for other simulation
@@ -44,12 +46,6 @@
 
 
 
-
-
-
-
-
-
 ## Results
 
 ### Calibration for next round of results (April 8 2019)
@@ -70,6 +66,7 @@ We have good results except in *Ouest* (see `15-05-long`)
 
 
 ### As of the last big calibration we have (12-20) is:
+
   - good in Artibonite, Sud, Grande Anse, Centre, Sud-Est
   - bad in Nord-Est, Nord, Mord Ouest, OUest, Centre, Nippes.
         -> Drop is needed in Nippes, Grande Anse, Nord, Nord-Est, Ouest, Sud, ...
