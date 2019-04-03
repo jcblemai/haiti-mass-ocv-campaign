@@ -12,18 +12,18 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Analysis Calibration  --------------------------------------------------------------
-output_dir <- "output_15-05-long/"
-#departement <- "Ouest"
-#run_level <- 3
+output_dir <- "output_15-28-cdc/"
+departement <- "Artibonite"
+run_level <- 3
 
 load(paste0(output_dir,departement, '/HaitiOCV-',run_level,'-',departement, '-mif_runs.rda' ))
 plot(mf)
 
 # Analysis Projection -----------------------------------------------------------
-load('calib.rda')
+load('output/Simulations/Haiti_OCV_Projection-Artibonite-500-S0.rda')
 load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
-d <- calib %>%
+d <- projec %>%
   gather(variable, value, -time, -rain, -sim)  %>% 
   ggplot(aes(x = time, y = value, color = sim)) + 
   #  geom_line(aes(y = cases), color = datacol, lwd = 0.2) 
@@ -37,7 +37,7 @@ print(d)
 
 # Analysis Projection -----------------------------------------------------------
 departement <- 'Artibonite'
-nsim <- 100
+nsim <- 500
 scenario <- 'S0'
 load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 load(sprintf("output/Simulations/Haiti_OCV_Projection-%s-%i-%s.rda", departement, nsim, scenario))
@@ -73,18 +73,18 @@ p.sim <- ggplot(data = quant,
    geom_line(aes(y = q50), color = simcol) + 
   facet_wrap(~variable, scales = "free_y") +  
   theme(legend.position = "none") + # Legend take too much space
-  theme(panel.grid.major = element_line(color = "lightgray"),
-        panel.background = element_rect(fill = "white"),
-        axis.line = element_line(color = "black"),
-        strip.text = element_blank(),
-        axis.title = element_text()) +
-scale_y_continuous(expand = c(0,0))+
-   labs(y = "daily cholera cases", x = "date") +
-   theme(panel.grid.major = element_line(color = "lightgray"),
-         panel.background = element_rect(fill = "white"),
-         axis.line = element_line(color = "black"),
-         strip.text = element_blank(),
-           axis.title = element_text())
+  #theme(panel.grid.major = element_line(color = "lightgray"),
+  #      panel.background = element_rect(fill = "white"),
+  #      axis.line = element_line(color = "black"),
+  #      strip.text = element_blank(),
+  #      axis.title = element_text()) +
+#scale_y_continuous(expand = c(0,0))+
+   labs(y = "daily cholera cases", x = "date") #+
+  # theme(panel.grid.major = element_line(color = "lightgray"),
+  #       panel.background = element_rect(fill = "white"),
+  #       axis.line = element_line(color = "black"),
+  #       strip.text = element_blank(),
+  #         axis.title = element_text())
  
  print(p.sim)
 # One simulation  --------------------------------------------------------------

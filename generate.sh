@@ -1,7 +1,7 @@
 #runlvl=$1
-output_dir="output_15-05-long"
+output_dir="output_15-28-cdc"
 
-for dept in Artibonite Centre Ouest Nord-Ouest Nord Sud  Nippes Nord-Est Sud-Est Grande_Anse; do
+for dept in Artibonite; do #Centre Ouest Nord-Ouest Nord Sud  Nippes Nord-Est Sud-Est Grande_Anse; do
     rm -R output/$dept/
     mkdir output/$dept;
     Rscript scripts/pomp_cholera_haitiOCV.R $dept;

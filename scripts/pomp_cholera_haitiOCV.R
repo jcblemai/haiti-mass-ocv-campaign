@@ -282,9 +282,8 @@ initalizeStates <- Csnippet("
   for(int i = 0; i < n_cases_start; i++){
     R0[0] +=                   cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t_start)  * (rhoI+mu)); /* because t_i in past so t_ - t_0 negative */
     R0[1] += (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t_start)  * (rhoA+mu));
-    B_acc += (thetaA * (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon +  
-              thetaI *                   cases_at_t_start[i][1]/epsilon)*
-              (1 + lambdaR * pow(0.024, r)) * D * exp((cases_at_t_start[i][0] - t_start)  * mu_B); //3.7 is mean rainfall
+    B_acc += (thetaA * (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon + thetaI * cases_at_t_start[i][1]/epsilon) *
+              (1 + lambdaR * pow(0.024, r)) * D * exp((cases_at_t_start[i][0] - t_start)  * mu_B);
   }
   B = B_acc;
   RI1   = nearbyint(R0[0]/3);
