@@ -32,7 +32,7 @@ if (length(args)==0) {
 }
 
 # Choose to restart from a previous file (named checkpoint.csv)
-restart <- F
+restart <- T
 
 departement <- args[1]
 run_level <- as.integer(args[2])
@@ -156,7 +156,7 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 # level 4 is 3.2 days if n_runs*4
 cholera_Np <-           c(1e2,    3e3,    3e3,    4e3)
 cholera_Nmif <-         c(5,      300,    300,    400)      # Entre 200 et 300  
-cholera_Ninit_param <-  c(n_runs, n_runs, n_runs*2, n_runs*4)   # How many rounds a cpu does
+cholera_Ninit_param <-  c(n_runs, n_runs, n_runs, n_runs*4)   # How many rounds a cpu does
 cholera_NpLL <-         c(1e2,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
 cholera_Nreps_global <- c(1,      5,      10,     15)
 
@@ -186,7 +186,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
     best_like <- best_like$loglik
 
     # get MLE paramter sets 
-    best_param <- liks_stoch %>% filter(loglik > best_like - 2) %>% arrange(desc(loglik)) 
+    best_param <- liks_stoch %>% filter(loglik > best_like - 4) %>% arrange(desc(loglik)) 
     
     to_generate = cholera_Ninit_param[run_level] - nrow(best_param)
     
@@ -298,7 +298,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
              Np = cholera_Np[run_level],
              Nmif = cholera_Nmif[run_level],
              cooling.type = "geometric",
-             cooling.fraction.50 = 0.6,   # 0.4-> Stabilize after 200 -> stop at 300.
+             cooling.fraction.50 = 0.5,   # 0.4-> Stabilize after 200 -> stop at 300.
              transform = TRUE,
              rw.sd = job_rw.sd,
              verbose = F

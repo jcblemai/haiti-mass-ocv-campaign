@@ -276,6 +276,9 @@ initalizeStates <- Csnippet("
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state, DP says its correct.
   double R0[2] = {0,0};
+  //FILE *fp;
+  //fp = fopen('Ouuuutput.txt', 'w');
+
   double B_acc = 0;
   double rhoI = rhoA * XrhoI;
   double thetaA = thetaI * XthetaA;
@@ -284,7 +287,11 @@ initalizeStates <- Csnippet("
     R0[1] += (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon  * exp((cases_at_t_start[i][0] - t_start)  * (rhoA+mu));
     B_acc += (thetaA * (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon + thetaI * cases_at_t_start[i][1]/epsilon) *
               (1 + lambdaR * pow(0.024, r)) * D * exp((cases_at_t_start[i][0] - t_start)  * mu_B);
+    
+    //fprintf(fp, '%f %f %f', cases_at_t_start[i][0] - t_start, cases_at_t_start[i][0], t_start);
   }
+ //fclose(fp);
+
   B = B_acc;
   RI1   = nearbyint(R0[0]/3);
   RI2   = nearbyint(R0[0]/3);
@@ -309,7 +316,7 @@ initalizeStates <- Csnippet("
     RA3   = nearbyint((1-sigma) * R_tot/3.0);
   }
   S   = nearbyint(H - A - I - RI1 - RI2 - RI3 - RA1 - RA2 - RA3);
-  //B   = 2.0/epsilon * thetaI/mu_B; // TODO custom initial conditions equivalent to the 'forcing' in the continous model
+  B   = (I * thetaI/mu_B + A * thetaA/mu_B) * D * (1 + lambdaR * pow(0.024, r)); // TODO custom initial conditions equivalent to the 'forcing' in the continous model
   C   = 0;
   W   = 0;
   VSd = 0;
