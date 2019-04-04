@@ -32,7 +32,7 @@ if (length(args)==0) {
 }
 
 # Choose to restart from a previous file (named checkpoint.csv)
-restart <- T
+restart <- F
 
 departement <- args[1]
 run_level <- as.integer(args[2])
@@ -54,15 +54,16 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 # Load pomp object ---------------------------------------------------------------
 load(paste0(output_dir, departement, "/sirb_cholera_pomped_", departement, ".rda"))
 
-# Fixes some parameter from Artibonite
-coef(sirb_cholera)["mu_B"] <-  159.593008
-coef(sirb_cholera)["XthetaA"] <- 0.033616
-coef(sirb_cholera)["thetaI"] <- 0.000767
-coef(sirb_cholera)["lambdaR"] <- 0.902726
-coef(sirb_cholera)["r"] <- 1.041372
-coef(sirb_cholera)["std_W"] <- 0.007852
-coef(sirb_cholera)["epsilon"] <- 0.975316
-coef(sirb_cholera)["k"] <- 379.266151
+# Fixes some parameter from Artibonite from 16-04-init
+coef(sirb_cholera)["mu_B"] <-  133.19716102404308
+coef(sirb_cholera)["XthetaA"] <- 0.0436160721505241
+coef(sirb_cholera)["thetaI"] <- 3.4476623459780395e-4
+coef(sirb_cholera)["lambdaR"] <- 0.2774237712085347
+coef(sirb_cholera)["r"] <- 0.31360358752214235
+coef(sirb_cholera)["std_W"] <- 0.008172280355938182
+coef(sirb_cholera)["epsilon"] <- 0.9750270707877388
+coef(sirb_cholera)["k"] <- 101.2215999283583
+coef(sirb_cholera)["cas_def"] <- 0.46
 
 # Parallel setup ----------------------------------------------------------
 
@@ -97,7 +98,7 @@ registerDoMC(ncpus)
 # Set parameter bounds -----------------------------------------------------
 
 # lower bound for positive parameter values
-min_param_val <- 1e-6 
+min_param_val <- 1e-7
 # define the bounds for the paramters to estimate, juste to give initial parameters.
 # parameter_bounds <- tribble(
 #   ~param, ~lower, ~upper,
@@ -125,17 +126,17 @@ min_param_val <- 1e-6
 
 parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
-  "betaB", min_param_val, 3,
-  "mu_B", min_param_val, 1e2,
-  "XthetaA", min_param_val, .5,
-  "thetaI", min_param_val, 1e-3,
-  "lambdaR", min_param_val, 5,
-  "r", min_param_val, 2,
-  "std_W", min_param_val, 1e-1,
-  "epsilon", min_param_val, 1,
-  "k", -3, 4,                   # hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT ID2314
-  "cas_def", min_param_val, 1,
-  "foi_add", min_param_val, 0.0005
+  "betaB", min_param_val, 0.3,
+#  "mu_B", min_param_val, 1e2,
+#  "XthetaA", min_param_val, .5,
+#  "thetaI", min_param_val, 1e-3,
+#  "lambdaR", min_param_val, 5,
+#  "r", min_param_val, 2,
+#  "std_W", min_param_val, 1e-1,
+#  "epsilon", min_param_val, 1,
+#  "k", -3, 4,# hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT ID2314
+#  "cas_def", min_param_val, 0.7,
+  "foi_add", min_param_val, 1e-5
 )
 
 
@@ -152,7 +153,7 @@ rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 # Level of detail on which to run the computations [Allow to chose easly set of params]
 # level 1 is short
 # level 2 is 12h
-# level 3 is 24h.
+# level 3 is 20h with *2, 10 without.
 # level 4 is 3.2 days if n_runs*4
 cholera_Np <-           c(1e2,    3e3,    3e3,    4e3)
 cholera_Nmif <-         c(5,      300,    300,    400)      # Entre 200 et 300  
@@ -218,7 +219,7 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
                                nseq = cholera_Ninit_param[run_level])
     
     # Allow large variation of k to chose neg in and poisson
-    init_params %<>% mutate(k=10^k)    # ID2314
+    #init_params %<>% mutate(k=10^k)    # ID2314
     
   }
 
@@ -259,15 +260,15 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
       #              ")")
       text = str_c("rw.sd(",
                    "betaB  = ",   rw.sd_param["regular"],
-                 ", mu_B   = ",   rw.sd_param["regular"],
-                 ", XthetaA= ",   rw.sd_param["regular"],
-                 ", thetaI = ",   rw.sd_param["regular"],
-                 ", lambdaR = ",  rw.sd_param["regular"],
-                 ", r      = ",   rw.sd_param["regular"],
-                 ", std_W  = ",   rw.sd_param["regular"],
-                 ", epsilon= ",   rw.sd_param["regular"],
-                 ", k = "     ,   rw.sd_param["regular"],
-                 ", cas_def = ifelse(time<2018., 0, ",  rw.sd_param["regular"], ")",
+                # ", mu_B   = ",   rw.sd_param["regular"],
+                # ", XthetaA= ",   rw.sd_param["regular"],
+                # ", thetaI = ",   rw.sd_param["regular"],
+                # ", lambdaR = ",  rw.sd_param["regular"],
+                # ", r      = ",   rw.sd_param["regular"],
+                # ", std_W  = ",   rw.sd_param["regular"],
+                # ", epsilon= ",   rw.sd_param["regular"],
+                # ", k = "     ,   rw.sd_param["regular"],
+                # ", cas_def = ifelse(time<2018., 0, ",  rw.sd_param["regular"], ")",
                  ", foi_add= ",   rw.sd_param["regular"],
                    ")")
     )
