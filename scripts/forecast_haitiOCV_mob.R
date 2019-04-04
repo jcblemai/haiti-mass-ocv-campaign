@@ -116,7 +116,8 @@ simulatePOMP <- function(params, nsim, seed = 199919L) {
   coef(sirb_cholera)["p1d_reg"] <-  as.numeric(p1d_reg)
   coef(sirb_cholera)["r_v_year"] <- as.numeric(r_v_year)
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
-
+  #coef(sirb_cholera)["cas_def"] <- 0.36
+ 
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = runif(1,1,10000), times = time_forecast) -> projec
   save(projec, file = sprintf("output/Simulations/Haiti_OCV_Projection-%s-%i-%s.rda", departement, nsim, scenario))
   

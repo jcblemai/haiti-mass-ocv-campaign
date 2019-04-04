@@ -12,7 +12,9 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Analysis Calibration  --------------------------------------------------------------
-output_dir <- "output_15-28-cdc/"
+#output_dir <- "output_15-28-cdc/"
+output_dir <- "output_16-04-init/"
+
 departement <- "Artibonite"
 run_level <- 3
 
