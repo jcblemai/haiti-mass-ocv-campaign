@@ -10,8 +10,8 @@
   
 ### Forecast and results
 
-  - Better mobility ? 
-  - *Get better Ouest by calibrating*
+  - Better mobility ?
+  - Ability to compute the time to elimination
   
 ### Reading
 
@@ -43,6 +43,8 @@
       - For now ignore first data point
     - Investigate starting parameters ro improve artinonite, especially reporting ? Javier says 97% is fine, better calibrated than anything
   - Make use of CDC case definiation information
+  - *Get better Ouest by calibrating*
+
 
 
 
