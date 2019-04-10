@@ -16,13 +16,46 @@ import warnings
 from rpy2.rinterface import RRuntimeWarning
 warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
+# Warning: Needs an output/Simulations folder
+
 output_dir = 'output_16-04-init/'
-nsim = 1000
+nsim = 500
 run_lvl = 3
-n_proc = 5
+n_proc = 10 
         
 dept_avail = os.listdir(output_dir)
 
+# Rainfall generation
+rainfall = pd.read_csv('haiti-data/fromAzman/rainfall.csv', index_col = 0, parse_dates = True)
+stream = open('haiti-data/input_parameters.yaml', 'r')
+input_parameters = yaml.load(stream)
+dept_name = [list(pop.keys())[0] for pop in input_parameters['population']]
+t_start = input_parameters['t_start']
+t_for = datetime.date(2029,12,20)
+def project_rain(rainfall, tf):
+    nd = 14 #days sampled - must be multiple of 7 d
+    dti = rainfall.iloc[0].name.date()
+    dtf = rainfall.iloc[-1].name.date()
+    rain_prj_index = pd.DatetimeIndex(start =  dtf + datetime.timedelta(1), 
+                                      end = tf, freq = 'D')
+    rain_prj = np.zeros((rain_prj_index.shape[0], 10))
+    # Full years of data available
+    years = range(dti.year+1, dtf.year-1)
+    # each nd days, assign an al precipitation.
+    for i, date in enumerate(pd.date_range(dtf + datetime.timedelta(1), tf, freq = str(nd)+'D')):
+        dd = date.day
+        if (date.month == 2 and dd == 29):
+            dd = 28
+        pick = datetime.date(np.random.choice(years), date.month, dd)
+        #print(pick, i, rainfall.loc[pd.date_range(pick, pick + datetime.timedelta(nd-1))].values.shape, rain_prj[nd * i: nd * (i+1)].shape)
+        rain_prj[nd * i: nd * (i+1)] = rainfall.loc[pd.date_range(pick, pick + datetime.timedelta(nd-1))].values
+    rain_prj = pd.DataFrame(rain_prj, index = rain_prj_index, columns = dept_name)    
+    return rain_prj
+rain_prj = project_rain(rainfall, t_for)
+rain = pd.concat((rainfall, rain_prj))
+rain.to_csv('haiti-data/proj/rainfall.csv', index_label = 'date')
+
+# Starting the run for all departemens
 rainfall = pd.read_csv('haiti-data/fromAzman/rainfall.csv', index_col = 0, parse_dates = True)
 cases    = pd.read_csv('haiti-data/fromAzman/cases_corrected.csv', index_col=0, parse_dates =True)
 rain     = pd.read_csv('haiti-data/proj/rainfall.csv', index_col = 0, parse_dates = True)
@@ -103,7 +136,7 @@ def run_sim(dp):
     robjects.r('p1d_reg      <- '  + str(scenario.p1d_reg[dp]))
     robjects.r('r_v_year     <- '  + str(scenario.r_v_year[dp]))
     robjects.r('cases_ext    <- '  + str(scenario.ve))
-    r_source('/Users/chadi/Documents/phd/haiti-ocv-pomp/scripts/forecast_haitiOCV_mob.R')
+    r_source('./scripts/forecast_haitiOCV_mob.R')
     for comp in compartments:
         #temp = pandas2ri.ri2py(robjects.r[comp])
         temp = robjects.r[comp]
@@ -225,7 +258,7 @@ for scenario_str, scenario  in scenarios.items():
         for dp, dept_data, _, _ in pool.imap_unordered(run_sim, dept_avail):
             all_data_vacc_mob[dp] = dept_data
 
-    all_data['Ouest']['cases'][:datetime.date(2015,7,1)] = np.nan
+    all_data_vacc_mob['Ouest']['cases'][:datetime.date(2015,7,1)] = np.nan
     
     # Save results
     dir_name = 'output/Results/' + scenario_str + '/'
@@ -240,7 +273,7 @@ for scenario_str, scenario  in scenarios.items():
     ti = input_parameters['t_start']
     tf = t_for
 
-    fig, axes = plt.subplots((len(all_data))//2, 2, figsize=(15,15), squeeze = True, dpi = 200);
+    fig, axes = plt.subplots((len(all_data_vacc_mob))//2, 2, figsize=(15,15), squeeze = True, dpi = 200);
     axes = axes.flatten();
     fig.patch.set_facecolor('white')
 
@@ -261,7 +294,7 @@ for scenario_str, scenario  in scenarios.items():
             start = mdates.date2num(scenario.t_vacc_start[dp])
             end = mdates.date2num(scenario.t_vacc_end[dp])
             width = end - start
-            rect = Rectangle((start, 0), width, 1000+max(all_data_vacc[dp]['cases']['q95']), color='orange', alpha= 0.1)
+            rect = Rectangle((start, 0), width, 1000+max(all_data_vacc_mob[dp]['cases']['q95']), color='orange', alpha= 0.1)
             axes[i].add_patch(rect) 
             axes[i].add_artist(rect)
             rx, ry = rect.get_xy()
@@ -269,4 +302,4 @@ for scenario_str, scenario  in scenarios.items():
             cy = ry + rect.get_height()/1.5
 
     fig.tight_layout()
-    plt.savefig('output/Results/' + scenario_str + 'png', bbox_inches='tight')
+    plt.savefig('output/Results/' + scenario_str + '.png', bbox_inches='tight')
