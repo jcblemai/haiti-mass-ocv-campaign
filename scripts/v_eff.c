@@ -1,7 +1,7 @@
  double eff_v_2d(double t_since_vacc, int scenario) {
   double eff_v_2d = 0.0;
-  /*switch(scenario){
-  case 1:*/
+  switch(scenario){
+  case 1:
       if      (t_since_vacc <=   1./12) eff_v_2d =  0.76              ;
       else if (t_since_vacc <=   2./12) eff_v_2d =  0.753527484533759;
       else if (t_since_vacc <=   3./12) eff_v_2d =  0.746961516042262;
@@ -63,7 +63,7 @@
       else if (t_since_vacc <=  59./12) eff_v_2d =  0.178743442640173;
       else if (t_since_vacc <=  60./12) eff_v_2d = 0.163878489331427;
       else if (t_since_vacc <=  61./12) eff_v_2d =  0.148798909288418;
-   /* break;
+   break;
     case 2:
       eff_v_2d = 0.76;
     break;
@@ -130,7 +130,7 @@
       else if (t_since_vacc <=  60./12) eff_v_2d = 0.13562916224751;      
       else if (t_since_vacc <=  61./12) eff_v_2d = 0.12314899589607;
     break;
-  }*/
+  }
   if (t_since_vacc >  61./12) 
       eff_v_2d =  0.0;
   return eff_v_2d * (1-(1-0.4688)*0.11) ; /* 11 % of U5 person have VE as 0.4688*VE_adult */
