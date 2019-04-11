@@ -106,7 +106,7 @@ probability_data = data.frame(scenarios, 'y3T1' = 0,  'y3T2' = 0,
 probability_data
 
 
-for (scenarios in scenarios)
+for (scenario in scenarios)
 {
   for (dp in departements) {
     print(dp)
