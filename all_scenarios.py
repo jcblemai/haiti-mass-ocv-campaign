@@ -241,6 +241,9 @@ for scenario_str, scenario  in scenarios.items():
     covar_mob_novacc = make_genuine_mobility_file()
     for dp in dept_avail:
         cases_df[dp] = all_data_vacc[dp]['cases']['q50'][scenario.t_vacc_start[dp]+datetime.timedelta(days = 90) : scenario.t_vacc_start[dp] + datetime.timedelta(days = 200)]
+        if (sum(all_data_vacc[dp]['cases']['q50'][scenario.t_vacc_start[dp]: scenario.t_vacc_start[dp] + datetime.timedelta(days = 200)] == 0) >= 3):
+        # No more cases at some point
+            cases_df[dp] = 0
     for dp in dept_name:
         if dp in dept_avail:
             vacc_init[dp] = covar_mob_novacc[dp][datetime.date(2010,10,23):scenario.t_vacc_start[dp]]   # 
