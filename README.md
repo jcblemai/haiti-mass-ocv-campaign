@@ -12,6 +12,12 @@
 
   - Better mobility ?
   - Ability to compute the time to elimination
+  - Plot compartements all.
+  - Why West has no vaccination in graph?
+  - Why some simulation scenarios extincts and goes back up ?  
+
+Find a way to get to elimination sometime, it never goes with this FOI add :/
+Finish that fast.
   
 ### Reading
 
@@ -47,6 +53,8 @@
 
 
 
+    write.csv(probability_data, 'probability_data.csv')
+    load('probability_data.Rda')
 
 ## Results
 

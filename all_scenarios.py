@@ -176,7 +176,7 @@ def save_result(to_save, scenario_str, folder_name = ''):
     csv_all_q95.to_csv(folder_name + scenario_str + '_q95_s.csv', index_label='date')
     csv_all_q50.to_csv(folder_name + scenario_str + '_q50_s.csv', index_label='date')
     pd.concat([csv_all_q05.sum(axis=1), csv_all_q50.sum(axis=1), csv_all_q95.sum(axis=1)], 
-              axis = 1, keys = ['q05', 'q50', 'q95']).to_csv(scenario_str + '_national_s.csv', index_label='date')
+              axis = 1, keys = ['q05', 'q50', 'q95']).to_csv(folder_name + scenario_str + '_national_s.csv', index_label='date')
 
 
 
