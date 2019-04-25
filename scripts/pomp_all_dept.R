@@ -154,6 +154,8 @@ t_end   <- dateToYears(as.Date(input_parameters$t_end))
 
 all_state <- list()
 all_param <- list()
+all_matrix_cases_at_t_start.string <- ""
+all_matrix_cases_other.string <- ""
 
 for (dp in departements) {
   cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
@@ -200,52 +202,45 @@ for (dp in departements) {
   all_state = append(all_state, lapply(state_names, paste0, dp))
   all_param = append(all_param, lapply(param_names, paste0, dp))
   
+
+  cases_at_t_start <- cases %>% filter(dateToYears(date) <= t_start)
+  cases_at_t_start.string <-
+    foreach(r = iter(cases_at_t_start, by = "row"),
+            .combine = c) %do% {
+              sprintf(" {%f, %f} ", r$time, r$cases)
+            } %>%
+    str_c(collapse = ", \n")
   
+  matrix_cases_at_t_start.string <-
+    str_c(
+      sprintf(
+        "double cases_at_t_start%s[%i][%i] = {\n",
+        dp,
+        nrow(cases_at_t_start),
+        2
+      ),
+      cases_at_t_start.string,
+      " \n };"
+    )
   
+  # Cases from other departement as a mobility rational
+  cases_other.string <-
+    foreach(r = iter(cases_other_dept, by = "row"),
+            .combine = c) %do% {
+              sprintf(" {%f, %f} ", r$time, r$cases)
+            } %>%
+    str_c(collapse = ", \n")
+  
+  matrix_cases_other.string <-
+    str_c(sprintf("double cases_other%s[%i][%i] = {\n", dp, nrow(cases_other_dept), 2),
+          cases_other.string,
+          " \n };")
+  
+  all_matrix_cases_at_t_start.string = str_c(all_matrix_cases_at_t_start.string, matrix_cases_at_t_start.string)
+  all_matrix_cases_other.string = str_c(all_matrix_cases_other.string, matrix_cases_other.string)
 }
 all_state = unlist(all_state)
 all_param = unlist(all_param)
-
-
-# Measurement model  -------------------------------------------------------
-
-## density
-
-## NegBinomial density (if k -> inf then becomes Poisson)
-dmeas <- Csnippet(
-  "
-  double mean_cases = epsilon * C;
-  if (t > 2018)
-  mean_cases = mean_cases * cas_def;
-  if (ISNA(cases)) {
-  lik = (give_log) ? 0 : 1;
-  } else {
-  if (S < 10000) {
-  lik = (give_log) ? -99999 : 1.0e-18;
-  } else {
-  lik = dnbinom_mu(cases, k, mean_cases, give_log) ;
-  }
-  }
-  "
-)
-
-## NegBinomial simulator OK
-rmeas <- Csnippet(
-  "
-  double mean_cases = epsilon * C;
-  if (t > 2018)
-  mean_cases = mean_cases * cas_def;
-  // cases = mean_cases;
-  cases = rnbinom_mu(k, mean_cases);
-  "
-)
-
-# Process model ----------------------------------------------------------------- OK
-
-sirb_file <- 'scripts/sirb_model_vacc.c'
-
-sirb.rproc <-
-  Csnippet(readChar(sirb_file, file.info(sirb_file)$size))
 
 # C function to compute the time-derivative of bacterial concentration OK
 derivativeBacteria.c <- " double fB(int I, int A, double B,
@@ -256,39 +251,6 @@ dB = -mu_B * B +  (1 + lambdaR * pow(rain, r)) * D * (thetaI * (double) I + thet
 return(dB);
 };
 "
-cases_at_t_start <- cases %>% filter(dateToYears(date) <= t_start)
-cases_at_t_start.string <-
-  foreach(r = iter(cases_at_t_start, by = "row"),
-          .combine = c) %do% {
-            sprintf(" {%f, %f} ", r$time, r$cases)
-          } %>%
-  str_c(collapse = ", \n")
-
-matrix_cases_at_t_start.string <-
-  str_c(
-    sprintf(
-      "double cases_at_t_start[%i][%i] = {\n",
-      nrow(cases_at_t_start),
-      2
-    ),
-    cases_at_t_start.string,
-    " \n };"
-  )
-
-
-# Cases from other departement as a mobility rational
-cases_other.string <-
-  foreach(r = iter(cases_other_dept, by = "row"),
-          .combine = c) %do% {
-            sprintf(" {%f, %f} ", r$time, r$cases)
-          } %>%
-  str_c(collapse = ", \n")
-
-matrix_cases_other.string <-
-  str_c(sprintf("double cases_other[%i][%i] = {\n", nrow(cases_other_dept), 2),
-        cases_other.string,
-        " \n };")
-
 
 
 initalizeStates <- Csnippet(
@@ -296,9 +258,7 @@ initalizeStates <- Csnippet(
   A     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
   I     = nearbyint(1/epsilon * cases_at_t_start[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state, DP says its correct.
   double R0[2] = {0,0};
-  //FILE *fp;
-  //fp = fopen('Ouuuutput.txt', 'w');
-  
+
   double B_acc = 0;
   double rhoI = rhoA * XrhoI;
   double thetaA = thetaI * XthetaA;
@@ -308,10 +268,8 @@ initalizeStates <- Csnippet(
   B_acc += (thetaA * (1-sigma)/sigma * cases_at_t_start[i][1]/epsilon + thetaI * cases_at_t_start[i][1]/epsilon) *
   (1 + lambdaR * pow(0.024, r)) * D * exp((cases_at_t_start[i][0] - t_start)  * mu_B);
   
-  //fprintf(fp, '%f %f %f', cases_at_t_start[i][0] - t_start, cases_at_t_start[i][0], t_start);
   }
-  //fclose(fp);
-  
+
   B = B_acc;
   RI1   = nearbyint(R0[0]/3);
   RI2   = nearbyint(R0[0]/3);
@@ -371,69 +329,36 @@ initalizeStates <- Csnippet(
 )
 
 
-eff_v.c <-
-  paste0(
-    readChar('scripts/v_eff.c', file.info(sirb_file)$size),
-    " double eff_v_1d(double t_since_vacc, int scenario) {
-    if (t_since_vacc < 1)
-    return eff_v_2d(t_since_vacc, scenario);
-    else
-    return 0;
-    };
-    "
-  )
-
-
-
-
-# Parameter transformations -----------------------------------------------
-# use log for positive parameters and logit for parmaters in [0,1]
-
-toEstimationScale <- Csnippet(
+# Build pomp object -------------------------------------------------------??
+## NegBinomial simulator OK
+rmeas <- Csnippet(
   "
-  Tsigma = logit(sigma);
-  TbetaB = log(betaB);
-  Tmu_B = log(mu_B);
-  TXthetaA = logit(XthetaA);
-  TthetaI = log(thetaI);
-  TXrhoI = logit(XrhoI);
-  TrhoA = log(rhoA);
-  TlambdaR = log(lambdaR);
-  Tr = log(r);
-  Tstd_W = log(std_W);
-  Tepsilon = logit(epsilon);
-  Tcas_def = logit(cas_def);
-  Tk = log(k);
-  TRtot_0 = logit(Rtot_0);
-  Tfoi_add = log(foi_add);
-  TgammaA = log(gammaA);
-  TgammaI = log(gammaI);
+  double mean_cases = epsilon * C;
+  if (t > 2018)
+  mean_cases = mean_cases * cas_def;
+  // cases = mean_cases;
+  cases = rnbinom_mu(k, mean_cases);
   "
 )
 
-fromEstimationScale <- Csnippet(
-  "
-  Tsigma = expit(sigma);
-  TbetaB = exp(betaB);
-  Tmu_B = exp(mu_B);
-  TthetaI = exp(thetaI);
-  TXthetaA = expit(XthetaA);
-  TrhoA = exp(rhoA);
-  TXrhoI = expit(XrhoI);
-  TlambdaR = exp(lambdaR);
-  Tr = exp(r);
-  Tstd_W = exp(std_W);
-  Tepsilon = expit(epsilon);
-  Tcas_def = expit(cas_def);
-  Tk = exp(k);
-  TRtot_0 = expit(Rtot_0);
-  Tfoi_add = exp(foi_add);
-  TgammaA = exp(gammaA);
-  TgammaI = exp(gammaI);
-  "
-)
+# Process model ----------------------------------------------------------------- OK
 
-# Build pomp object -------------------------------------------------------
+sirb_file <- 'scripts/sirb_model_vacc.c'
+
+sirb.rproc <-
+  Csnippet(readChar(sirb_file, file.info(sirb_file)$size))
+
+sirb.rproc <- ""
+
+
+eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " double eff_v_1d(double t_since_vacc, int scenario) {
+  if (t_since_vacc < 1) 
+                  return eff_v_2d(t_since_vacc, scenario);
+                  else
+                  return 0;
+                  };
+                  ")
+
 
 # input parameters to the model
 input_parameters <-
@@ -561,8 +486,6 @@ sirb_cholera <- pomp(
   # names of covariates
   # covarnames = "rain",
   initializer = initalizeStates,
-  toEstimationScale = toEstimationScale,
-  fromEstimationScale = fromEstimationScale,
   # global C definitions
   globals = str_c(
     sprintf(
@@ -589,9 +512,6 @@ save(
   sirb_cholera,
   file = paste0(
     output_dir,
-    departement,
-    "/sirb_cholera_pomped_",
-    departement,
-    ".rda"
+    "/sirb_cholera_pomped_all.rda"
   )
 )
