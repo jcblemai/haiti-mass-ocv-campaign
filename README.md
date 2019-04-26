@@ -14,7 +14,8 @@
   - Ability to compute the time to elimination
   - Plot compartements all.
   - Why West has no vaccination in graph?
-  - Why some simulation scenarios extincts and goes back up ?  
+  - Why some simulation scenarios extincts and goes back up ? 
+  - I have a new west calibration on echopc 16, use it
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
 Finish that fast.
