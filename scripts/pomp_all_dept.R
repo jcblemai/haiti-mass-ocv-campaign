@@ -141,17 +141,17 @@ all_rain <- read_csv("haiti-data/fromAzman/rainfall.csv") %>%
          time = dateToYears(date)) %>%
   filter(time > t_start - 0.01 & time < (t_end + 0.01))
 
+all_cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
+  mutate(date = as.Date(date, format = "%Y-%m-%d"),
+         time = dateToYears(date))
+
 for (dp in departements) {
   cases <- read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
     gather(dep, cases,-date) %>%
     filter(dep == dp) %>%
     mutate(date = as.Date(date, format = "%Y-%m-%d"),
            time = dateToYears(date))
-  
-  case_dates <- with(cases %>%
-                       filter(time > t_start - 0.01 &
-                                time < (t_end + 0.01)),
-                     seq.Date(min(date), max(date), by = "1 week"))
+
   
   rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
     gather(dep, rain,-date) %>%
@@ -164,8 +164,11 @@ for (dp in departements) {
     mutate(max_rain = max(rain), rain_std = rain / max_rain)
 
   all_rain <- cbind(all_rain, placeholder = rain$max_rain)
+  names(all_rain)[names(all_rain) == "placeholder"] <- paste0('max_rain', gsub('-','_',dp))
   
-  names(all_rain)[names(all_rain) == "placeholder"] <- paste0('max_rain', dp)
+  all_cases <- cbind(all_cases, placeholder = cases$cases)
+  names(all_cases)[names(all_cases) == "placeholder"] <- paste0('cases', gsub('-','_',dp))
+  
   
   cases_other_dept <-
     read_csv("haiti-data/fromAzman/cases_corrected.csv")  %>%
@@ -360,20 +363,27 @@ double thetaA = thetaI * XthetaA;"
 for (dp in departements) {
   initalizeStatesAll = paste0(initalizeStatesAll, gsub('%s', gsub('-', '_', dp), initalizeStatesTemplate))
 }
+
 initalizeStates <- Csnippet(initalizeStatesAll)
 
 
 # Build pomp object -------------------------------------------------------??
-## NegBinomial simulator OK
-rmeas <- Csnippet(
-  "
-  double mean_cases = epsilon * C;
+rmeasTemplate <-   "
+  double mean_cases%s = epsilon * C%s;
   if (t > 2018)
-  mean_cases = mean_cases * cas_def;
-  // cases = mean_cases;
-  cases = rnbinom_mu(k, mean_cases);
+  mean_cases%s = mean_cases%s * cas_def;
+  cases%s = rnbinom_mu(k, mean_cases%s);
   "
-)
+
+rmeasAll = ""
+for (dp in departements) {
+  rmeasAll = paste0(rmeasAll, gsub('%s', gsub('-', '_', dp), rmeasTemplate))
+}
+
+
+
+
+rmeas <- Csnippet(rmeasAll)
 
 # Process model ----------------------------------------------------------------- OK
 
@@ -382,7 +392,14 @@ sirb_file <- 'scripts/sirb_model_vacc.c'
 sirb.rproc <-
   Csnippet(readChar(sirb_file, file.info(sirb_file)$size))
 
-sirb.rproc <- ""
+sirb.rprocTemplate = "C%s = 32;"
+
+sirb.rproc = ""
+for (dp in departements) {
+  sirb.rproc = paste0(sirb.rproc, gsub('%s', gsub('-', '_', dp), sirb.rprocTemplate))
+}
+
+sirb.rproc = Csnippet(sirb.rproc)
 
 # C function to compute the time-derivative of bacterial concentration OK
 derivativeBacteria.c <- " double fB(int I, int A, double B,
@@ -401,13 +418,31 @@ eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " doub
                   };
                   ")
 
+zeronameTemplate = c("C", "W")
+zeronameAll = list()
+for (dp in departements){
+  zeronameAll = append(zeronameAll, lapply(zeronameTemplate, paste0, dp))
+  
+}
+zeronameAll <- unlist(zeronameAll)
+
 # rate of simulation in fractions of years
 dt_yrs <- 1 / 365.25 * .2
 sirb_cholera <- pomp(
   # set data
-  data = cases %>%
-    filter(time > t_start & time < (t_end + 0.01)) %>%
-    select(time, cases) ,
+  data = all_cases %>%
+    filter(time > t_start & time < (t_end + 0.01)) %>% select(time,
+                                                              casesArtibonite,
+                                                              casesCentre,
+                                                              casesGrande_Anse,
+                                                              casesNippes,
+                                                              casesNord,
+                                                              casesNord_Est,
+                                                              casesOuest,
+                                                              casesSud,
+                                                              casesSud_Est,
+                                                              casesNord_Ouest)
+  ,
   # time column
   times = "time",
   # initialization time
@@ -426,7 +461,7 @@ sirb_cholera <- pomp(
   statenames = all_state_names,
   # names of accumulator variables to be re-initalized at each observation timestep
   # (C for cases, W for the white noise just for plotting)
-  zeronames = c("C", "W"),
+  zeronames = zeronameAll,
   # names of paramters
   paramnames = all_param_names,
   # names of covariates
