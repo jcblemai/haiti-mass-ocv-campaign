@@ -52,30 +52,49 @@ t_end <- dateToYears(as.Date(input_parameters$t_end))
 t_forecast <- dateToYears(as.Date("2029-12-21"))
 
 
-rain4max <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>% 
-  gather(dep, rain, -date) %>% 
-  group_by(dep) %>% 
-  ungroup() %>% 
-  filter(dep == departement) %>% 
+all_rain <- read_csv("haiti-data/fromAzman/rainfall.csv") %>%
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date)) %>%
-  filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
-  mutate(max_rain = max(rain), rain_std = rain/max_rain) 
+  filter(time > t_start - 0.01 & time < (t_end + 0.01))
 
 
-max_rain<- rain4max %>% select(max_rain) %>% max()
+for (dp in departements) {
+  rain <- read_csv("haiti-data/fromAzman/rainfall.csv")  %>%
+    gather(dep, rain,-date) %>%
+    group_by(dep) %>%
+    ungroup() %>%
+    filter(dep == dp) %>%
+    mutate(date = as.Date(date, format = "%Y-%m-%d"),
+           time = dateToYears(date)) %>%
+    filter(time > t_start - 0.01 & time < (t_end + 0.01)) %>%
+    mutate(max_rain = max(rain), rain_std = rain / max_rain)
+  
+  all_rain <- cbind(all_rain, placeholder = rain$max_rain)
+  all_rain <- cbind(all_rain, placeholder2 = rain$rain_std)
+  names(all_rain)[names(all_rain) == "placeholder"] <- paste0('max_rain', gsub('-','_',dp))
+  names(all_rain)[names(all_rain) == "placeholder2"] <- paste0('rain_std', gsub('-','_',dp))
 
+}
 
-rain_forecast <- read_csv("haiti-data/proj/rainfall.csv")  %>% 
-  gather(dep, rain, -date) %>% 
-  group_by(dep) %>% 
-  ungroup() %>% 
-  filter(dep == departement) %>% 
+all_rain_forecast <- read_csv("haiti-data/proj/rainfall.csv") %>%
   mutate(date = as.Date(date, format = "%Y-%m-%d"),
          time = dateToYears(date)) %>%
-  filter(time > t_start - 0.01 & time < (t_forecast + 0.01)) %>%
-  mutate(max_rain = max_rain, rain_std = rain/max_rain) 
+  filter(time > t_start - 0.01 & time < (t_forecast + 0.01))
 
+for (dp in departements) {
+  rain_forecast <- read_csv("haiti-data/proj/rainfall.csv")  %>% 
+    gather(dep, rain, -date) %>% 
+    group_by(dep) %>% 
+    ungroup() %>% 
+    filter(dep == dp) %>%
+    mutate(date = as.Date(date, format = "%Y-%m-%d"),
+           time = dateToYears(date)) %>%
+    filter(time > t_start - 0.01 & time < (t_forecast + 0.01)) %>%
+    mutate(rain_std = rain/all_rain[paste0('max_rain',gsub('-','_', dp))][[1]][1])
+  
+  all_rain_forecast <- cbind(all_rain_forecast, placeholder2 = rain_forecast$rain_std)
+  names(all_rain_forecast)[names(all_rain_forecast) == "placeholder2"] <- paste0('rain_std', gsub('-','_',dp))
+}
 
 time_forecast <- dateToYears(seq.Date(yearsToDate(t_start), yearsToDate(t_forecast), by = "1 week"))
 
@@ -112,7 +131,7 @@ simulatePOMP <- function(nsim, seed = 199919L) {
 }
 
 sirb_cholera <- pomp(sirb_cholera,
-                     covar = rain,
+                     covar = all_rain_forecast,
                      tcovar = "time")
 
 # run simulations for each model
