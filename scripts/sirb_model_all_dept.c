@@ -1,3 +1,14 @@
+previous_vacc_campaign = TRUE ; 
+r_v_wdn = 0.0;    
+p1d = 0;
+mobility = 0;
+pdd = 0;
+t_eff =  0;
+t_eff_alt = 0;
+
+
+
+
 
 /* Compute mobility term */
 if (t < t_end) {
