@@ -164,7 +164,9 @@ for (dp in departements) {
     mutate(max_rain = max(rain), rain_std = rain / max_rain)
 
   all_rain <- cbind(all_rain, placeholder = rain$max_rain)
+  all_rain <- cbind(all_rain, placeholder2 = rain$rain_std)
   names(all_rain)[names(all_rain) == "placeholder"] <- paste0('max_rain', gsub('-','_',dp))
+  names(all_rain)[names(all_rain) == "placeholder2"] <- paste0('rain_std', gsub('-','_',dp))
   
   all_cases <- cbind(all_cases, placeholder = cases$cases)
   names(all_cases)[names(all_cases) == "placeholder"] <- paste0('cases', gsub('-','_',dp))
@@ -476,7 +478,7 @@ sirb_cholera <- pomp(
   # measurement model simulator
   rmeasure =  rmeas,
   # covariates
-  covar = rain,
+  covar = all_rain,
   tcovar = "time",
   # names of state variables
   statenames = all_state_names,
