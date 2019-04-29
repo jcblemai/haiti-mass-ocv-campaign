@@ -11,62 +11,62 @@ Sys.setenv(TZ='GMT')
 
 
 
-scenario     <- "S0"
-nsim         <- 100
-t_vacc_start <- list()
-t_vacc_end <- list()
-p1d_reg<- list()
-r_v_year <- list()
-t_vacc_start$Artibonite <- "2024-01-11"
-t_vacc_end$Artibonite   <- "2029-01-09"
-p1d_reg$Artibonite     <- 1.0
-r_v_year$Artibonite     <- 0.0003457414265972485
-cases_ext    <- 1
-t_vacc_start$Centre <- "2019-01-12"
-t_vacc_end$Centre   <- "2024-01-11"
-p1d_reg$Centre     <- 1.0
-r_v_year$Centre     <- 0.00014934941524298614
-cases_ext    <- 1
-t_vacc_start$Grande_Anse <- "2064-01-01"
-t_vacc_end$Grande_Anse   <- "2068-12-30"
-p1d_reg$Grande_Anse     <- 1.0
-r_v_year$Grande_Anse     <- 9.372434525767405e-05
-cases_ext    <- 1
-t_vacc_start$Nippes <- "2049-01-04"
-t_vacc_end$Nippes   <- "2054-01-03"
-p1d_reg$Nippes     <- 1.0
-r_v_year$Nippes     <- 6.855191716307418e-05
-cases_ext    <- 1
-t_vacc_start$Nord <- "2039-01-07"
-t_vacc_end$Nord   <- "2044-01-06"
-p1d_reg$Nord     <- 1.0
-r_v_year$Nord     <- 0.0002135815759501876
-cases_ext    <- 1
-t_vacc_start$Nord_Est <- "2054-01-03"
-t_vacc_end$Nord_Est   <- "2059-01-02"
-p1d_reg$Nord_Est     <- 1.0
-r_v_year$Nord_Est     <- 7.884736340116735e-05
-cases_ext    <- 1
-t_vacc_start$Nord_Ouest <- "2034-01-08"
-t_vacc_end$Nord_Ouest   <- "2039-01-07"
-p1d_reg$Nord_Ouest     <- 1.0
-r_v_year$Nord_Ouest     <- 0.0001458612279158269
-cases_ext    <- 1
-t_vacc_start$Ouest <- "2029-01-09"
-t_vacc_end$Ouest   <- "2034-01-08"
-p1d_reg$Ouest     <- 1.0
-r_v_year$Ouest     <- 0.0008064929665035424
-cases_ext    <- 1
-t_vacc_start$Sud <- "2044-01-06"
-t_vacc_end$Sud   <- "2049-01-04"
-p1d_reg$Sud     <- 1.0
-r_v_year$Sud     <- 0.00015510135188780548
-cases_ext    <- 1
-t_vacc_start$Sud_Est <- "2059-01-02"
-t_vacc_end$Sud_Est   <- "2064-01-01"
-p1d_reg$Sud_Est     <- 1.0
-r_v_year$Sud_Est     <- 0.00012660685015481463
-cases_ext    <- 1
+# scenario     <- "S0"
+# nsim         <- 100
+# t_vacc_start <- list()
+# t_vacc_end <- list()
+# p1d_reg<- list()
+# r_v_year <- list()
+# t_vacc_start$Artibonite <- "2024-01-11"
+# t_vacc_end$Artibonite   <- "2029-01-09"
+# p1d_reg$Artibonite     <- 1.0
+# r_v_year$Artibonite     <- 0.0003457414265972485
+# cases_ext    <- 1
+# t_vacc_start$Centre <- "2019-01-12"
+# t_vacc_end$Centre   <- "2024-01-11"
+# p1d_reg$Centre     <- 1.0
+# r_v_year$Centre     <- 0.00014934941524298614
+# cases_ext    <- 1
+# t_vacc_start$Grande_Anse <- "2064-01-01"
+# t_vacc_end$Grande_Anse   <- "2068-12-30"
+# p1d_reg$Grande_Anse     <- 1.0
+# r_v_year$Grande_Anse     <- 9.372434525767405e-05
+# cases_ext    <- 1
+# t_vacc_start$Nippes <- "2049-01-04"
+# t_vacc_end$Nippes   <- "2054-01-03"
+# p1d_reg$Nippes     <- 1.0
+# r_v_year$Nippes     <- 6.855191716307418e-05
+# cases_ext    <- 1
+# t_vacc_start$Nord <- "2039-01-07"
+# t_vacc_end$Nord   <- "2044-ß01-06"
+# p1d_reg$Nord     <- 1.0
+# r_v_year$Nord     <- 0.0002135815759501876
+# cases_ext    <- 1
+# t_vacc_start$Nord_Est <- "2054-01-03"
+# t_vacc_end$Nord_Est   <- "2059-01-02"
+# p1d_reg$Nord_Est     <- 1.0
+# r_v_year$Nord_Est     <- 7.884736340116735e-05
+# cases_ext    <- 1
+# t_vacc_start$Nord_Ouest <- "2034-01-08"
+# t_vacc_end$Nord_Ouest   <- "2039-01-07"
+# p1d_reg$Nord_Ouest     <- 1.0
+# r_v_year$Nord_Ouest     <- 0.0001458612279158269
+# cases_ext    <- 1
+# t_vacc_start$Ouest <- "2029-01-09"
+# t_vacc_end$Ouest   <- "2034-01-08"
+# p1d_reg$Ouest     <- 1.0
+# r_v_year$Ouest     <- 0.0008064929665035424
+# cases_ext    <- 1
+# t_vacc_start$Sud <- "2044-01-06"
+# t_vacc_end$Sud   <- "2049-01-04"
+# p1d_reg$Sud     <- 1.0
+# r_v_year$Sud     <- 0.00015510135188780548
+# cases_ext    <- 1
+# t_vacc_start$Sud_Est <- "2059-01-02"
+# t_vacc_end$Sud_Est   <- "2064-01-01"
+# p1d_reg$Sud_Est     <- 1.0
+# r_v_year$Sud_Est     <- 0.00012660685015481463
+# cases_ext    <- 1
 
 
 
@@ -182,7 +182,7 @@ simulatePOMP <- function(nsim, seed = 199919L) {
   projec %>%
     as_tibble() %>% 
     mutate(isdata = sim == "data") %>%
-    gather(variable, value, -time, -rain, -sim, -isdata) %>% 
+    gather(variable, value, -time, -sim, -isdata) %>% 
     group_by(time, isdata, variable) %>% 
     summarise( q05 = quantile(value, 0.025, na.rm = T),
                mean = mean(value, na.rm = T),
@@ -202,9 +202,4 @@ sirb_cholera <- pomp(sirb_cholera,
 # run simulations for each model
 sim_stochastic <- simulatePOMP(nsim = nsim)
 
-# tidy tibble for merger
-sim_stochastic_quantiles <- sim_stochastic %>% 
-  mutate(date = as.Date(round_date(date))) %>% 
-  filter(variable == "cases", isdata == "simulation") %>% 
-  select(-isdata, -time, -variable)# %>% 
 

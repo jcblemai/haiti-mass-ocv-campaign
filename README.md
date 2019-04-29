@@ -17,6 +17,7 @@
   - Why some simulation scenarios extincts and goes back up ? 
   - I have a new west calibration on echopc 16, use it
   - BUG: in the pomp object used for calibration, covar is not defined at most time step. Is it a bug or is it interpolated ?
+  - BUG: in forecast is the rain should be the same that in calibration
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
 Finish that fast.
