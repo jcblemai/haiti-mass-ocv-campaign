@@ -121,7 +121,7 @@ params_common <-
    "cases_ext")
 
 ## fixed process model parameters  OK
-params_diff <- c("H", "D","t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year",
+params_diff <- c("foi_add", "betaB", "H", "D","t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year",
     "t_vacc_start_alt", "t_vacc_end_alt", "p1d_reg_alt", "r_v_year_alt")
 
 # input parameters to the model
@@ -225,8 +225,8 @@ for (dp in departements) {
   all_matrix_cases_other.string = str_c(all_matrix_cases_other.string, matrix_cases_other.string)
 
 
-  all_state_names = append(all_state_names, lapply(state_names, paste0, dp))
-  all_param_names = append(all_param_names, lapply(params_diff, paste0, dp))
+  all_state_names = append(all_state_names, lapply(state_names, paste0, gsub('-', '_',dp)))
+  all_param_names = append(all_param_names, lapply(params_diff, paste0, gsub('-', '_',dp)))
   
 }
 all_state_names = unlist(all_state_names)
@@ -242,29 +242,50 @@ all_params["gammaA"] <- 182.625          # Fixed
 all_params["gammaI"] <- 182.625          # Fixed
 all_params["Rtot_0"] <- 0.35             # Useless
 
-# Estimated parameters for all dept:
-all_params["betaB"] <- 0.296517
-all_params["foi_add"] <- 0.0
-# Estimated parameters for Artibonite:
-all_params["mu_B"] <-  159.593008
-all_params["XthetaA"] <- 0.033616
-all_params["thetaI"] <- 0.000767
-all_params["lambdaR"] <- 0.902726
-all_params["r"] <- 1.041372
-all_params["std_W"] <- 0.007852
-all_params["epsilon"] <- 0.975316
-all_params["k"] <- 379.266151
-all_params["cas_def"] <- 0.5
 
 all_params['cases_ext'] <- 1
 all_params['mu'] <-  0.01586625546  
-all_params['alpha'] <- 1.461 
+all_params['alpha'] <- 1.461
+
+# From calibration
+all_params["mu_B"] <-  133.19716102404308
+all_params["XthetaA"] <- 0.0436160721505241
+all_params["thetaI"] <- 3.4476623459780395e-4
+all_params["lambdaR"] <- 0.2774237712085347
+all_params["r"] <- 0.31360358752214235
+all_params["std_W"] <- 0.008172280355938182
+all_params["epsilon"] <- 0.9750270707877388
+all_params["k"] <- 101.2215999283583
+all_params["cas_def"] <- 0.36
+
+all_params["betaBArtibonite"] =   0.516191 
+all_params["betaBSud_Est"] =      1.384372 
+all_params["betaBNippes"] =       2.999928 
+all_params["betaBNord_Est"] =     3.248645 
+all_params["betaBOuest"] =        0.106151 
+all_params["betaBCentre"] =       1.977686 
+all_params["betaBNord"] =         0.589541 
+all_params["betaBSud"] =          1.305966 
+all_params["betaBNord_Ouest"] =   1.141691 
+all_params["betaBGrande_Anse"] =  2.823539 
+
+all_params["foi_addArtibonite"] =    1.530994e-06  
+all_params["foi_addSud_Est"] =     6.105491e-07
+all_params["foi_addNippes"] =       3.056857e-07
+all_params["foi_addNord_Est"] =     8.209611e-07
+all_params["foi_addOuest"] =        1.029080e-07
+all_params["foi_addCentre "] =      1.065046e-05
+all_params["foi_addNord"] =         5.319736e-07
+all_params["foi_addSud"] =          1.030357e-06   
+all_params["foi_addNord_Ouest"] =   5.855759e-07
+all_params["foi_addGrande_Anse"] =  8.762740e-07 
+
 
 for (dp in departements) {
   populations  <- unlist(flatten(input_parameters["population"]))
   densities <- unlist(flatten(input_parameters["density"]))
-  all_params[paste0('H', dp)] <- populations[dp]
-  all_params[paste0('D', dp)] <- densities[dp]
+  all_params[paste0('H', gsub('-','_',dp))] <- populations[dp]
+  all_params[paste0('D', gsub('-','_',dp))] <- densities[dp]
   p1d_alt_year  <- unlist(flatten(input_parameters["p1d_alt_year"]))
   nb_doses_alt_year <- unlist(flatten(input_parameters["nb_doses_alt_year"]))
   t_vacc_start_alt  <- unlist(flatten(input_parameters["t_vacc_start_alt"]))
@@ -275,10 +296,10 @@ for (dp in departements) {
   r_v_alt_year = nb_doses_alt_year[dp] / (t_vacc_end_alt - t_vacc_start_alt)
   p1d_alt = p1d_alt_year[dp]
   
-  all_params[paste0("t_vacc_start_alt", dp)] = t_vacc_start_alt
-  all_params[paste0("t_vacc_end_alt",dp)] = t_vacc_end_alt
-  all_params[paste0("p1d_reg_alt", dp)] = p1d_alt 
-  all_params[paste0("r_v_year_alt", dp)] = r_v_alt_year
+  all_params[paste0("t_vacc_start_alt", gsub('-','_',dp))] = t_vacc_start_alt
+  all_params[paste0("t_vacc_end_alt",gsub('-','_',dp))] = t_vacc_end_alt
+  all_params[paste0("p1d_reg_alt", gsub('-','_',dp))] = p1d_alt 
+  all_params[paste0("r_v_year_alt", gsub('-','_',dp))] = r_v_alt_year
 
 }
 
@@ -387,14 +408,14 @@ rmeas <- Csnippet(rmeasAll)
 
 # Process model ----------------------------------------------------------------- OK
 
-sirb_file <- 'scripts/sirb_model_vacc.c'
+sirb_file <- 'scripts/sirb_model_all_dept.c'
+sirb_file_init <- 'scripts/sirb_model_all_dept_init.c'
 
-sirb.rproc <-
-  Csnippet(readChar(sirb_file, file.info(sirb_file)$size))
 
-sirb.rprocTemplate = "C%s = 32;"
 
-sirb.rproc = ""
+sirb.rprocTemplate = readChar(sirb_file, file.info(sirb_file)$size)
+
+sirb.rproc = readChar(sirb_file_init, file.info(sirb_file_init)$size)
 for (dp in departements) {
   sirb.rproc = paste0(sirb.rproc, gsub('%s', gsub('-', '_', dp), sirb.rprocTemplate))
 }
@@ -421,7 +442,7 @@ eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " doub
 zeronameTemplate = c("C", "W")
 zeronameAll = list()
 for (dp in departements){
-  zeronameAll = append(zeronameAll, lapply(zeronameTemplate, paste0, dp))
+  zeronameAll = append(zeronameAll, lapply(zeronameTemplate, paste0, gsub('-', '_', dp)))
   
 }
 zeronameAll <- unlist(zeronameAll)

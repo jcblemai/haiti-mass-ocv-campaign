@@ -150,7 +150,7 @@ cases_covar <- aggregate(cases_covar$cases, by=list(Category=cases_covar$time), 
 
 rain <- rain_forecast  %>% 
   filter(time > (t_start - 0.01) & time < (t_forecast + 0.01)) %>% 
-  select(time, rain_std) %>% 
+  select(time, rain_std) %>%
   rename(rain = rain_std)
 
 cases_covar <- cases_covar %>% 
