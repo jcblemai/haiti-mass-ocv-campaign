@@ -161,6 +161,8 @@ def run_sim(scenario_str):
     all_data['Ouest'].q05['cases'][:datetime.date(2017,6,10)] = np.nan
     all_data['Ouest'].q50['cases'][:datetime.date(2017,6,10)] = np.nan
     all_data['Ouest'].q95['cases'][:datetime.date(2017,6,10)] = np.nan
+
+    print ("Finished run of scenario " + scenario_str)
     
     # Save results
     dir_name = 'output/Results/' + scenario_str + '/'
@@ -201,12 +203,12 @@ def run_sim(scenario_str):
         if i%5 != 4:
             axt.get_yaxis().set_visible(False)
 
-        if (dp not in scenario.not_dep) and (scenarios_str != 'S0'):
+        if (dp not in scenario.not_dep) and (scenario_str != 'S0'):
             # convert to matplotlib date representation
             start = mdates.date2num(scenario.t_vacc_start[dp])
             end = mdates.date2num(scenario.t_vacc_end[dp])
             width = end - start
-            rect = Rectangle((start, 0), width, 1000+max(all_data_vacc[dp].q95['cases']), color='orange', alpha= 0.1)
+            rect = Rectangle((start, 0), width, 1000+max(all_data[dp].q95['cases']), color='orange', alpha= 0.1)
             axes[i].add_patch(rect) 
             axes[i].add_artist(rect)
             rx, ry = rect.get_xy()
@@ -254,9 +256,6 @@ def save_result(to_save, scenario_str, folder_name = ''):
     csv_all_q50.to_csv(folder_name + scenario_str + '_q50_s.csv', index_label='date')
     pd.concat([csv_all_q05.sum(axis=1), csv_all_q50.sum(axis=1), csv_all_q95.sum(axis=1)], 
               axis = 1, keys = ['q05', 'q50', 'q95']).to_csv(folder_name + scenario_str + '_national_s.csv', index_label='date')
-
-
-
 
 scenarios_df = pd.read_csv('haiti-data/scenarios.csv', index_col = 0)
 
