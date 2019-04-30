@@ -18,8 +18,8 @@ warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
 # Warning: Needs an output/Simulations folder
 
-nsim = 10
-n_proc = 2
+nsim = 1000
+n_proc = 15
         
 compartments = ['S', 'I', 'A', 'RA1', 'RA2', 'RA3', 'RI1', 'RI2', 'RI3', 'W', 'B', 'cases', 'C',
                  "VSd", "VRI1d", "VRI2d", "VRI3d", "VRA1d", "VRA2d", "VRA3d",
@@ -185,9 +185,8 @@ def run_sim(scenario_str):
     fig, axes = plt.subplots((len(all_data))//2, 2, figsize=(15,15), squeeze = True, dpi = 200)
     fig.patch.set_facecolor('white')
 
-    axes = axes.flat;
+    axes = axes.flat
     for i, dp in enumerate(departements):
-
         axt =  axes[i].twinx()
         axes[i].plot(cases[dp][t_start:][ti:tf], marker='.', linestyle='-',color='black', linewidth=0, markersize=3 ) 
         axes[i].fill_between(all_data[dp].q05['cases'][ti:tf].index, all_data[dp].q05['cases'][ti:tf], all_data[dp].q95['cases'][ti:tf], alpha = .5, color = 'darkblue', linewidth = 0)
