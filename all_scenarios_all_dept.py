@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=RRuntimeWarning)
 # Warning: Needs an output/Simulations folder
 
 nsim = 1000
-n_proc = 10
+n_proc = 18
         
 compartments = ['S', 'I', 'A', 'RA1', 'RA2', 'RA3', 'RI1', 'RI2', 'RI3', 'W', 'B', 'cases', 'C',
                  "VSd", "VRI1d", "VRI2d", "VRI3d", "VRA1d", "VRA2d", "VRA3d",
@@ -147,8 +147,8 @@ def run_sim(scenario_str):
         robjects.r('t_vacc_end${}   <- "'.format(dp.replace('-','_')) + str(scenario.t_vacc_end[dp]) + '"')
         robjects.r('p1d_reg${}     <- '.format(dp.replace('-','_'))  + str(scenario.p1d_reg[dp]))
         robjects.r('r_v_year${}     <- '.format(dp.replace('-','_'))  + str(scenario.r_v_year[dp]))
-    robjects.r('cases_ext    <- '.format(dp)  + str(scenario.ve))
-    r_source('/Users/chadi/Documents/phd/haiti-ocv-pomp/scripts/forecast_all_dept.R')
+    robjects.r('cases_ext    <- '  + str(scenario.ve))
+    r_source('scripts/forecast_all_dept.R')
     temp = robjects.r['sim_stochastic']
     
     for dp in departements:
@@ -175,7 +175,7 @@ def run_sim(scenario_str):
     ti = input_parameters['t_start']
     tf = t_for
 
-    fig, axes = plt.subplots((len(all_data_vacc_mob))//2, 2, figsize=(15,15), squeeze = True, dpi = 200)
+    fig, axes = plt.subplots((len(all_data))//2, 2, figsize=(15,15), squeeze = True, dpi = 200)
     fig.patch.set_facecolor('white')
 
     axes = axes.flat;
