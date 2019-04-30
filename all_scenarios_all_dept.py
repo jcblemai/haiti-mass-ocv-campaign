@@ -118,7 +118,7 @@ class VaccinationScenario():
                 self.t_vacc_end[dp] = t_init + datetime.timedelta(days=(i+1)*days_per_departement)
                 self.p1d_reg[dp] = 0
                 self.r_v_year[dp] =0
-def run_sim(scenarios_str):
+def run_sim(scenario_str):
     # see second answer of https://stackoverflow.com/questions/25175530/can-rpy2-code-be-run-in-parallel on why it starts different 
     # R instances
 
@@ -130,7 +130,7 @@ def run_sim(scenarios_str):
         all_data[dp] = DeptData()
 
 
-    r_source = robjects.r['source'];
+    r_source = robjects.r['source']
     dept_data = {}
     r_options = robjects.r['options']
     r_options(warn=-1)
