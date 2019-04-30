@@ -18,8 +18,8 @@ warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
 # Warning: Needs an output/Simulations folder
 
-nsim = 1000
-n_proc = 18
+nsim = 10
+n_proc = 2
         
 compartments = ['S', 'I', 'A', 'RA1', 'RA2', 'RA3', 'RI1', 'RI2', 'RI3', 'W', 'B', 'cases', 'C',
                  "VSd", "VRI1d", "VRI2d", "VRI3d", "VRA1d", "VRA2d", "VRA3d",
@@ -37,6 +37,8 @@ input_parameters = yaml.load(stream)
 dept_name = [list(pop.keys())[0] for pop in input_parameters['population']]
 t_start = input_parameters['t_start']
 t_for = datetime.date(2029,12,20)
+
+
 def project_rain(rainfall, tf):
     nd = 14 #days sampled - must be multiple of 7 d
     dti = rainfall.iloc[0].name.date()
@@ -61,6 +63,9 @@ rain = pd.concat((rainfall, rain_prj))
 rain.to_csv('haiti-data/proj/rainfall.csv', index_label = 'date')
 
 # Starting the run for all departemens
+rainfall = pd.read_csv('haiti-data/fromAzman/rainfall.csv', index_col = 0, parse_dates = True)
+cases    = pd.read_csv('haiti-data/fromAzman/cases_corrected.csv', index_col=0, parse_dates =True)
+rain     = pd.read_csv('haiti-data/proj/rainfall.csv', index_col = 0, parse_dates = True)
 
 
 stream = open('haiti-data/input_parameters.yaml', 'r')
