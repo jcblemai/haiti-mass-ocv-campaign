@@ -102,8 +102,6 @@ departements <-
   )
 
 
-
-
 # input parameters to the model
 input_parameters <- yaml::read_yaml("haiti-data/input_parameters.yaml")
 # Start and end dates of epidemic

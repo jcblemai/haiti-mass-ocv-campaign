@@ -20,6 +20,10 @@
   - BUG: in forecast is the rain should be the same that in calibration
   - Create a cumul ovcer se
   - Switch to all incidence !
+  - Add cumulative vaccine to graph
+  - Model Diagram
+  - Open-Source.
+  - DEtai remote sensing produces.
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
 Finish that fast.

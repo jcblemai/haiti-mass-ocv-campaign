@@ -18,8 +18,9 @@ warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
 # Warning: Needs an output/Simulations folder
 
-nsim = 1000
-n_proc = 15
+nsim = 500
+n_proc = 5 
+# Already uses a looot of RAM like this, more than 60G
         
 compartments = ['S', 'I', 'A', 'RA1', 'RA2', 'RA3', 'RI1', 'RI2', 'RI3', 'W', 'B', 'cases', 'C',
                  "VSd", "VRI1d", "VRI2d", "VRI3d", "VRA1d", "VRA2d", "VRA3d",
@@ -136,7 +137,6 @@ def run_sim(scenario_str):
 
 
     r_source = robjects.r['source']
-    dept_data = {}
     r_options = robjects.r['options']
     r_options(warn=-1)
     robjects.r('scenario     <- "' + scenario_str + '"')
@@ -212,12 +212,10 @@ def run_sim(scenario_str):
             start = mdates.date2num(scenario.t_vacc_start[dp])
             end = mdates.date2num(scenario.t_vacc_end[dp])
             width = end - start
-            rect = Rectangle((start, 0), width, 1000+max(all_data[dp].q95['cases']), color='orange', alpha= 0.1)
+            rect = Rectangle((start, 0), width, 1000, color='orange', alpha= 0.1)
             axes[i].add_patch(rect) 
             axes[i].add_artist(rect)
             rx, ry = rect.get_xy()
-            cx = rx + rect.get_width()/2.0
-            cy = ry + rect.get_height()/1.5
     
     for ax in axes:
         ax.label_outer()
@@ -268,11 +266,11 @@ for sid, row in scenarios_df.iterrows():
     not_dep = []
     course_year = 2
     if (row['Roll-out'] == 2):
-        not_dep = ['Ouest','Nord-Ouest','Sud', 'Nippes','Nord-Est', 'Sud-Est','Grande_Anse']
+        not_dep = ['Ouest','Nord-Ouest','Nord','Sud', 'Nippes','Nord-Est', 'Sud-Est','Grande_Anse']
     elif (row['Roll-out'] == 3):
         course_year = 5
     elif (row['Roll-out'] == 4):
-        not_dep = ['Nord-Ouest','Sud', 'Nippes','Nord-Est', 'Sud-Est','Grande_Anse']
+        not_dep = ['Nord-Ouest','Nord','Sud', 'Nippes','Nord-Est', 'Sud-Est','Grande_Anse']
         
     percent_completely_unvaccinated = 0
     percent_onedose = 0
