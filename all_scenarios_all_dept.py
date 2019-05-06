@@ -290,8 +290,8 @@ for sid, row in scenarios_df.iterrows():
         percent_twodoses = 95
     ve = row['VE']
             
-    #if (row['Priority'] == 1):
-    if True:
+    if (row['Priority'] == 1):
+    #if True:
         scenarios['S' + str(sid)] = VaccinationScenario(course_year, 
                                                       percent_completely_unvaccinated, 
                                                       percent_onedose, 
