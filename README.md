@@ -13,17 +13,18 @@
   - Better mobility ?
   - Ability to compute the time to elimination
   - Plot compartements all.
-  - Why West has no vaccination in graph?
   - Why some simulation scenarios extincts and goes back up ? 
-  - I have a new west calibration on echopc 16, use it
-  - BUG: in the pomp object used for calibration, covar is not defined at most time step. Is it a bug or is it interpolated ?
-  - BUG: in forecast is the rain should be the same that in calibration
-  - Create a cumul ovcer se
   - Switch to all incidence !
   - Add cumulative vaccine to graph
   - Model Diagram
   - Open-Source.
-  - DEtai remote sensing produces.
+  - Detail remote sensing produces.
+  - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each 
+  - Produce results with probabilty of ressurgence.
+  - Produce time to elimination.
+
+
+
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
 Finish that fast.
@@ -59,6 +60,11 @@ Finish that fast.
     - Investigate starting parameters ro improve artinonite, especially reporting ? Javier says 97% is fine, better calibrated than anything
   - Make use of CDC case definiation information
   - *Get better Ouest by calibrating*
+  - BUG: in the pomp object used for calibration, covar is not defined at most time step. Is it a bug or is it interpolated ?
+  - Why West has no vaccination in graph?
+  - I have a new west calibration on echopc 16, use it
+
+
 
 
 
