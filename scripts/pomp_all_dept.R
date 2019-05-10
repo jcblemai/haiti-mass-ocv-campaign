@@ -258,7 +258,7 @@ all_params["r"] <- 0.31360358752214235
 all_params["std_W"] <- 0.008172280355938182
 all_params["epsilon"] <- 0.9750270707877388
 all_params["k"] <- 101.2215999283583
-all_params["cas_def"] <- 0.36
+all_params["cas_def"] <- 0.10
 
 all_params["betaBArtibonite"] =   0.516191 
 all_params["betaBSud_Est"] =      1.384372 
@@ -275,7 +275,7 @@ all_params["foi_addArtibonite"] =    1.530994e-06
 all_params["foi_addSud_Est"] =     6.105491e-07
 all_params["foi_addNippes"] =       3.056857e-07
 all_params["foi_addNord_Est"] =     8.209611e-07
-all_params["foi_addOuest"] =       1.070717e-06
+all_params["foi_addOuest"] =       1.070717e-06 
 all_params["foi_addCentre"] =      0.0000106504579266415
 all_params["foi_addNord"] =         5.319736e-07
 all_params["foi_addSud"] =          1.030357e-06   

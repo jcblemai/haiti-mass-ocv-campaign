@@ -9,21 +9,13 @@
   - Beta Drop to match the drop with two beta ?
   
 ### Forecast and results
-
-  - Better mobility ?
   - Ability to compute the time to elimination
-  - Plot compartements all.
-  - Why some simulation scenarios extincts and goes back up ? 
   - Switch to all incidence !
   - Add cumulative vaccine to graph
-  - Model Diagram
+  - Add national graph to graph done automatically.
   - Open-Source.
-  - Detail remote sensing produces.
-  - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each 
-  - Produce results with probabilty of ressurgence.
-  - Produce time to elimination.
-
-
+  - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each
+  - Mmmh it's a bit inconsistent that mobility does not dépends on real cases. 
 
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
@@ -63,6 +55,9 @@ Finish that fast.
   - BUG: in the pomp object used for calibration, covar is not defined at most time step. Is it a bug or is it interpolated ?
   - Why West has no vaccination in graph?
   - I have a new west calibration on echopc 16, use it
+  - Better mobility 
+  - Why some simulation scenarios extincts and goes back up ? 
+
 
 
 

@@ -9,8 +9,6 @@ library(lubridate)
 Sys.setlocale("LC_ALL","C")
 Sys.setenv(TZ='GMT')
 
-
-
 # scenario     <- "S0"
 # nsim         <- 100
 # t_vacc_start <- list()
@@ -172,8 +170,7 @@ simulatePOMP <- function(nsim, seed = 199919L) {
     coef(sirb_cholera)[paste0("r_v_year", gsub('-','_', dp))] <- as.numeric(r_v_year[gsub('-','_', dp)][[1]][1])
   }
   coef(sirb_cholera)["cases_ext"] <- as.numeric(cases_ext)
-  coef(sirb_cholera)["cas_def"] <- 0.36
-  
+
   pomp::simulate(sirb_cholera, nsim = nsim, as.data.frame = T , include.data = TRUE, seed = runif(1,1,10000), times = time_forecast) -> projec
   save(projec, file = sprintf("output/Simulations/Haiti_OCV_Projection-allDep-%i-%s.rda", nsim, scenario))
   
