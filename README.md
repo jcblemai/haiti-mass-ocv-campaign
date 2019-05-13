@@ -16,6 +16,7 @@
   - Open-Source.
   - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each
   - Mmmh it's a bit inconsistent that mobility does not dépends on real cases. 
+  - Replace NaN in ouest with just the data.
 
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
@@ -35,7 +36,7 @@ Finish that fast.
   - being able to run stuff in parallel
   - Mobility a better way:
     1. Manage to recreate initial conditions: launch sim by simulation b.c pomp store state
-    2 Do it in the pomp object
+    2. Do it in the pomp object
     3. Iterative (easier but wronger) via csv
       -> I keep nobility like this because it's too long otherwise
   - Build some calibration diagnosis

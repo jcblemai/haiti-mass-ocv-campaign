@@ -32,7 +32,7 @@ if (length(args)==0) {
 }
 
 # Choose to restart from a previous file (named checkpoint.csv)
-restart <- F
+restart <- T
 
 departement <- args[1]
 run_level <- as.integer(args[2])
@@ -63,7 +63,7 @@ coef(sirb_cholera)["r"] <- 0.31360358752214235
 coef(sirb_cholera)["std_W"] <- 0.008172280355938182
 coef(sirb_cholera)["epsilon"] <- 0.9750270707877388
 coef(sirb_cholera)["k"] <- 101.2215999283583
-coef(sirb_cholera)["cas_def"] <- 0.46
+coef(sirb_cholera)["cas_def"] <- 1
 
 # Parallel setup ----------------------------------------------------------
 
@@ -127,15 +127,15 @@ min_param_val <- 1e-7
 parameter_bounds <- tribble(
   ~param, ~lower, ~upper,
   "betaB", min_param_val, 0.3,
-#  "mu_B", min_param_val, 1e2,
-#  "XthetaA", min_param_val, .5,
-#  "thetaI", min_param_val, 1e-3,
-#  "lambdaR", min_param_val, 5,
-#  "r", min_param_val, 2,
-#  "std_W", min_param_val, 1e-1,
-#  "epsilon", min_param_val, 1,
-#  "k", -3, 4,# hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT ID2314
-#  "cas_def", min_param_val, 0.7,
+  "mu_B", min_param_val, 1e2,
+  "XthetaA", min_param_val, .5,
+  "thetaI", min_param_val, 1e-3,
+  "lambdaR", min_param_val, 5,
+  "r", min_param_val, 2,
+  "std_W", min_param_val, 1e-1,
+  "epsilon", min_param_val, 1,
+  "k", -3, 4,# hard to get negbin like this, sobol in log scale -5 et 4 TODO IF ENABLE: UNCOMMENT ID2314
+  "cas_def", min_param_val, 0.7,
   "foi_add", min_param_val, 1e-5
 )
 
@@ -260,15 +260,15 @@ cholera_Nreps_global <- c(1,      5,      10,     15)
       #              ")")
       text = str_c("rw.sd(",
                    "betaB  = ",   rw.sd_param["regular"],
-                # ", mu_B   = ",   rw.sd_param["regular"],
-                # ", XthetaA= ",   rw.sd_param["regular"],
-                # ", thetaI = ",   rw.sd_param["regular"],
-                # ", lambdaR = ",  rw.sd_param["regular"],
-                # ", r      = ",   rw.sd_param["regular"],
-                # ", std_W  = ",   rw.sd_param["regular"],
-                # ", epsilon= ",   rw.sd_param["regular"],
-                # ", k = "     ,   rw.sd_param["regular"],
-                # ", cas_def = ifelse(time<2018., 0, ",  rw.sd_param["regular"], ")",
+                 ", mu_B   = ",   rw.sd_param["regular"],
+                 ", XthetaA= ",   rw.sd_param["regular"],
+                 ", thetaI = ",   rw.sd_param["regular"],
+                 ", lambdaR = ",  rw.sd_param["regular"],
+                 ", r      = ",   rw.sd_param["regular"],
+                 ", std_W  = ",   rw.sd_param["regular"],
+                 ", epsilon= ",   rw.sd_param["regular"],
+                 ", k = "     ,   rw.sd_param["regular"],
+                 ", cas_def = ifelse(time<2018., 0, ",  rw.sd_param["regular"], ")",
                  ", foi_add= ",   rw.sd_param["regular"],
                    ")")
     )

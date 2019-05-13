@@ -33,8 +33,15 @@ else {
 }
 
 
+if (t < 2018){
+	mobility = mobility / epsilon;
+}
+else 
+{
+	mobility = mobility / (epsilon*cas_def);
+}  
 
-  // force of infection
+// force of infection
 foi = betaB * (B / (1 + B)) + foi_add*mobility;
 if(std_W > 0.0)
 {
