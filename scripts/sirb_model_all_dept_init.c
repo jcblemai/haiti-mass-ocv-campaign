@@ -3,7 +3,7 @@ double dw;            // extra-demographic stochasticity on foi
 double dB;            // deterministic forward time difference of bacteria in the environment
 double k1, k2, k3, k4;  // coefficients of  the Runge-Kutta method
 double rate[39];      // vector of all rates in model
-double dN[94];        // vector of transitions between classes during integration timestep
+double dN[95];        // vector of transitions between classes during integration timestep
 
 double thetaA = thetaI * XthetaA;
 double rhoI = rhoA * XrhoI;

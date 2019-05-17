@@ -403,10 +403,31 @@ for (dp in departements) {
   rmeasAll = paste0(rmeasAll, gsub('%s', gsub('-', '_', dp), rmeasTemplate))
 }
 
-
-
-
 rmeas <- Csnippet(rmeasAll)
+
+
+## NegBinomial density (if k -> inf then becomes Poisson)
+dmeasTemplate <- "
+    double mean_cases%s = epsilon * C%s;
+    if (t > 2018)
+       mean_cases%s = mean_cases%s * cas_def;
+    if (ISNA(cases%s)) {
+       lik += (give_log) ? 0 : 1;
+    } else {
+       if (S%s < 10000) {
+          lik += (give_log) ? -99999 : 1.0e-18;
+       } else {
+           lik += dnbinom_mu(cases%s, k, mean_cases%s, give_log) ;
+       }
+    }
+"
+
+dmeasAll = "lik = 0;"
+for (dp in departements) {
+  dmeasAll = paste0(dmeasAll, gsub('%s', gsub('-', '_', dp), dmeasTemplate))
+}
+
+dmeas <- Csnippet(dmeasAll)
 
 # Process model ----------------------------------------------------------------- OK
 
@@ -449,6 +470,45 @@ for (dp in departements){
 }
 zeronameAll <- unlist(zeronameAll)
 
+
+toEstimationScale <- "       Tmu_B = log(mu_B);
+                              TthetaI = log(thetaI);
+                              TXthetaA = logit(XthetaA);
+                              TlambdaR = log(lambdaR);
+                              Tr = log(r);
+                              Tstd_W = log(std_W);
+                              Tepsilon = logit(epsilon);
+                              Tcas_def = logit(cas_def);
+                              Tk = log(k);
+                              "
+toEstimationScaleTemplate <- "TbetaB%s = log(betaB%s);
+Tfoi_add%s = log(foi_add%s);"
+
+for (dp in departements) {
+  toEstimationScale = paste0(toEstimationScale, gsub('%s', gsub('-', '_', dp), toEstimationScaleTemplate))
+}
+toEstimationScale <- Csnippet(toEstimationScale)
+
+fromEstimationScale <- "      Tmu_B = exp(mu_B);
+                                TthetaI = exp(thetaI);
+                                TXthetaA = expit(XthetaA);
+                                TlambdaR = exp(lambdaR);
+                                Tr = exp(r);
+                                Tstd_W = exp(std_W);
+                                Tepsilon = expit(epsilon);
+                                Tcas_def = expit(cas_def);
+                                Tk = exp(k);
+                                "
+fromEstimationScaleTemplate <- "TbetaB%s = exp(betaB%s);
+Tfoi_add%s = exp(foi_add%s);"
+
+for (dp in departements) {
+  fromEstimationScale = paste0(fromEstimationScale, gsub('%s', gsub('-', '_', dp), fromEstimationScaleTemplate))
+}
+
+fromEstimationScale <- Csnippet(fromEstimationScale)
+
+
 # rate of simulation in fractions of years
 dt_yrs <- 1 / 365.25 * .2
 sirb_cholera <- pomp(
@@ -477,6 +537,8 @@ sirb_cholera <- pomp(
   rprocess = euler.sim(step.fun = sirb.rproc, delta.t = dt_yrs),
   # measurement model simulator
   rmeasure =  rmeas,
+  # measurement model density
+  dmeasure = dmeas,
   # covariates
   covar = all_rain,
   tcovar = "time",
@@ -488,8 +550,9 @@ sirb_cholera <- pomp(
   # names of paramters
   paramnames = all_param_names,
   # names of covariates
-  # covarnames = "rain",
   initializer = initalizeStates,
+  toEstimationScale = toEstimationScale,
+  fromEstimationScale = fromEstimationScale,
   # global C definitions
   globals = str_c(
     sprintf("int n_cases_start = %i;",  nrow(cases_at_t_start)),
