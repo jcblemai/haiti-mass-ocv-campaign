@@ -16,7 +16,10 @@ Sys.setlocale("LC_ALL","C")
 hostname <- system('hostname', intern = T) 
 output_dir <- "output/"
 
+args = commandArgs(trailingOnly=TRUE)
+print(args[1])
 run_level <- as.integer(args[1])
+
 # Helper functions 
 dateToYears <- function(date, origin = as.Date("2014-01-01"), yr_offset = 2014) {
   julian(date, origin = origin)/365.25 + yr_offset
@@ -56,11 +59,11 @@ rw.sd_ivp <- 0.2  # for the initial value paramters
 rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
 
 # Level of detail on which to run the computations [Allow to chose easly set of params]
-cholera_Np <-           c(3e3,    1e2,    3e3,    4e3)
-cholera_Nmif <-         c(300,     3,    300,    400)      # Entre 200 et 300  
-cholera_Ninit_param <-  c(n_runs,  n_runs, n_runs*2, n_runs*4)   # How many rounds a cpu does
-cholera_NpLL <-         c(1e4,    1e2,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
-cholera_Nreps_global <- c(5,      1,      10,     15)
+cholera_Np <-           c(3e3,    3e3,    10e3,    4e3)
+cholera_Nmif <-         c(300,     300,   100,    150)      # Entre 200 et 300  
+cholera_Ninit_param <-  c(n_runs,  n_runs, n_runs, n_runs)   # How many rounds a cpu does
+cholera_NpLL <-         c(1e4,    1e4,    1e4,    1e4)      # Au moins 10 000 pour un truc ok
+cholera_Nreps_global <- c(5,      10,      10,     10)
 
 
 # Run the computations -----------------------------------------------
