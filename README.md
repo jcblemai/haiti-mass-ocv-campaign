@@ -17,6 +17,8 @@
   - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each
   - Mmmh it's a bit inconsistent that mobility does not dépends on real cases. 
   - Replace NaN in ouest with just the data.
+  - Add changed with K to the sharelatex
+  - Reorganize section on the sharelatex as ELee says
 
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
