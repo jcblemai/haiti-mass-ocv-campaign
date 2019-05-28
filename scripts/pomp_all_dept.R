@@ -132,7 +132,7 @@ input_parameters <-
 t_start <- dateToYears(as.Date(input_parameters$t_start))
 t_end   <- dateToYears(as.Date(input_parameters$t_end))
 
-all_state_names <- list()
+all_state_names <- c('IncidenceAll', 'DosesAll', 'CasesAll')
 all_param_names <- params_common
 all_matrix_cases_at_t_start.string <- ""
 all_matrix_cases_other.string <- ""
@@ -463,7 +463,7 @@ eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " doub
                   ")
 
 zeronameTemplate = c("C", "W")
-zeronameAll = list()
+zeronameAll = c('IncidenceAll', 'CasesAll')
 for (dp in departements){
   zeronameAll = append(zeronameAll, lapply(zeronameTemplate, paste0, gsub('-', '_', dp)))
   

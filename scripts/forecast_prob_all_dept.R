@@ -33,7 +33,9 @@ yearsToDateTime <-
     as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
   }
 
-# TODO comment to run in python
+team <- 'EPFL'
+folder = '2019-05-27 Delivrable/Simulations/'
+
 
 departements <-
   c(
@@ -53,17 +55,22 @@ df <- data.frame(matrix(ncol = 10, nrow = 0))
 colnames(df) <- departements
 
 #all_data <- data.frame(departements)
-nsim <- 500
+nsim <- 1000
 scenario <- 'S25'
 haiti_pop = 10911819
 t_vacc_start <- dateToYears(as.Date('2019-01-12'))
 
+time_frames = c(
+  3,
+  5,
+  10)
+
 scenarios = c(
-  'S0',
-  'S1',
-  'S2',
-  'S3',
-  'S4',
+ # 'S0',
+  # 'S1',
+  #'S2',
+  #'S3',
+  #'S4',
   # 'S5',
   # 'S6',
   # 'S7',
@@ -98,27 +105,58 @@ scenarios = c(
   # 'S36'
 )
 
+thresh1 = haiti_pop / 10000
+thresh2 = 1
 
-probability_data = data.frame(scenarios, 'y3T1' = 0,  'y3T2' = 0, 
-                              'y5T1' = 0,  'y5T2' = 0,
-                              'y10T1' = 0, 'y10T2' = 0, row.names = 1)
+pr_elim <- tribble(
+  ~team, ~scenario, ~time_frame, ~pr_elim_thresh1, 
+  ~pr_resurg_thresh1, ~pr_elim_thresh2, ~pr_resurg_thresh2,
+  ~cum_inf_med, ~cum_inf_low, ~cum_inf_hi)
 
+tte <-  tribble(
+  ~team, ~scenario, ~t_elim_thresh1_med, ~t_elim_thresh1_low,
+  ~t_elim_thresh1_hi, ~t_elim_thresh2_med, ~t_elim_thresh2_low, 
+  ~t_elim_thresh2_hi, ~vacc_startdate)
 
-probability_data
-
+ts <- tribble(
+  ~team, ~scenario, ~saturday_date,
+  ~obs_cases_med, ~obs_cases_low, ~obs_cases_hi, 
+  ~true_inf_med, ~true_inf_low, ~true_inf_hi,
+  ~population_size, ~vacc_med, ~vacc_low, ~vacc_hi)
 
 for (scenario in scenarios)
 {
-  for (dp in departements) {
-    print(dp)
-    load(
-      file = sprintf(
-        "output/Simulations/Haiti_OCV_Projection-%s-%i-%s.rda",
-        dp,
-        nsim,
-        scenario
-      )
-    )
+  load(file = sprintf("%sHaiti_OCV_Projection-allDep-%i-%s.rda", folder, nsim, scenario ))
+  
+  
+  for (time_frame in time_frames)
+  {
+    acc_elim_thresh1 = 0
+    acc_elim_thresh2 = 0
+    acc_resurg_thresh1 = 0
+    acc_resurg_thresh2 = 0
+    
+    for (s in 1:nsim) {
+      df_s <- df %>% filter(sim == s)
+      if (sum(
+        df_s %>% filter(time > t_vacc_start + 3 - 6 / 12)
+        %>% filter(time < t_vacc_start + 3 + 6 / 12)
+        %>% select('sum')
+      ) < thresh1) {
+        acc_elim_thresh1 = acc_elim_thresh1 + 1
+      }
+      pr_elim_thresh1 =   acc_elim_thresh1 / nsim
+      pr_elim_thresh2 =   acc_elim_thresh2 / nsim
+      pr_resurg_thresh1 =   acc_resurg_thresh1 / nsim
+      pr_resurg_thresh2 =   acc_resurg_thresh2 / nsim
+      
+    pr_elim <- add_row(pr_elim, team, scenario, time_frame, pr_elim_thresh1, 
+                       pr_resurg_thresh1, pr_elim_thresh2, pr_resurg_thresh2,
+                       cum_inf_med, cum_inf_low, cum_inf_hi)
+  }
+}
+
+  
     if (dp == 'Artibonite') {
       df <-
         projec %>% filter(sim != 'data', time > t_vacc_start) %>% select(time, sim, I)
@@ -136,31 +174,9 @@ for (scenario in scenarios)
   df$sum <- rowSums(df %>% select(-sim,-time))
   
   df %<>% select(sim, time, sum)
+
   
-  thresh1 = haiti_pop / 10000
-  thresh2 = 1
-  
-  acc_3y_thresh1 = 0
-  acc_3y_thresh2 = 0
-  
-  acc_5y_thresh1 = 0
-  acc_5y_thresh2 = 0
-  
-  acc_10y_thresh1 = 0
-  acc_10y_thresh2 = 0
-  
-  
-  
-  
-  for (s in 1:nsim) {
-    df_s <- df %>% filter(sim == s)
-    if (sum(
-      df_s %>% filter(time > t_vacc_start + 3 - 6 / 12)
-      %>% filter(time < t_vacc_start + 3 + 6 / 12)
-      %>% select('sum')
-    ) < thresh1) {
-      acc_3y_thresh1 = acc_3y_thresh1 + 1
-    }
+
     if (sum(
       df_s %>% filter(time > t_vacc_start + 3 - 6 / 12)
       %>% filter(time < t_vacc_start + 3 + 6 / 12)

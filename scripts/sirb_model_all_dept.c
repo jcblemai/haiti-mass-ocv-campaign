@@ -264,3 +264,9 @@ S%s = nearbyint(H%s - I%s - A%s - RI1%s - RI2%s - RI3%s - RA1%s - RA2%s - RA3%s 
 	VSdd%s- VRI1dd%s -VRI2dd%s -VRI3dd%s -VRA1dd%s-VRA2dd%s-VRA3dd%s -
 	VSd_alt%s - VRI1d_alt%s - VRI2d_alt%s - VRI3d_alt%s - VRA1d_alt%s - VRA2d_alt%s - VRA3d_alt%s -
 	VSdd_alt%s - VRI1dd_alt%s - VRI2dd_alt%s - VRI3dd_alt%s - VRA1dd_alt%s- VRA2dd_alt%s - VRA3dd_alt%s);
+
+
+
+IncidenceAll +=  dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30] + dN[1] + dN[36] + dN[51] + dN[36+30] + dN[51+30];
+DosesAll  += dN[2] + dN[13] + dN[17] + dN[21] + dN[9] + dN[25] + dN[29] + dN[33] + 2*( dN[3] + dN[14] + dN[18] + dN[22] + dN[10] + dN[26] + dN[30] + dN[34]);
+CasesAll  +=  dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30];
