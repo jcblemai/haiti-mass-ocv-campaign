@@ -85,17 +85,17 @@ output_dir <- "output/"
 
 
 
-liks_stoch <- read_csv("output_17-17-mobinf/Haiti_OCVAll-param_logliks-10-l2.csv") 
-liks <- liks_stoch
-best_param <- liks %>% 
-  arrange(desc(loglik)) %>% 
-  slice(1)  %>% 
-  arrange(desc(loglik)) %>% 
-  ungroup %>% 
-  left_join(liks_stoch)
+# liks_stoch <- read_csv("output_17-17-mobinf/Haiti_OCVAll-param_logliks-10-l2.csv") 
+# liks <- liks_stoch
+# best_param <- liks %>% 
+#   arrange(desc(loglik)) %>% 
+#   slice(1)  %>% 
+#   arrange(desc(loglik)) %>% 
+#   ungroup %>% 
+#   left_join(liks_stoch)
 load(paste0(output_dir, "/sirb_cholera_pomped_all.rda"))
-params <- unlist(best_param[names(coef(sirb_cholera))]) %>% as.double()
-names(params) <- names(best_param[names(coef(sirb_cholera))])
+#params <- unlist(best_param[names(coef(sirb_cholera))]) %>% as.double()
+#names(params) <- names(best_param[names(coef(sirb_cholera))])
 # pomp::coef(sirb_cholera) <- params   # UNCOMMENT TO CHANGE TO CALIBRATION PARAMETERS
 
 departements <-

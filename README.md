@@ -138,7 +138,7 @@ At root level:
 
 ### Package to install
 
-    install.packages(c("tictoc", "pomp", "tidyverse", "magrittr", "ggthemes", "GGally", "foreach", "itertools", "lubridate", "dplyr", "purrr", "readr", "stringr", "tibble", "doMC","doSNOW","truncnorm")  , dependencies=TRUE)
+    install.packages(c("tictoc", "pomp", "tidyverse", "magrittr", "ggthemes", "GGally", "foreach", "itertools", "lubridate", "dplyr", "purrr", "readr", "stringr", "tibble", "doMC","doSNOW","truncnorm", "zoo")  , dependencies=TRUE)
  
 ### Show errors in R
     

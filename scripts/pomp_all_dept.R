@@ -376,10 +376,14 @@ VRI3dd_alt%s = 0;
 VRA1dd_alt%s = 0;
 VRA2dd_alt%s = 0;
 VRA3dd_alt%s= 0;
+
+
 "
 
 initalizeStatesAll = "double R0[2] = {0,0};
-
+IncidenceAll = 0;
+DosesAll = 0;
+CasesAll = 0;
 double B_acc = 0;
 double rhoI = rhoA * XrhoI;
 double thetaA = thetaI * XthetaA;"

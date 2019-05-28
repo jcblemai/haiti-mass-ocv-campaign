@@ -359,8 +359,6 @@ VRA3dd <-sim_stochastic %>%
 #print(p.all)
 
 
-
-
 VSd_alt <-sim_stochastic %>% 
   mutate(date = as.Date(round_date(date))) %>% 
   filter(variable == "VSd_alt", isdata == "simulation") %>% 

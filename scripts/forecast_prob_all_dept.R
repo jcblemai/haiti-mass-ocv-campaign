@@ -5,6 +5,7 @@ library(GGally)
 library(foreach)
 library(itertools)
 library(pomp)
+library(zoo)
 
 library(lubridate)
 Sys.setlocale("LC_ALL", "C")
@@ -35,6 +36,7 @@ yearsToDateTime <-
 
 team <- 'EPFL'
 folder = '2019-05-27 Delivrable/Simulations/'
+load("output/sirb_cholera_pomped_all.rda")
 
 
 departements <-
@@ -66,7 +68,7 @@ time_frames = c(
   10)
 
 scenarios = c(
- # 'S0',
+  'S0'#,
   # 'S1',
   #'S2',
   #'S3',
@@ -91,7 +93,7 @@ scenarios = c(
   # 'S22',
   # 'S23',
   # 'S24',
-   'S25'
+  #'S25'
   # 'S26',
   # 'S27',
   # 'S28',
@@ -118,122 +120,129 @@ tte <-  tribble(
   ~t_elim_thresh1_hi, ~t_elim_thresh2_med, ~t_elim_thresh2_low, 
   ~t_elim_thresh2_hi, ~vacc_startdate)
 
-ts <- tribble(
-  ~team, ~scenario, ~saturday_date,
-  ~obs_cases_med, ~obs_cases_low, ~obs_cases_hi, 
-  ~true_inf_med, ~true_inf_low, ~true_inf_hi,
-  ~population_size, ~vacc_med, ~vacc_low, ~vacc_hi)
 
 for (scenario in scenarios)
 {
+  print(scenario)
   load(file = sprintf("%sHaiti_OCV_Projection-allDep-%i-%s.rda", folder, nsim, scenario ))
   
+  df <- projec %>% filter(sim != 'data', time > t_vacc_start) %>% select(time, sim, IncidenceAll)
+  
+  quantiles <- projec %>% select(time, sim, CasesAll, IncidenceAll, DosesAll) %>% as_tibble() %>% 
+    mutate(isdata = sim == "data") %>%
+    gather(variable, value, -time, -sim, -isdata) %>% 
+    group_by(time, isdata, variable) %>% 
+    summarise( q05 = quantile(value, 0.025, na.rm = T),
+               mean = mean(value, na.rm = T),
+               q50 = quantile(value, 0.5, na.rm = T),
+               q95 = quantile(value, 0.975, na.rm = T)) %>%
+    ungroup() %>%
+    mutate(isdata = ifelse(isdata, "data", "simulation"),
+           date = yearsToDateTime(time)) %>% 
+    filter(date >= yearsToDate(sirb_cholera@t0)) %>%
+    mutate(date = as.Date(round_date(date)))
+
+  
+  #tte <- add_row(
+  #  team, scenario, t_elim_thresh1_med, t_elim_thresh1_low,
+  #  t_elim_thresh1_hi, t_elim_thresh2_med, t_elim_thresh2_low, 
+  #  t_elim_thresh2_hi, vacc_startdate)
+
+  
+  ts_inc <- quantiles %>% 
+    mutate(saturday_date = as.Date(round_date(date))) %>% 
+    filter(variable == "IncidenceAll", isdata == "simulation") %>% 
+    select(saturday_date, q05, q50, q95) %>% 
+    filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+    mutate(true_inf_med = q50) %>% 
+    mutate(true_inf_low = q05) %>% 
+    mutate(true_inf_hi = q95) %>%
+    select(saturday_date, true_inf_med, true_inf_low, true_inf_hi)
+    
+  ts_obs <- quantiles %>% 
+    mutate(saturday_date = as.Date(round_date(date))) %>% 
+    filter(variable == "CasesAll", isdata == "simulation") %>% 
+    select(saturday_date, q05, q50, q95) %>% 
+    filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+    mutate(obs_cases_med = q50) %>% 
+    mutate(obs_cases_low = q05) %>% 
+    mutate(obs_cases_hi = q95) %>%
+    select(saturday_date, obs_cases_med, obs_cases_low, obs_cases_hi)
+  
+  ts_vacc <- quantiles %>% 
+    mutate(saturday_date = as.Date(round_date(date))) %>% 
+    filter(variable == "DosesAll", isdata == "simulation") %>% 
+    select(saturday_date, q05, q50, q95) %>% 
+    filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+    mutate(vacc_med = q50) %>% 
+    mutate(vacc_low = q05) %>% 
+    mutate(vacc_hi = q95) %>%
+    select(saturday_date, vacc_med, vacc_low, vacc_hi)
+  
+  ts <- merge(merge(ts_inc, ts_obs), ts_vacc) %>% 
+    mutate(population_size = haiti_pop) %>% 
+    mutate(scenario = scenario) %>% 
+    mutate(team = team) %>% 
+    select(team, scenario, saturday_date,
+          obs_cases_med, obs_cases_low, obs_cases_hi, 
+          true_inf_med, true_inf_low, true_inf_hi,
+          population_size, vacc_med, vacc_low, vacc_hi)
+  
+  
+  
+  acc_elim_thresh1 = 0
+  acc_elim_thresh2 = 0
+  acc_resurg_thresh1 = 0
+  acc_resurg_thresh2 = 0
   
   for (time_frame in time_frames)
   {
-    acc_elim_thresh1 = 0
-    acc_elim_thresh2 = 0
-    acc_resurg_thresh1 = 0
-    acc_resurg_thresh2 = 0
-    
-    for (s in 1:nsim) {
+    print(time_frame)
+    for (s in 1:1)  # TODO
+    {
       df_s <- df %>% filter(sim == s)
-      if (sum(
-        df_s %>% filter(time > t_vacc_start + 3 - 6 / 12)
-        %>% filter(time < t_vacc_start + 3 + 6 / 12)
-        %>% select('sum')
-      ) < thresh1) {
-        acc_elim_thresh1 = acc_elim_thresh1 + 1
-      }
-      pr_elim_thresh1 =   acc_elim_thresh1 / nsim
-      pr_elim_thresh2 =   acc_elim_thresh2 / nsim
-      pr_resurg_thresh1 =   acc_resurg_thresh1 / nsim
-      pr_resurg_thresh2 =   acc_resurg_thresh2 / nsim
+      roll_sum <- zoo::rollapply(df_s$IncidenceAll, 52, sum)
       
+      if (sum(roll_sum[((time_frame-1)*52):(time_frame*52)] < thresh1, na.rm = T) >= 1 ){
+        acc_elim_thresh1 = acc_elim_thresh1 + 1
+        if (sum(df_s$IncidenceAll[(time_frame*52):length(roll_sum)] > thresh1/52.14, na.rm = T) >= 1 ){
+          acc_resurg_thresh1 = acc_resurg_thresh1 +1
+        }
+      }
+      if (sum(roll_sum[((time_frame-1)*52):(time_frame*52)] < thresh2, na.rm = T) >= 1 ){
+        acc_elim_thresh2 = acc_elim_thresh2 + 1
+        if (sum(df_s$IncidenceAll[(time_frame*52):length(roll_sum)] > thresh2/52.14, na.rm = T) >= 2 ){
+          acc_resurg_thresh2 = acc_resurg_thresh2 +1
+        }
+      }
+    }
+    
+    
+    incidence_tf = quantiles %>% 
+      mutate(date = as.Date(round_date(date))) %>% 
+      filter(variable == "IncidenceAll", isdata == "simulation") %>% 
+      select(date, q05, q50, q95) %>% 
+      filter(dateToYears(date) > t_vacc_start) %>% 
+      filter(dateToYears(date) < (t_vacc_start + time_frame)) 
+    
+    #TODO Is better to to the quantile of the cuminf
+    cum_inf_med <- sum(incidence_tf %>% select(q50))
+    cum_inf_low <- sum(incidence_tf %>% select(q05))
+    cum_inf_hi <- sum(incidence_tf %>% select(q95))
+    
+    pr_elim_thresh1 =   acc_elim_thresh1 / nsim
+    pr_elim_thresh2 =   acc_elim_thresh2 / nsim
+    pr_resurg_thresh1 =   acc_resurg_thresh1 / acc_elim_thresh1
+    pr_resurg_thresh2 =   acc_resurg_thresh2 / acc_elim_thresh2
+    
     pr_elim <- add_row(pr_elim, team, scenario, time_frame, pr_elim_thresh1, 
                        pr_resurg_thresh1, pr_elim_thresh2, pr_resurg_thresh2,
                        cum_inf_med, cum_inf_low, cum_inf_hi)
+    
   }
 }
 
-  
-    if (dp == 'Artibonite') {
-      df <-
-        projec %>% filter(sim != 'data', time > t_vacc_start) %>% select(time, sim, I)
-      colnames(df)[names(df) == "I"] <- dp
-      
-    } else{
-      dat <-
-        projec %>% filter(sim != 'data', time > 2019) %>% select(time, sim, I)
-      colnames(dat)[names(dat) == "I"] <- dp
-      
-      df <- merge(df, dat, by = c('time', 'sim'))
-    }
-  }
-  
-  df$sum <- rowSums(df %>% select(-sim,-time))
-  
-  df %<>% select(sim, time, sum)
-
-  
-
-    if (sum(
-      df_s %>% filter(time > t_vacc_start + 3 - 6 / 12)
-      %>% filter(time < t_vacc_start + 3 + 6 / 12)
-      %>% select('sum')
-    ) < thresh2) {
-      acc_3y_thresh2 = acc_3y_thresh2 + 1
-    }
-    
-    if (sum(
-      df_s %>% filter(time > t_vacc_start + 5 - 6 / 12)
-      %>% filter(time < t_vacc_start + 5 + 6 / 12)
-      %>% select('sum')
-    ) < thresh1) {
-      acc_5y_thresh1 = acc_5y_thresh1 + 1
-    }
-    if (sum(
-      df_s %>% filter(time > t_vacc_start + 5 - 6 / 12)
-      %>% filter(time < t_vacc_start + 5 + 6 / 12)
-      %>% select('sum')
-    ) < thresh2) {
-      acc_5y_thresh2 = acc_5y_thresh2 + 1
-    }
-    
-    
-    if (sum(
-      df_s %>% filter(time > t_vacc_start + 10 - 6 / 12)
-      %>% filter(time < t_vacc_start + 10 + 6 / 12)
-      %>% select('sum')
-    ) < thresh1) {
-      acc_10y_thresh1 = acc_10y_thresh1 + 1
-    }
-    if (sum(
-      df_s %>% filter(time > t_vacc_start + 10 - 6 / 12)
-      %>% filter(time < t_vacc_start + 10 + 6 / 12)
-      %>% select('sum')
-    ) < thresh2) {
-      acc_10y_thresh2 = acc_10y_thresh2 + 1
-    }
-  }
-  
-  print(paste0('3 years T1 : ', acc_3y_thresh1 / nsim * 100))
-  print(paste0('3 years T2 : ', acc_3y_thresh2 / nsim * 100))
-  
-  print(paste0('5 years T1 : ', acc_5y_thresh1 / nsim * 100))
-  print(paste0('5 years T2 : ', acc_5y_thresh2 / nsim * 100))
-  
-  print(paste0('10 years T1 : ', acc_10y_thresh1 / nsim * 100))
-  print(paste0('10 years T2 : ', acc_10y_thresh2 / nsim * 100))
-  
-  probability_data[scenario,] = c(acc_3y_thresh1 / nsim * 100,
-                                  acc_3y_thresh2 / nsim * 100,
-                                  acc_5y_thresh1 / nsim * 100,
-                                  acc_5y_thresh2 / nsim * 100,
-                                  acc_10y_thresh1 / nsim * 100,
-                                  acc_10y_thresh2 / nsim * 100)
-  
-}
-
-save(probability_data,file="probability_data.Rda")
+write.csv(pr_elim, file = paste0(folder, "pr_elim_", team, '_', Sys.Date(), '.csv'))
+write.csv(pr_elim, file = paste0(folder, "ts_", team, '_', Sys.Date(), '.csv'))
+#write.csv( tte, file = paste0(folder, "tte_", team, '_', Sys.Date(), '.csv'))
 
