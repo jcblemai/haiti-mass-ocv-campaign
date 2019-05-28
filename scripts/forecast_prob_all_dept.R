@@ -36,7 +36,7 @@ yearsToDateTime <-
 
 team <- 'EPFL'
 folder = '2019-05-27 Delivrable/Simulations/'
-#folder = 'output/Simulations/'
+folder = 'output/Simulations/'
 load("output/sirb_cholera_pomped_all.rda")
 
 
@@ -69,10 +69,10 @@ time_frames = c(
 
 scenarios = c(
   'S0',
-#  'S1',
-#  'S2',
-#  'S3',
-#  'S4',
+  'S1',
+  'S2',
+  'S3',
+  'S4',
   # 'S5',
   # 'S6',
   # 'S7',
@@ -203,7 +203,7 @@ for (scenario in scenarios)
     acc_resurg_thresh2 = 0
     cum_inf = list()
 
-    for (s in 1:5)
+    for (s in 1:nsim)
     {
       df_s <- df %>% filter(sim == s)
       roll_sum <- zoo::rollapply(df_s$IncidenceAll, 52, sum)
