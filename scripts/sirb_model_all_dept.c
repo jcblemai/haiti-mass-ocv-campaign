@@ -268,5 +268,8 @@ S%s = nearbyint(H%s - I%s - A%s - RI1%s - RI2%s - RI3%s - RA1%s - RA2%s - RA3%s 
 
 
 IncidenceAll +=  dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30] + dN[1] + dN[36] + dN[51] + dN[36+30] + dN[51+30];
-DosesAll  += dN[2] + dN[13] + dN[17] + dN[21] + dN[9] + dN[25] + dN[29] + dN[33] + 2*(dN[3] + dN[14] + dN[18] + dN[22] + dN[10] + dN[26] + dN[30] + dN[34]);
+if (!previous_vacc_campaign)
+{
+	DosesAll  += dN[2] + dN[13] + dN[17] + dN[21] + dN[9] + dN[25] + dN[29] + dN[33] + 2*(dN[3] + dN[14] + dN[18] + dN[22] + dN[10] + dN[26] + dN[30] + dN[34]);
+}
 CasesAll  +=  dN[0] + dN[35] + dN[50] + dN[35+30] + dN[50+30];

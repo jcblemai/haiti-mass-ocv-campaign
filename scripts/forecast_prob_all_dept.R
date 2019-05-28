@@ -36,6 +36,7 @@ yearsToDateTime <-
 
 team <- 'EPFL'
 folder = '2019-05-27 Delivrable/Simulations/'
+#folder = 'output/Simulations/'
 load("output/sirb_cholera_pomped_all.rda")
 
 
@@ -58,7 +59,6 @@ colnames(df) <- departements
 
 #all_data <- data.frame(departements)
 nsim <- 1000
-scenario <- 'S25'
 haiti_pop = 10911819
 t_vacc_start <- dateToYears(as.Date('2019-01-12'))
 
@@ -68,11 +68,11 @@ time_frames = c(
   10)
 
 scenarios = c(
-  'S0'#,
-  # 'S1',
-  #'S2',
-  #'S3',
-  #'S4',
+  'S0',
+#  'S1',
+#  'S2',
+#  'S3',
+#  'S4',
   # 'S5',
   # 'S6',
   # 'S7',
@@ -93,7 +93,7 @@ scenarios = c(
   # 'S22',
   # 'S23',
   # 'S24',
-  #'S25'
+  'S25'
   # 'S26',
   # 'S27',
   # 'S28',
@@ -120,6 +120,11 @@ tte <-  tribble(
   ~t_elim_thresh1_hi, ~t_elim_thresh2_med, ~t_elim_thresh2_low, 
   ~t_elim_thresh2_hi, ~vacc_startdate)
 
+ts <-  tribble(
+  ~team, ~scenario, ~saturday_date,	~obs_cases_med, 
+  ~obs_cases_low, ~obs_cases_hi, ~true_inf_med, ~true_inf_low,
+  ~true_inf_hi, ~population_size, ~vacc_med, ~vacc_low, ~vacc_hi)
+
 
 for (scenario in scenarios)
 {
@@ -141,13 +146,6 @@ for (scenario in scenarios)
            date = yearsToDateTime(time)) %>% 
     filter(date >= yearsToDate(sirb_cholera@t0)) %>%
     mutate(date = as.Date(round_date(date)))
-
-  
-  #tte <- add_row(
-  #  team, scenario, t_elim_thresh1_med, t_elim_thresh1_low,
-  #  t_elim_thresh1_hi, t_elim_thresh2_med, t_elim_thresh2_low, 
-  #  t_elim_thresh2_hi, vacc_startdate)
-
   
   ts_inc <- quantiles %>% 
     mutate(saturday_date = as.Date(round_date(date))) %>% 
@@ -158,7 +156,7 @@ for (scenario in scenarios)
     mutate(true_inf_low = q05) %>% 
     mutate(true_inf_hi = q95) %>%
     select(saturday_date, true_inf_med, true_inf_low, true_inf_hi)
-    
+  
   ts_obs <- quantiles %>% 
     mutate(saturday_date = as.Date(round_date(date))) %>% 
     filter(variable == "CasesAll", isdata == "simulation") %>% 
@@ -179,26 +177,33 @@ for (scenario in scenarios)
     mutate(vacc_hi = q95) %>%
     select(saturday_date, vacc_med, vacc_low, vacc_hi)
   
-  ts <- merge(merge(ts_inc, ts_obs), ts_vacc) %>% 
+  dummy <- left_join(left_join(ts_inc, ts_obs), ts_vacc) %>% 
     mutate(population_size = haiti_pop) %>% 
     mutate(scenario = scenario) %>% 
     mutate(team = team) %>% 
     select(team, scenario, saturday_date,
-          obs_cases_med, obs_cases_low, obs_cases_hi, 
-          true_inf_med, true_inf_low, true_inf_hi,
-          population_size, vacc_med, vacc_low, vacc_hi)
+           obs_cases_med, obs_cases_low, obs_cases_hi, 
+           true_inf_med, true_inf_low, true_inf_hi,
+           population_size, vacc_med, vacc_low, vacc_hi)
+  
+  ts <- rbind(ts, dummy)
   
   
   
-  acc_elim_thresh1 = 0
-  acc_elim_thresh2 = 0
-  acc_resurg_thresh1 = 0
-  acc_resurg_thresh2 = 0
+
+  t_elim_thresh1 = list()
+  t_elim_thresh2 = list()
   
   for (time_frame in time_frames)
   {
     print(time_frame)
-    for (s in 1:1)  # TODO
+    acc_elim_thresh1 = 0
+    acc_elim_thresh2 = 0
+    acc_resurg_thresh1 = 0
+    acc_resurg_thresh2 = 0
+    cum_inf = list()
+
+    for (s in 1:5)
     {
       df_s <- df %>% filter(sim == s)
       roll_sum <- zoo::rollapply(df_s$IncidenceAll, 52, sum)
@@ -215,34 +220,57 @@ for (scenario in scenarios)
           acc_resurg_thresh2 = acc_resurg_thresh2 +1
         }
       }
+      cum_inf <- c(cum_inf, df_s %>%
+                     filter(time < t_vacc_start+time_frame) %>%
+                     select(IncidenceAll) %>%
+                     sum() )
+      # Following code is time_frame independant:
+      # Find if elimination
+      if (time_frame == 3) {
+        if (sum(roll_sum < thresh1, na.rm = T) >= 1 ){
+          t_elim_thresh1 <- c(t_elim_thresh1, match(TRUE, roll_sum < thresh1))
+        }
+        if (sum(roll_sum < thresh2, na.rm = T) >= 1 ){
+          t_elim_thresh2 <- c(t_elim_thresh2, match(TRUE, roll_sum < thresh2))
+        }
+      }
     }
     
-    
-    incidence_tf = quantiles %>% 
-      mutate(date = as.Date(round_date(date))) %>% 
-      filter(variable == "IncidenceAll", isdata == "simulation") %>% 
-      select(date, q05, q50, q95) %>% 
-      filter(dateToYears(date) > t_vacc_start) %>% 
-      filter(dateToYears(date) < (t_vacc_start + time_frame)) 
-    
-    #TODO Is better to to the quantile of the cuminf
-    cum_inf_med <- sum(incidence_tf %>% select(q50))
-    cum_inf_low <- sum(incidence_tf %>% select(q05))
-    cum_inf_hi <- sum(incidence_tf %>% select(q95))
     
     pr_elim_thresh1 =   acc_elim_thresh1 / nsim
     pr_elim_thresh2 =   acc_elim_thresh2 / nsim
     pr_resurg_thresh1 =   acc_resurg_thresh1 / acc_elim_thresh1
     pr_resurg_thresh2 =   acc_resurg_thresh2 / acc_elim_thresh2
     
+    cum_inf <- unlist(cum_inf)
+    
+    cum_inf_med = quantile(cum_inf, 0.5, na.rm = T)
+    cum_inf_low = quantile(cum_inf, 0.025, na.rm = T)
+    cum_inf_hi = quantile(cum_inf, 0.975, na.rm = T)
+    
     pr_elim <- add_row(pr_elim, team, scenario, time_frame, pr_elim_thresh1, 
                        pr_resurg_thresh1, pr_elim_thresh2, pr_resurg_thresh2,
                        cum_inf_med, cum_inf_low, cum_inf_hi)
-    
   }
+  
+  t_elim_thresh1 <- unlist(t_elim_thresh1)
+  t_elim_thresh2 <- unlist(t_elim_thresh2)
+  t_elim_thresh1_med = quantile(t_elim_thresh1, 0.5, na.rm = T)
+  t_elim_thresh1_low = quantile(t_elim_thresh1, 0.025, na.rm = T)
+  t_elim_thresh1_hi  = quantile(t_elim_thresh1, 0.975, na.rm = T)
+  t_elim_thresh2_med = quantile(t_elim_thresh2, 0.5, na.rm = T)
+  t_elim_thresh2_low = quantile(t_elim_thresh2, 0.025, na.rm = T)
+  t_elim_thresh2_hi  = quantile(t_elim_thresh2, 0.975, na.rm = T)
+  vacc_startdate = '2019-01-12'
+  
+  tte <-  add_row(tte,
+    team, scenario, t_elim_thresh1_med, t_elim_thresh1_low,
+    t_elim_thresh1_hi, t_elim_thresh2_med, t_elim_thresh2_low, 
+    t_elim_thresh2_hi, vacc_startdate)
+  
 }
 
-write.csv(pr_elim, file = paste0(folder, "pr_elim_", team, '_', Sys.Date(), '.csv'))
-write.csv(pr_elim, file = paste0(folder, "ts_", team, '_', Sys.Date(), '.csv'))
-#write.csv( tte, file = paste0(folder, "tte_", team, '_', Sys.Date(), '.csv'))
+write.csv(pr_elim, file = paste0(folder, "pr_elim_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
+write.csv(ts, file = paste0(folder, "ts_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
+write.csv(tte, file = paste0(folder, "tte_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
 

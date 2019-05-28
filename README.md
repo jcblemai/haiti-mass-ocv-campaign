@@ -9,12 +9,8 @@
   - Beta Drop to match the drop with two beta ?
   
 ### Forecast and results
-  - Ability to compute the time to elimination
-  - Switch to all incidence !
-  - Add cumulative vaccine to graph
-  - Add national graph to graph done automatically.
   - Open-Source.
-  - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each
+
   - Mmmh it's a bit inconsistent that mobility does not dépends on real cases. 
   - Replace NaN in ouest with just the data.
   - Add changed with K to the sharelatex
@@ -59,15 +55,13 @@ Finish that fast.
   - Why West has no vaccination in graph?
   - I have a new west calibration on echopc 16, use it
   - Better mobility 
-  - Why some simulation scenarios extincts and goes back up ? 
+  - Why some simulation scenarios extincts and goes back up ?
+   - Ability to compute the time to elimination
+  - Switch to all incidence !
+  - Add cumulative vaccine to graph
+  - Add national graph to graph done automatically.
+  - Make graph of vaccine distributed overtime: at do you think about each team including a figure with cumulative vaccines delivered over time for each
 
-
-
-
-
-
-    write.csv(probability_data, 'probability_data.csv')
-    load('probability_data.Rda')
 
 ## Results
 

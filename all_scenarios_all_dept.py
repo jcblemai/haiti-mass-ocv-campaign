@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=RRuntimeWarning)
 # Warning: Needs an output/Simulations folder
 
 nsim = 1000
-n_proc = 2
+n_proc = 3
 # Already uses a looot of RAM like this, more than 60G
         
 compartments = ['S', 'I', 'A', 'RA1', 'RA2', 'RA3', 'RI1', 'RI2', 'RI3', 'W', 'B', 'cases', 'C',
