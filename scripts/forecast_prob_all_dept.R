@@ -36,7 +36,7 @@ yearsToDateTime <-
 
 team <- 'EPFL'
 folder = '2019-05-27 Delivrable/Simulations/'
-folder = 'output/Simulations/'
+#folder = 'output/Simulations/'
 load("output/sirb_cholera_pomped_all.rda")
 
 
@@ -125,6 +125,9 @@ ts <-  tribble(
   ~obs_cases_low, ~obs_cases_hi, ~true_inf_med, ~true_inf_low,
   ~true_inf_hi, ~population_size, ~vacc_med, ~vacc_low, ~vacc_hi)
 
+elimdate <-  tribble(
+  ~team, ~scenario, ~elimination_date)
+
 
 for (scenario in scenarios)
 {
@@ -188,8 +191,6 @@ for (scenario in scenarios)
   
   ts <- rbind(ts, dummy)
   
-  
-  
 
   t_elim_thresh1 = list()
   t_elim_thresh2 = list()
@@ -217,7 +218,7 @@ for (scenario in scenarios)
       if (sum(roll_sum[((time_frame-1)*52):(time_frame*52)] < thresh2, na.rm = T) >= 1 ){
         acc_elim_thresh2 = acc_elim_thresh2 + 1
         if (sum(df_s$IncidenceAll[(time_frame*52):length(roll_sum)] > thresh2/52.14, na.rm = T) >= 2 ){
-          acc_resurg_thresh2 = acc_resurg_thresh2 +1
+          acc_resurg_thresh2 = acc_resurg_thresh2 +1  # TODO not length(roll_sum
         }
       }
       cum_inf <- c(cum_inf, df_s %>%
@@ -232,6 +233,15 @@ for (scenario in scenarios)
         }
         if (sum(roll_sum < thresh2, na.rm = T) >= 1 ){
           t_elim_thresh2 <- c(t_elim_thresh2, match(TRUE, roll_sum < thresh2))
+        }
+        # Find elimination date
+        if (sum(roll_sum < thresh2, na.rm = T) >= 1 ){
+          ind <- match(TRUE, roll_sum < thresh2)
+          elimination_date = toString(as.Date(yearsToDate(df_s$time[ind])))
+          elimdate <- add_row(elimdate, team, scenario, elimination_date)
+        } else {
+          elimination_date = NA
+          elimdate <- add_row(elimdate, team, scenario, elimination_date)
         }
       }
     }
@@ -273,4 +283,5 @@ for (scenario in scenarios)
 write.csv(pr_elim, file = paste0(folder, "pr_elim_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
 write.csv(ts, file = paste0(folder, "ts_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
 write.csv(tte, file = paste0(folder, "tte_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
+write.csv(elimdate, file = paste0(folder, "elimdate_", team, '_', Sys.Date(), '.csv'), row.names=FALSE)
 

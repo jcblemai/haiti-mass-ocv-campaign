@@ -11,6 +11,53 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
   as.POSIXct((year_frac - yr_offset) * 365.25 * 3600 * 24, origin = origin)
 }
 
+
+# Plot sim data:
+simcol <- "#175CD6"
+datacol <- "#ED0000"
+
+quant <- projec %>% as_tibble() %>% 
+  mutate(isdata = sim == "data") %>%
+  gather(variable, value, -time, -sim, -isdata) %>% 
+  group_by(time, isdata, variable) %>% 
+  summarise( q05 = quantile(value, 0.025, na.rm = T),
+             mean = mean(value, na.rm = T),
+             q50 = quantile(value, 0.5, na.rm = T),
+             q95 = quantile(value, 0.975, na.rm = T)) %>%
+  ungroup() %>%
+  mutate(isdata = ifelse(isdata, "data", "simulation"),
+         date = yearsToDateTime(time)) %>% 
+  filter(date >= yearsToDate(sirb_cholera@t0)) %>%
+  mutate(date = as.Date(round_date(date)))
+
+# Aggregate by compartement
+vars_2_sum <- c("q05", "q50", "q95", "mean")
+
+quants_sum <- quant %>% 
+  filter (variable != 'Artibonite') %>%
+  filter (variable != 'Centre') %>%
+  filter (variable != 'Grande_Anse') %>%
+  filter (variable != 'Nippes') %>%
+  filter (variable != 'Nord') %>%
+  filter (variable != 'Nord-Est') %>%
+  filter (variable != 'Nord-Ouest') %>%
+  filter (variable != 'Ouest') %>%
+  filter (variable != 'Sud') %>%
+  filter (variable != 'Sud-Est') %>%
+  # head %>% 
+  mutate(grp = str_sub(variable, 1, 1)) %>%
+  group_by(grp, date) %>% 
+  summarise_at(.vars = vars_2_sum, .funs = sum, na.rm = T)
+
+p.sim <- ggplot(data = quants_sum,
+                aes(x = date))+
+  geom_ribbon(aes(ymin = q05, ymax = q95), alpha = 0.1, color = simcol, fill = simcol) +
+  geom_line(aes(y = q50), color = simcol) + 
+  facet_wrap(~grp, scales = "free_y") +  
+  theme(legend.position = "none") +
+  labs(y = "daily cholera cases", x = "date") 
+print(p.sim)
+
 # Analysis Calibration  --------------------------------------------------------------
 #output_dir <- "output_15-28-cdc/"
 output_dir <- "output_16-04-init/"
