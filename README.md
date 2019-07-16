@@ -10,11 +10,8 @@
   
 ### Forecast and results
   - Open-Source.
-
   - Mmmh it's a bit inconsistent that mobility does not dépends on real cases. 
   - Replace NaN in ouest with just the data.
-  - Add changed with K to the sharelatex
-  - Reorganize section on the sharelatex as ELee says
 
 
 Find a way to get to elimination sometime, it never goes with this FOI add :/
@@ -28,6 +25,7 @@ Finish that fast.
 
   - VE proportional to population U5*
   - Find what's need to be calibrated
+  - Add changed with K to the sharelatex
   - Use artibonite (Xcept rainfall) as starting point for other simulation
   - add new data
   - Cancel some parameters
