@@ -8,28 +8,11 @@ t_eff_alt = 0;
 dw = 0;
 
 
+mobility =  (IArtibonite + ICentre + IGrande_Anse + INippes + INord + INord_Est + INord_Ouest + IOuest + ISud + ISud_Est - I%s) * epsilon * 3.5; 
+
+foi = betaB%s * (B%s / (1 + B%s) + foi_add%s * mobility);
 
 
-
-/* Compute mobility term */
-/*
-if (t < t_end) {
-      for(int i = 0; i < n_cases_start - 1; i++){
-           if (t >= cases_other%s[i][0] && t <= cases_other%s[i+1][0])
-               mobility = cases_other%s[i][1];
-      }
-      if (t > cases_other%s[n_cases_start-1][0])
-          mobility = cases_other%s[n_cases_start-1][1];
-}*/
-//else { 
-    mobility =  (IArtibonite + ICentre + IGrande_Anse + INippes + INord + INord_Est + INord_Ouest + IOuest + ISud + ISud_Est - I%s) * epsilon * 3.5; 
-    /* in week for comparison (3.5 because theta is 2) */
-    //if (t > 2018) 
-        //mobility = mobility * cas_def;
-//}
-
-  // force of infection
-foi = betaB%s * (B%s / (1 + B%s)) + foi_add%s * mobility;
 if(std_W > 0.0)
 {
     dw = rgammawn(std_W, dt);   // white noise (extra-demographic stochasticity)

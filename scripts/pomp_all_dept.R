@@ -13,9 +13,11 @@ library(foreach)
 library(doSNOW)
 library(magrittr)
 library(lubridate)
+options(readr.num_columns = 0)   # Readr is too verbose for me to see error messages
 rm(list = ls())
 Sys.setlocale("LC_ALL", "C")
 output_dir <- "output/"
+
 
 # function to convert dates to fractions of years for model
 dateToYears <-
@@ -391,7 +393,7 @@ for (dp in departements) {
   initalizeStatesAll = paste0(initalizeStatesAll, gsub('%s', gsub('-', '_', dp), initalizeStatesTemplate))
 }
 
-initalizeStates <- Csnippet(initalizeStatesAll)
+rinit <- Csnippet(initalizeStatesAll)
 
 
 # Build pomp object -------------------------------------------------------??
@@ -488,6 +490,18 @@ toEstimationScale <- "       Tmu_B = log(mu_B);
 toEstimationScaleTemplate <- "TbetaB%s = log(betaB%s);
 Tfoi_add%s = log(foi_add%s);"
 
+log_params =  c('mu_B', 'thetaI', 'lambdaR', 'r', 'std_W', 'k')
+
+logit_params = c('XthetaA', 'epsilon', 'cas_def')
+
+per_dep_trans = c('betaB', 'foi_add')
+
+for (dp in departements)
+{
+  log_params = c(log_params, lapply(per_dep_trans, paste0, gsub('-', '_',dp)))
+}
+log_params = unlist(log_params)
+
 for (dp in departements) {
   toEstimationScale = paste0(toEstimationScale, gsub('%s', gsub('-', '_', dp), toEstimationScaleTemplate))
 }
@@ -511,6 +525,8 @@ for (dp in departements) {
 }
 
 fromEstimationScale <- Csnippet(fromEstimationScale)
+
+
 
 
 # rate of simulation in fractions of years
@@ -538,25 +554,23 @@ sirb_cholera <- pomp(
   params = all_params,
   
   # process simulator
-  rprocess = euler.sim(step.fun = sirb.rproc, delta.t = dt_yrs),
+  rprocess = euler(step.fun = sirb.rproc, delta.t = dt_yrs),
   # measurement model simulator
   rmeasure =  rmeas,
   # measurement model density
   dmeasure = dmeas,
   # covariates
-  covar = all_rain,
-  tcovar = "time",
+  covar = covariate_table(all_rain, times= all_rain$time),
   # names of state variables
   statenames = all_state_names,
   # names of accumulator variables to be re-initalized at each observation timestep
   # (C for cases, W for the white noise just for plotting)
-  zeronames = zeronameAll,
+  accumvars = zeronameAll,
   # names of paramters
   paramnames = all_param_names,
   # names of covariates
-  initializer = initalizeStates,
-  toEstimationScale = toEstimationScale,
-  fromEstimationScale = fromEstimationScale,
+  rinit = rinit,
+  partrans = parameter_trans(log=log_params, logit = logit_params),
   # global C definitions
   globals = str_c(
     sprintf("int n_cases_start = %i;",  nrow(cases_at_t_start)),
