@@ -168,12 +168,10 @@ stew(mifruns.filename, {
                   .options.multicore = list(set.seed = TRUE)
     ) %dopar% {
       mif2(sirb_cholera,
-           start = unlist(itpar),
+           params = unlist(itpar),
            Np = cholera_Np[run_level],
            Nmif = cholera_Nmif[run_level],
-           cooling.type = "geometric",
            cooling.fraction.50 = 0.5,   # 0.4-> Stabilize after 200 -> stop at 300.
-           transform = TRUE,
            rw.sd = job_rw.sd,
            verbose = T
       )
