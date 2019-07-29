@@ -123,7 +123,7 @@ params_common <-
    "cases_ext")
 
 ## fixed process model parameters  OK
-params_diff <- c("foi_add", "betaB", "H", "D","t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year",
+params_diff <- c("m", "betaB", "H", "D","t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year",
     "t_vacc_start_alt", "t_vacc_end_alt", "p1d_reg_alt", "r_v_year_alt")
 
 # input parameters to the model
@@ -273,16 +273,16 @@ all_params["betaBSud"] =          1.305966
 all_params["betaBNord_Ouest"] =   1.141691 
 all_params["betaBGrande_Anse"] =  2.823539 
 
-all_params["foi_addArtibonite"] =    1.530994e-06  
-all_params["foi_addSud_Est"] =     6.105491e-07
-all_params["foi_addNippes"] =       3.056857e-07
-all_params["foi_addNord_Est"] =     8.209611e-07
-all_params["foi_addOuest"] =       1.070717e-06 
-all_params["foi_addCentre"] =      0.0000106504579266415
-all_params["foi_addNord"] =         5.319736e-07
-all_params["foi_addSud"] =          1.030357e-06   
-all_params["foi_addNord_Ouest"] =   5.855759e-07
-all_params["foi_addGrande_Anse"] =  8.762740e-07 
+all_params["mArtibonite"] =    1.530994e-06  
+all_params["mSud_Est"] =     6.105491e-07
+all_params["mNippes"] =       3.056857e-07
+all_params["mNord_Est"] =     8.209611e-07
+all_params["mOuest"] =       1.070717e-06 
+all_params["mCentre"] =      0.0000106504579266415
+all_params["mNord"] =         5.319736e-07
+all_params["mSud"] =          1.030357e-06   
+all_params["mNord_Ouest"] =   5.855759e-07
+all_params["mGrande_Anse"] =  8.762740e-07 
 
 
 for (dp in departements) {
@@ -477,61 +477,26 @@ for (dp in departements){
 zeronameAll <- unlist(zeronameAll)
 
 
-toEstimationScale <- "       Tmu_B = log(mu_B);
-                              TthetaI = log(thetaI);
-                              TXthetaA = logit(XthetaA);
-                              TlambdaR = log(lambdaR);
-                              Tr = log(r);
-                              Tstd_W = log(std_W);
-                              Tepsilon = logit(epsilon);
-                              Tcas_def = logit(cas_def);
-                              Tk = log(k);
-                              "
-toEstimationScaleTemplate <- "TbetaB%s = log(betaB%s);
-Tfoi_add%s = log(foi_add%s);"
-
+# Parameters transformation
 log_params =  c('mu_B', 'thetaI', 'lambdaR', 'r', 'std_W', 'k')
-
 logit_params = c('XthetaA', 'epsilon', 'cas_def')
 
-per_dep_trans = c('betaB', 'foi_add')
+per_dep_log_params = c('betaB')
+per_dep_logit_params = c('m')
 
 for (dp in departements)
 {
-  log_params = c(log_params, lapply(per_dep_trans, paste0, gsub('-', '_',dp)))
+  log_params = c(log_params, lapply(per_dep_log_params, paste0, gsub('-', '_',dp)))
+  logit_params = c(logit_params, lapply(per_dep_logit_params, paste0, gsub('-', '_',dp)))
 }
 log_params = unlist(log_params)
-
-for (dp in departements) {
-  toEstimationScale = paste0(toEstimationScale, gsub('%s', gsub('-', '_', dp), toEstimationScaleTemplate))
-}
-toEstimationScale <- Csnippet(toEstimationScale)
-
-fromEstimationScale <- "      Tmu_B = exp(mu_B);
-                                TthetaI = exp(thetaI);
-                                TXthetaA = expit(XthetaA);
-                                TlambdaR = exp(lambdaR);
-                                Tr = exp(r);
-                                Tstd_W = exp(std_W);
-                                Tepsilon = expit(epsilon);
-                                Tcas_def = expit(cas_def);
-                                Tk = exp(k);
-                                "
-fromEstimationScaleTemplate <- "TbetaB%s = exp(betaB%s);
-Tfoi_add%s = exp(foi_add%s);"
-
-for (dp in departements) {
-  fromEstimationScale = paste0(fromEstimationScale, gsub('%s', gsub('-', '_', dp), fromEstimationScaleTemplate))
-}
-
-fromEstimationScale <- Csnippet(fromEstimationScale)
-
+logit_params = unlist(logit_params)
 
 
 
 # rate of simulation in fractions of years
 dt_yrs <- 1 / 365.25 * .2
-sirb_cholera <- pomp(
+sirb_haitiOCV <- pomp(
   # set data
   data = all_cases %>%
     filter(time > t_start & time < (t_end + 0.01)) %>% select(time,
@@ -587,9 +552,9 @@ sirb_cholera <- pomp(
 
 # save pomp object for further use
 save(
-  sirb_cholera,
+  sirb_haitiOCV,
   file = paste0(
     output_dir,
-    "/sirb_cholera_pomped_all.rda"
+    "/sirb_haitiOCV_pomped.rda"
   )
 )

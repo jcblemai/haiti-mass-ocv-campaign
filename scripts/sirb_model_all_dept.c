@@ -7,10 +7,21 @@ t_eff =  0;
 t_eff_alt = 0;
 dw = 0;
 
+mobility = BArtibonite / (1 + BArtibonite) +
+           BCentre / (1 + BCentre) +
+           BGrande_Anse / (1 + BGrande_Anse) +
+           BNippes / (1 + BNippes) +
+           BNord / (1 + BNord) +
+           BNord_Est / (1 + BNord_Est) +
+           BNord_Ouest / (1 + BNord_Ouest) +
+           BOuest / (1 + BOuest) +
+           BSud / (1 + BSud) +
+           BSud_Est / (1 + BSud_Est) -
+           B%s / (1 + B%s);
 
-mobility =  (IArtibonite + ICentre + IGrande_Anse + INippes + INord + INord_Est + INord_Ouest + IOuest + ISud + ISud_Est - I%s) * epsilon * 3.5; 
 
-foi = betaB%s * (B%s / (1 + B%s) + foi_add%s * mobility);
+
+foi = betaB%s * ( (1 - m%s) * B%s / (1 + B%s) + m%s * mobility);
 
 
 if(std_W > 0.0)
@@ -99,7 +110,6 @@ rate[35] = 3*rhoA;
 rate[36] = sigma *       (1 - eff_v_2d(t_eff_alt, scenario)) * foi_stoc; // symptomatic infections
 rate[37] = (1 - sigma) * (1 - eff_v_2d(t_eff_alt, scenario)) * foi_stoc; // asymptomatic infections
 rate[38] = mu;          // natural death
-
 
 
 // simulate all transitions
