@@ -12,8 +12,6 @@ double r_v_wdn = 0.0;       // rate of vaccination: 0 if out of time window, r_v
 double p1d = 0;
 double mobility = 0;
 
-int scenario =  cases_ext;
-
 double pdd = 0;
 double t_eff =  0;
 double t_eff_alt = 0;

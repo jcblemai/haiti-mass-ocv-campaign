@@ -103,7 +103,7 @@ params_common <-
    "Rtot_0",
     "mu",
    "alpha", 
-   "cases_ext")
+   "scenario")
 
 ## fixed process model parameters  OK
 params_diff <- c("m", "betaB", "H", "D","t_vacc_start", "t_vacc_end", "p1d_reg", "r_v_year",
@@ -228,7 +228,7 @@ all_params["gamma"] <- 182.625          # Fixed
 all_params["Rtot_0"] <- 0.35             # Useless
 
 
-all_params['cases_ext'] <- 1
+all_params['scenario'] <- 1
 all_params['mu'] <-  0.01586625546  
 all_params['alpha'] <- 1.461
 
