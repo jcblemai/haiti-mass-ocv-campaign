@@ -61,40 +61,25 @@ state_names <-
     "S",
     "I",
     "A",
-    "RI1",
-    "RI2",
-    "RI3",
-    "RA1",
-    "RA2",
-    "RA3",
+    "R1",
+    "R2",
+    "R3",
     "VSd",
-    "VRI1d",
-    "VRI2d",
-    "VRI3d",
-    "VRA1d",
-    "VRA2d",
-    "VRA3d",
+    "VR1d",
+    "VR2d",
+    "VR3d",
     "VSdd",
-    "VRI1dd",
-    "VRI2dd",
-    "VRI3dd",
-    "VRA1dd",
-    "VRA2dd",
-    "VRA3dd",
+    "VR1dd",
+    "VR2dd",
+    "VR3dd",
     "VSd_alt",
-    "VRI1d_alt",
-    "VRI2d_alt",
-    "VRI3d_alt",
-    "VRA1d_alt",
-    "VRA2d_alt",
-    "VRA3d_alt",
+    "VR1d_alt",
+    "VR2d_alt",
+    "VR3d_alt",
     "VSdd_alt",
-    "VRI1dd_alt",
-    "VRI2dd_alt",
-    "VRI3dd_alt",
-    "VRA1dd_alt",
-    "VRA2dd_alt",
-    "VRA3dd_alt",
+    "VR1dd_alt",
+    "VR2dd_alt",
+    "VR3dd_alt",
     "B",
     "C",
     "W"
@@ -109,10 +94,8 @@ params_common <-
     "XthetaA",
     "lambdaR",
     "r",
-    "gammaI",
-    "gammaA",
-    "rhoA",
-    "XrhoI",
+    "gamma",
+    "rho",
     "epsilon",
     "k",
     "std_W",
@@ -240,10 +223,8 @@ all_params <-
   set_names(seq_along(all_param_names) * 0, all_param_names)
 
 all_params["sigma"] <- .25               # Fixed
-all_params["rhoA"] <- 1 / (365 * 8) * 365.25   # Fixed
-all_params["XrhoI"] <- 1                 # Fixed
-all_params["gammaA"] <- 182.625          # Fixed
-all_params["gammaI"] <- 182.625          # Fixed
+all_params["rho"] <-  1 / (365 * 8) * 365.25   # Fixed
+all_params["gamma"] <- 182.625          # Fixed
 all_params["Rtot_0"] <- 0.35             # Useless
 
 
@@ -308,29 +289,27 @@ for (dp in departements) {
 }
 
 initalizeStatesTemplate =   "
-A%s     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start%s[n_cases_start-1][1]/7 * 365 /(mu+gammaA));
-I%s     = nearbyint(1/epsilon * cases_at_t_start%s[n_cases_start-1][1]/7 * 365 /(mu+alpha+gammaI))  ;  // Steady state, DP says its correct.
+A%s     = nearbyint((1-sigma)/sigma  * 1/epsilon * cases_at_t_start%s[n_cases_start-1][1]/7 * 365 /(mu+gamma));
+I%s     = nearbyint(1/epsilon * cases_at_t_start%s[n_cases_start-1][1]/7 * 365 /(mu+alpha+gamma))  ;  // Steady state, DP says its correct.
 
 R0[0] = 0;
 R0[1] = 0;
 B_acc = 0;
 
 for(int i = 0; i < n_cases_start; i++){
-R0[0] +=                   cases_at_t_start%s[i][1]/epsilon  * exp((cases_at_t_start%s[i][0] - t_start)  * (rhoI+mu)); /* because t_i in past so t_ - t_0 negative */
-R0[1] += (1-sigma)/sigma * cases_at_t_start%s[i][1]/epsilon  * exp((cases_at_t_start%s[i][0] - t_start)  * (rhoA+mu));
+R0[0] +=                   cases_at_t_start%s[i][1]/epsilon  * exp((cases_at_t_start%s[i][0] - t_start)  * (rho+mu)); /* because t_i in past so t_ - t_0 negative */
+R0[1] += (1-sigma)/sigma * cases_at_t_start%s[i][1]/epsilon  * exp((cases_at_t_start%s[i][0] - t_start)  * (rho+mu));
 B_acc += (thetaA * (1-sigma)/sigma * cases_at_t_start%s[i][1]/epsilon + thetaI * cases_at_t_start%s[i][1]/epsilon) *
 (1 + lambdaR * pow(0.024, r)) * D%s * exp((cases_at_t_start%s[i][0] - t_start)  * mu_B);
 
 }
 
 B%s = B_acc;
-RI1%s   = nearbyint(R0[0]/3);
-RI2%s   = nearbyint(R0[0]/3);
-RI3%s   = nearbyint(R0[0]/3);
-RA1%s   = nearbyint(R0[1]/3);
-RA2%s   = nearbyint(R0[1]/3);
-RA3%s   = nearbyint(R0[1]/3);
-if (A%s + I%s + RI1%s + RI2%s + RI3%s + RA1%s + RA2%s + RA3%s >= H%s)
+R1%s   = nearbyint(R0[0]/3) + nearbyint(R0[1]/3);
+R2%s   = nearbyint(R0[0]/3) + nearbyint(R0[1]/3);
+R3%s   = nearbyint(R0[0]/3) + nearbyint(R0[1]/3);
+
+if (A%s + I%s + R1%s + R2%s + R3%s  >= H%s)
 {
   double R_tot = H%s - A%s - I%s - 100.0;
   if (R_tot <= 0)
@@ -339,47 +318,30 @@ if (A%s + I%s + RI1%s + RI2%s + RI3%s + RA1%s + RA2%s + RA3%s >= H%s)
   A%s     = nearbyint(0);
   R_tot = nearbyint(0);
   }
-  RI1%s   = nearbyint(sigma * R_tot/3.0);
-  RI2%s   = nearbyint(sigma * R_tot/3.0);
-  RI3%s   = nearbyint(sigma * R_tot/3.0);
-  RA1%s   = nearbyint((1-sigma) * R_tot/3.0);
-  RA2%s   = nearbyint((1-sigma) * R_tot/3.0);
-  RA3%s   = nearbyint((1-sigma) * R_tot/3.0);
+  R1%s   = nearbyint(sigma * R_tot/3.0) + nearbyint((1-sigma) * R_tot/3.0); 
+  R2%s   = nearbyint(sigma * R_tot/3.0) + nearbyint((1-sigma) * R_tot/3.0);
+  R3%s   = nearbyint(sigma * R_tot/3.0) + nearbyint((1-sigma) * R_tot/3.0);
 }
-S%s   = nearbyint(H%s - A%s - I%s - RI1%s - RI2%s - RI3%s - RA1%s - RA2%s - RA3%s);
+S%s   = nearbyint(H%s - A%s - I%s - R1%s - R2%s - R3%s);
 B%s   = (I%s * thetaI/mu_B + A%s * thetaA/mu_B) * D%s * (1 + lambdaR * pow(0.024, r)); // TODO custom initial conditions equivalent to the 'forcing' in the continous model
 C%s   = 0;
 W%s   = 0;
 VSd%s = 0;
-VRI1d%s = 0;
-VRI2d%s = 0;
-VRI3d%s = 0;
-VRA1d%s = 0;
-VRA2d%s = 0;
-VRA3d%s = 0;
+VR1d%s = 0;
+VR2d%s = 0;
+VR3d%s = 0;
 VSdd%s = 0;
-VRI1dd%s = 0;
-VRI2dd%s = 0;
-VRI3dd%s = 0;
-VRA1dd%s = 0;
-VRA2dd%s = 0;
-VRA3dd%s = 0;
+VR1dd%s = 0;
+VR2dd%s = 0;
+VR3dd%s = 0;
 VSd_alt%s = 0;
-VRI1d_alt%s = 0;
-VRI2d_alt%s = 0;
-VRI3d_alt%s = 0;
-VRA1d_alt%s = 0;
-VRA2d_alt%s = 0;
-VRA3d_alt%s = 0;
+VR1d_alt%s = 0;
+VR2d_alt%s = 0;
+VR3d_alt%s = 0;
 VSdd_alt%s = 0;
-VRI1dd_alt%s = 0;
-VRI2dd_alt%s = 0;
-VRI3dd_alt%s = 0;
-VRA1dd_alt%s = 0;
-VRA2dd_alt%s = 0;
-VRA3dd_alt%s= 0;
-
-
+VR1dd_alt%s = 0;
+VR2dd_alt%s = 0;
+VR3dd_alt%s = 0;
 "
 
 initalizeStatesAll = "double R0[2] = {0,0};
@@ -387,7 +349,6 @@ IncidenceAll = 0;
 DosesAll = 0;
 CasesAll = 0;
 double B_acc = 0;
-double rhoI = rhoA * XrhoI;
 double thetaA = thetaI * XthetaA;"
 for (dp in departements) {
   initalizeStatesAll = paste0(initalizeStatesAll, gsub('%s', gsub('-', '_', dp), initalizeStatesTemplate))
@@ -440,8 +401,6 @@ dmeas <- Csnippet(dmeasAll)
 sirb_file <- 'scripts/sirb_model_all_dept.c'
 sirb_file_init <- 'scripts/sirb_model_all_dept_init.c'
 
-
-
 sirb.rprocTemplate = readChar(sirb_file, file.info(sirb_file)$size)
 
 sirb.rproc = readChar(sirb_file_init, file.info(sirb_file_init)$size)
@@ -460,7 +419,7 @@ dB = -mu_B * B +  (1 + lambdaR * pow(rain, r)) * D * (thetaI * (double) I + thet
 return(dB);
 };
 "
-eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info(sirb_file)$size), " double eff_v_1d(double t_since_vacc, int scenario) {
+eff_v.c <- paste0(readChar('scripts/v_eff.c', file.info('scripts/v_eff.c')$size), " double eff_v_1d(double t_since_vacc, int scenario) {
   if (t_since_vacc < 1) 
                   return eff_v_2d(t_since_vacc, scenario);
                   else
@@ -472,7 +431,6 @@ zeronameTemplate = c("C", "W")
 zeronameAll = c('IncidenceAll', 'CasesAll')
 for (dp in departements){
   zeronameAll = append(zeronameAll, lapply(zeronameTemplate, paste0, gsub('-', '_', dp)))
-  
 }
 zeronameAll <- unlist(zeronameAll)
 
@@ -493,9 +451,10 @@ log_params = unlist(log_params)
 logit_params = unlist(logit_params)
 
 
-
 # rate of simulation in fractions of years
-dt_yrs <- 1 / 365.25 * .2
+dt_yrs <- 1 / 365.25 * 1 # Changed to day per day !!
+
+
 sirb_haitiOCV <- pomp(
   # set data
   data = all_cases %>%

@@ -11,9 +11,13 @@ library(doMC)
 library(lubridate)
 library(tictoc)
 library(truncnorm)
+
+
 rm(list = ls())
+
 Sys.setlocale("LC_ALL","C")
 hostname <- system('hostname', intern = T) 
+
 output_dir <- "output/"
 
 args = commandArgs(trailingOnly=TRUE)
@@ -34,14 +38,12 @@ yearsToDateTime <- function(year_frac, origin = as.Date("2014-01-01"), yr_offset
 }
 
 # Load pomp object ---------------------------------------------------------------
-load(paste0(output_dir, "sirb_cholera_pomped_all.rda"))
+load(paste0(output_dir, "sirb_haitiOCV_pomped.rda"))
 
 # run on a single multi-core machine or on a cluster (using SLURM)
 ncpus <- detectCores()
-jobname <- "HaitiOCVAll"
-script <- "run_mif_cholera"
-projname <- jobname
-job_id <- 1
+projname <- 'mif_haitiOCV'
+
 # seed for simulations to assure reproducibility
 master.seed <- as.integer(runif(1) * 10000) 
 
@@ -53,7 +55,7 @@ array_id_vec <- seq(1,1) * 100 + 1
 # spawn workers
 registerDoMC(ncpus)
 
-# values of the random walks standard deviations [From somewhere, don't touch]
+# values of the random walks standard deviations 
 rw.sd_rp <- 0.02  # for the regular (process and measurement model) paramters
 rw.sd_ivp <- 0.2  # for the initial value paramters
 rw.sd_param <- set_names(c(rw.sd_rp, rw.sd_ivp), c("regular", "ivp"))
@@ -102,35 +104,35 @@ init_params <- as.data.frame(best_param)
 job_rw.sd <- eval(
   parse(
     text = str_c("rw.sd(",
-                 "betaBArtibonite         = ",   rw.sd_param["regular"],
-                 ",betaBSud_Est           = ",   rw.sd_param["regular"],
-                 ",betaBNippes            = ",   rw.sd_param["regular"],
-                 ",betaBNord_Est          = ",   rw.sd_param["regular"],
-                 ",betaBOuest             = ",   rw.sd_param["regular"],
-                 ",betaBCentre            = ",   rw.sd_param["regular"],
-                 ",betaBNord              = ",   rw.sd_param["regular"],
-                 ",betaBSud               = ",   rw.sd_param["regular"],
-                 ",betaBNord_Ouest        = ",   rw.sd_param["regular"],
-                 ",betaBGrande_Anse       = ",   rw.sd_param["regular"],
-                 ",foi_addArtibonite      = ",   rw.sd_param["regular"],
-                 ",foi_addSud_Est         = ",   rw.sd_param["regular"],
-                 ",foi_addNippes          = ",   rw.sd_param["regular"],
-                 ",foi_addNord_Est        = ",   rw.sd_param["regular"],
-                 ",foi_addOuest           = ",   rw.sd_param["regular"],
-                 ",foi_addCentre          = ",   rw.sd_param["regular"],
-                 ",foi_addNord            = ",   rw.sd_param["regular"],
-                 ",foi_addSud             = ",   rw.sd_param["regular"],    
-                 ",foi_addNord_Ouest      = ",   rw.sd_param["regular"],
-                 ",foi_addGrande_Anse     = ",   rw.sd_param["regular"],
-                 ", mu_B   = ", 1/10*  rw.sd_param["regular"],
-                 ", XthetaA= ", 1/10*  rw.sd_param["regular"],
-                 ", thetaI = ", 1/10*  rw.sd_param["regular"],
-                 ", lambdaR = ",1/10*  rw.sd_param["regular"],
-                 ", r      = ",1/10*   rw.sd_param["regular"],
-                 ", std_W  = ",1/10*   rw.sd_param["regular"],
-                 ", epsilon= ",1/10*   rw.sd_param["regular"],
-                 ", k = "     ,1/10*   rw.sd_param["regular"],
-                 ", cas_def = ifelse(time<2018., 0, ",  rw.sd_param["regular"], ")",
+                 "betaBArtibonite   = ", rw.sd_param["regular"],
+                 ",betaBSud_Est     = ", rw.sd_param["regular"],
+                 ",betaBNippes      = ", rw.sd_param["regular"],
+                 ",betaBNord_Est    = ", rw.sd_param["regular"],
+                 ",betaBOuest       = ", rw.sd_param["regular"],
+                 ",betaBCentre      = ", rw.sd_param["regular"],
+                 ",betaBNord        = ", rw.sd_param["regular"],
+                 ",betaBSud         = ", rw.sd_param["regular"],
+                 ",betaBNord_Ouest  = ", rw.sd_param["regular"],
+                 ",betaBGrande_Anse = ", rw.sd_param["regular"],
+                 ",mArtibonite      = ", rw.sd_param["regular"],
+                 ",mSud_Est         = ", rw.sd_param["regular"],
+                 ",mNippes          = ", rw.sd_param["regular"],
+                 ",mNord_Est        = ", rw.sd_param["regular"],
+                 ",mOuest           = ", rw.sd_param["regular"],
+                 ",mCentre          = ", rw.sd_param["regular"],
+                 ",mNord            = ", rw.sd_param["regular"],
+                 ",mSud             = ", rw.sd_param["regular"],    
+                 ",mNord_Ouest      = ", rw.sd_param["regular"],
+                 ",mGrande_Anse     = ", rw.sd_param["regular"],
+                 ",mu_B             = ", rw.sd_param["regular"],
+                 ",XthetaA          = ", rw.sd_param["regular"],
+                 ",thetaI           = ", rw.sd_param["regular"],
+                 ",lambdaR          = ", rw.sd_param["regular"],
+                 ",r                = ", rw.sd_param["regular"],
+                 ",std_W            = ", rw.sd_param["regular"],
+                 ",epsilon          = ", rw.sd_param["regular"],
+                 ",k                = ", rw.sd_param["regular"],
+                 ",cas_def          = ifelse(time<2018., 0, ", rw.sd_param["regular"], ")",
                  ")")
   )
 )
@@ -223,6 +225,3 @@ closeAllConnections()
 if (hostname != 'echopc27') {
   system(sprintf('bash ~/science_bot.sh "Successful completion on %s :) \n (Departement: All | Run level: %d)"', hostname, run_level))
 }
-
-
-
