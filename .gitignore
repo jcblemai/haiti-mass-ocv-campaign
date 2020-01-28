@@ -8,3 +8,5 @@ output*/
 .DS_Store
 .vscode
 2019-*
+.Rproj.user
+packrat/lib*/

@@ -276,8 +276,8 @@ for scenario_str, scenario  in scenarios.items():
     ti = input_parameters['t_start']
     tf = t_for
 
-    fig, axes = plt.subplots((len(all_data_vacc_mob))//2, 2, figsize=(15,15), squeeze = True, dpi = 200);
-    axes = axes.flatten();
+    fig, axes = plt.subplots((len(all_data_vacc_mob))//2, 2, figsize=(15,15), squeeze = True, dpi = 200)
+    axes = axes.flatten()
     fig.patch.set_facecolor('white')
 
     for i, dp in enumerate(dept_avail):
