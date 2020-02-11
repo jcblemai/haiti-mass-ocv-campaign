@@ -63,6 +63,7 @@ haiti_pop = 10911819
 t_vacc_start <- dateToYears(as.Date('2019-01-12'))
 
 time_frames = c(
+  1,
   3,
   5,
   10)
@@ -73,38 +74,8 @@ scenarios = c(
   'S2',
   'S3',
   'S4',
-  # 'S5',
-  # 'S6',
-  # 'S7',
-  # 'S8',
-  # 'S9',
-  # 'S10',
-  # 'S11',
-  # 'S12',
-  # 'S13',
-  # 'S14',
-  # 'S15',
-  # 'S16',
-  # 'S17',
-  # 'S18',
-  # 'S19',
-  # 'S20',
-  # 'S21',
-  # 'S22',
-  # 'S23',
-  # 'S24',
   'S25'
-  # 'S26',
-  # 'S27',
-  # 'S28',
-  # 'S29',
-  # 'S30',
-  # 'S31',
-  # 'S32',
-  # 'S33',
-  # 'S34',
-  # 'S35',
-  # 'S36'
+ 
 )
 
 thresh1 = haiti_pop / 10000
@@ -134,7 +105,9 @@ for (scenario in scenarios)
   print(scenario)
   load(file = sprintf("%sHaiti_OCV_Projection-allDep-%i-%s.rda", folder, nsim, scenario ))
   
-  df <- projec %>% filter(sim != 'data', time > t_vacc_start) %>% select(time, sim, IncidenceAll)
+  #df <- projec %>% filter(sim != 'data', time > t_vacc_start) %>% select(time, sim, IncidenceAll)
+  # This does not work for data.
+  df <- projec %>% filter(sim != 'data') %>% select(time, sim, IncidenceAll)
   
   quantiles <- projec %>% select(time, sim, CasesAll, IncidenceAll, DosesAll) %>% as_tibble() %>% 
     mutate(isdata = sim == "data") %>%
@@ -147,24 +120,59 @@ for (scenario in scenarios)
     ungroup() %>%
     mutate(isdata = ifelse(isdata, "data", "simulation"),
            date = yearsToDateTime(time)) %>% 
-    filter(date >= yearsToDate(2014.159)) %>%
+    #filter(date >= yearsToDate(2014.159)) %>%
     mutate(date = as.Date(round_date(date)))
+  
+  quantiles <- projec %>% select(time, sim, CasesAll, IncidenceAll, DosesAll, starts_with('S')) %>%
+    mutate(SusceptibleAll = rowSums(.[grep("S", names(.))], na.rm = TRUE)) %>%
+     select(time, sim, CasesAll, IncidenceAll, DosesAll, SusceptibleAll) %>%
+    as_tibble() %>% 
+    mutate(isdata = sim == "data") %>%
+    gather(variable, value, -time, -sim, -isdata) %>% 
+    group_by(time, isdata, variable) %>% 
+    summarise( q05 = quantile(value, 0.025, na.rm = T),
+               mean = mean(value, na.rm = T),
+               q50 = quantile(value, 0.5, na.rm = T),
+               q95 = quantile(value, 0.975, na.rm = T)) %>%
+    ungroup() %>%
+    mutate(isdata = ifelse(isdata, "data", "simulation"),
+           date = yearsToDateTime(time)) %>% 
+    #filter(date >= yearsToDate(2014.159)) %>%
+    mutate(date = as.Date(round_date(date)))
+  
+  cumI5y <- quantiles %>% filter(variable == "IncidenceAll", isdata == "simulation") %>%
+     select(time, mean) %>%
+     filter(time > t_vacc_start) %>%
+     filter(time < t_vacc_start+ 5) %>% 
+    select(mean) %>% 
+    sum()
+     
+
+  print(cumI5y)
   
   ts_inc <- quantiles %>% 
     mutate(saturday_date = as.Date(round_date(date))) %>% 
     filter(variable == "IncidenceAll", isdata == "simulation") %>% 
     select(saturday_date, q05, q50, q95) %>% 
-    filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+    #filter(dateToYears(saturday_date) > t_vacc_start) %>% 
     mutate(true_inf_med = q50) %>% 
     mutate(true_inf_low = q05) %>% 
     mutate(true_inf_hi = q95) %>%
     select(saturday_date, true_inf_med, true_inf_low, true_inf_hi)
   
+  ts_sus <- quantiles %>% 
+    mutate(saturday_date = as.Date(round_date(date))) %>% 
+    filter(variable == "SusceptibleAll", isdata == "simulation") %>% 
+    select(saturday_date, q05, q50, q95, mean) 
+    #filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+  
+  write.csv(ts_sus, file = paste0(folder, "sus_", scenario, '_', Sys.Date(), '.csv'), row.names=FALSE)
+  
   ts_obs <- quantiles %>% 
     mutate(saturday_date = as.Date(round_date(date))) %>% 
     filter(variable == "CasesAll", isdata == "simulation") %>% 
     select(saturday_date, q05, q50, q95) %>% 
-    filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+    #filter(dateToYears(saturday_date) > t_vacc_start) %>% 
     mutate(obs_cases_med = q50) %>% 
     mutate(obs_cases_low = q05) %>% 
     mutate(obs_cases_hi = q95) %>%
@@ -174,7 +182,7 @@ for (scenario in scenarios)
     mutate(saturday_date = as.Date(round_date(date))) %>% 
     filter(variable == "DosesAll", isdata == "simulation") %>% 
     select(saturday_date, q05, q50, q95) %>% 
-    filter(dateToYears(saturday_date) > t_vacc_start) %>% 
+   # filter(dateToYears(saturday_date) > t_vacc_start) %>% 
     mutate(vacc_med = q50) %>% 
     mutate(vacc_low = q05) %>% 
     mutate(vacc_hi = q95) %>%
